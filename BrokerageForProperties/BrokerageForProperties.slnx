@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Brokerage.API/Brokerage.API.csproj" />
+  <Project Path="Brokerage.Business/Brokerage.Business.csproj" />
+  <Project Path="Brokerage.Data/Brokerage.Data.csproj" />
+  <Project Path="Brokerage.Models/Brokerage.Models.csproj" />
+</Solution>

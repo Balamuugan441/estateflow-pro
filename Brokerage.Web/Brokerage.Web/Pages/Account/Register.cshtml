@@ -1,0 +1,261 @@
+﻿@page
+@model Brokerage.Web.Pages.Account.RegisterModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EstateFlow Pro</title>
+    <link rel="stylesheet" href="~/css/register.css" />
+</head>
+
+<body>
+<div class="register-page">
+
+    <div class="register-container">
+
+        <!-- LEFT SIDE BRANDING -->
+
+        <section class="register-image-panel">
+
+            <div class="register-brand-content">
+
+                <div class="logo-flex">
+                    <div class="register-logo"
+                         role="img"
+                         aria-label="EstateFlow Pro">
+                    </div>
+
+
+                    <h1 class="register-brand">
+                        EstateFlow
+                        <span>Pro</span>
+                    </h1>
+                </div>
+                <h1 class="register-brand-title">
+                    Professional Real Estate
+                    <span>Ecosystem</span>
+                </h1>
+               
+
+
+                <p class="register-brand-description">
+                    Connect with industry leaders, manage high-value
+                    properties, and streamline your brokerage operations
+                    with our wireframe-inspired technical interface.
+                </p>
+
+            </div>
+
+        </section>
+
+        <!--RIGHT SIDE - REGISTRATION FORM-->
+
+        <section class="register-form-panel">
+
+            <div class="register-form-container">
+
+                <!-- Form heading -->
+
+                <h2 class="register-heading">
+                    Create Account
+                </h2>
+
+                <p class="register-subheading">
+                    Join the future of high-stakes real estate brokerage.
+                </p>
+
+
+                <form method="post" novalidate>
+
+                    <!-- FULL NAME -->
+
+                    <div class="form-group">
+
+                        <label asp-for="Register.FullName"
+                               class="form-label">
+                            Full Name
+                        </label>
+
+                        <input asp-for="Register.FullName"
+                               class="form-input"
+                               placeholder="Balamurugan" />
+                        <span asp-validation-for="Register.FullName"
+                              class="validation-message">
+                        </span>
+
+
+                    </div>
+
+
+                    <!-- EMAIL -->
+
+                    <div class="form-group">
+
+                        <label asp-for="Register.Email"
+                               class="form-label">
+                            Email Address
+                        </label>
+
+                        <div class="form-input-wrapper">
+
+                            <input asp-for="Register.Email"
+                                   class="form-input"
+                           
+                                   placeholder="balamurgang441@estate.com" />
+
+                            <span class="input-warning-icon"></span>
+
+                        </div>
+
+                        <span asp-validation-for="Register.Email"
+                              class="validation-message">
+                        </span>
+
+                    </div>
+
+                    <!-- PHONE NUMBER -->
+
+                    <div class="form-group">
+
+                        <label asp-for="Register.MobileNumber"
+                               class="form-label">
+                            Phone Number
+                        </label>
+
+                        <input asp-for="Register.MobileNumber"
+                               class="form-input"
+                               placeholder="+91 7305768301" />
+                        <span asp-validation-for="Register.MobileNumber"
+                              class="validation-message">
+                        </span>
+
+                    </div>
+
+
+                    <!-- USER ROLE -->
+
+                    <div class="form-group">
+
+                        <label asp-for="Register.Role"
+                               class="form-label">
+                            User Role
+                        </label>
+
+                        <div class="form-select-wrapper">
+
+                            <select asp-for="Register.Role"
+                                    class="form-select">
+
+                                <option value="">
+                                    Select role
+                                </option>
+
+                                <option value="Buyer">
+                                    Buyer
+                                </option>
+
+                                <option value="Seller">
+                                    Seller
+                                </option>
+
+                            </select>
+
+                            <span class="select-chevron"></span>
+                            
+
+
+                        </div>
+                        <span asp-validation-for="Register.Role"
+                              class="validation-message">
+                        </span>
+
+                    </div>
+
+
+                    <!-- PASSWORD + CONFIRM PASSWORD -->
+
+                    <div class="password-row">
+
+                        <div class="form-group">
+
+                            <label asp-for="Register.Password"
+                                   class="form-label">
+                                Password
+                            </label>
+
+                            <input asp-for="Register.Password"
+                                   type="password"
+                                   class="form-input"
+                                   placeholder="••••••••" />
+                            <span asp-validation-for="Register.Password"
+                                  class="validation-message">
+                            </span>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label asp-for="Register.ConfirmPassword"
+                                   class="form-label">
+                                Confirm Password
+                            </label>
+
+                            <input asp-for="Register.ConfirmPassword"
+                                   type="password"
+                                   class="form-input"
+                                   placeholder="••••••••" />
+
+                            <span asp-validation-for="Register.ConfirmPassword"
+                                  class="validation-message">
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- REGISTER BUTTON -->
+
+                    <button type="submit"
+                            class="register-button">
+
+                        <span>
+                            Register
+                        </span>         
+                        <span class="register-button-arrow"></span>
+
+                    </button>
+
+                    <p class="register-terms">
+
+                        By registering, you agree to the
+
+                        <a href="#">
+                            Terms of Service
+                        </a>
+
+                        and
+
+                        <a href="#">
+                            Privacy Policy
+                        </a>.
+
+                    </p>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+<script src="~/js/register.js"></script>
+</body>
+</html>

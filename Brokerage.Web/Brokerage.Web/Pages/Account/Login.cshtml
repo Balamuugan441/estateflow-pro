@@ -1,0 +1,79 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Log In";
+    Layout = null; // Self-contained page
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EstateFlow Pro</title>
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+<body class="login-page">
+
+    <div class="login-wrapper">
+
+        <!-- =========================================================
+             BRAND LOGO HEADER
+             ========================================================= -->
+        <div class="login-logo-header">
+            <!-- Logo Image controlled via CSS variable --logo-image -->
+            <div class="login-logo" role="img" aria-label="EstateFlow Pro"></div>
+            <h1 class="login-brand">
+                EstateFlow <span>Pro</span>
+            </h1>
+        </div>
+
+        <!-- =========================================================
+             LOGIN CARD CONTAINER
+             ========================================================= -->
+        <div class="login-card">
+            <h2 class="login-title">Welcome Back</h2>
+
+            <form method="post" class="login-form" novalidate>
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <!-- EMAIL FIELD -->
+                <div class="form-group">
+                    <label asp-for="Input.Email" class="form-label">Email Address</label>
+                    <input asp-for="Input.Email"
+                           class="form-input"
+                           placeholder="name@brokerage.com"
+                           autocomplete="username"
+                           aria-required="true" />
+                    <span asp-validation-for="Input.Email" class="validation-message"></span>
+                </div>
+
+                <!-- PASSWORD FIELD -->
+                <div class="form-group">
+                    <div class="label-row">
+                        <label asp-for="Input.Password" class="form-label">Password</label>
+                        <a asp-page="./ForgotPassword" class="forgot-password-link">Forgot password?</a>
+                    </div>
+                    <input asp-for="Input.Password"
+                           type="password"
+                           class="form-input"
+                           placeholder="••••••••"
+                           autocomplete="current-password"
+                           aria-required="true" />
+                    <span asp-validation-for="Input.Password" class="validation-message"></span>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <button type="submit" class="login-button">Sign In</button>
+            </form>
+
+            <!-- CARD FOOTER -->
+            <p class="login-footer-text">
+                Don't have an account? <a asp-page="./Register" class="register-link">Register</a>
+            </p>
+        </div>
+
+    </div>
+
+</body>
+</html>

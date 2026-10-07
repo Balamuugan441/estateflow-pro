@@ -49,8 +49,7 @@ public class PropertyService
             AreaUnit = request.AreaUnit,
 
             Bedrooms = request.Bedrooms,
-            Bathrooms = request.Bathrooms,
-
+            Bathrooms = request.Bathrooms > 0 ? request.Bathrooms : 2m,
             Balconies = request.Balconies,
             Floor = request.Floor,
             ParkingSpaces = request.ParkingSpaces,
@@ -180,7 +179,9 @@ public class PropertyService
             request.Bedrooms;
 
         existingProperty.Bathrooms =
-            request.Bathrooms;
+            request.Bathrooms > 0
+        ? request.Bathrooms
+        : 2m;
 
         existingProperty.Balconies =
             request.Balconies;
@@ -519,111 +520,319 @@ public class PropertyService
         return saved;
     }
     public async Task<bool> UploadPropertyMediaAsync(
-    int propertyId,
-    int sellerId,
-    MediaUploadRequest request)
+     int propertyId,
+     int sellerId,
+     MediaUploadRequest request)
     {
         Property? property =
-            await _propertyRepository.GetPropertyByIdAsync(
-                propertyId);
+            await _propertyRepository
+                .GetPropertyByIdAsync(propertyId);
 
         if (property == null)
         {
-            throw new Exception("Property not found.");
+            throw new Exception(
+                "Property not found."
+            );
         }
+
 
         if (property.SellerID != sellerId)
         {
             throw new UnauthorizedAccessException(
-                "You do not own this property.");
+                "You do not own this property."
+            );
         }
+
+
 
         if (property.ListingStatus != "Draft" &&
             property.ListingStatus != "Rejected")
         {
             throw new InvalidOperationException(
-                "Media can only be uploaded for Draft or Rejected properties.");
+                "Media can only be uploaded for Draft or Rejected properties."
+            );
         }
 
-        if (request.CoverPhoto == null)
+
+        IFormFile? coverPhoto =
+            IsRealFile(request.CoverPhoto)
+                ? request.CoverPhoto
+                : null;
+
+
+        List<IFormFile> galleryImages =
+            GetRealFiles(
+                request.GalleryImages
+            );
+
+
+        List<IFormFile> videos =
+            GetRealFiles(
+                request.Videos
+            );
+
+
+        List<IFormFile> floorPlans =
+            GetRealFiles(
+                request.FloorPlans
+            );
+
+
+        List<IFormFile> documents =
+            GetRealFiles(
+                request.Documents
+            );
+
+
+        IEnumerable<PropertyMedia> existingMedia =
+            await _propertyRepository
+                .GetPropertyMediaAsync(
+                    propertyId
+                );
+        foreach (int mediaId in request.RemovedMediaIds.Distinct())
+        {
+            PropertyMedia? media =
+                existingMedia.FirstOrDefault(
+                    x => x.MediaID == mediaId);
+
+            if (media == null)
+            {
+                throw new InvalidOperationException(
+                    "Media was not found.");
+            }
+
+            if (media.MediaType == "CoverPhoto")
+            {
+                throw new InvalidOperationException(
+                    "Cover photo cannot be removed.");
+            }
+
+            bool deleted =
+                await _propertyRepository
+                    .DeletePropertyMediaAsync(
+                        propertyId,
+                        mediaId);
+
+            if (!deleted)
+            {
+                throw new InvalidOperationException(
+                    "Unable to remove media.");
+            }
+        }
+        PropertyMedia? existingCover =
+    existingMedia.FirstOrDefault(
+        x => x.MediaType == "CoverPhoto");
+
+        int existingCoverCount =
+            existingMedia.Count(
+                x => x.MediaType == "CoverPhoto"
+            );
+
+
+        int existingGalleryCount =
+            existingMedia.Count(
+                x => x.MediaType == "GalleryImage"
+            );
+
+
+        int existingVideoCount =
+            existingMedia.Count(
+                x => x.MediaType == "Video"
+            );
+
+
+        int existingFloorPlanCount =
+            existingMedia.Count(
+                x => x.MediaType == "FloorPlan"
+            );
+
+
+        int existingDocumentCount =
+            existingMedia.Count(
+                x => x.MediaType == "Document"
+            );
+
+
+        // -----------------------------------------
+        // Cover validation
+        //
+        // Existing cover is enough.
+        // -----------------------------------------
+
+        if (coverPhoto == null &&
+            existingCoverCount == 0)
         {
             throw new InvalidOperationException(
-                "Cover photo is required.");
+                "Cover photo is required."
+            );
         }
 
-        if (request.GalleryImages == null ||
-            request.GalleryImages.Count == 0)
+
+        // -----------------------------------------
+        // Gallery validation
+        //
+        // Existing gallery is enough.
+        // -----------------------------------------
+
+        if (galleryImages.Count == 0 &&
+            existingGalleryCount == 0)
         {
             throw new InvalidOperationException(
-                "At least one gallery image is required.");
-        }
-        if (request.GalleryImages.Count > 7)
-        {
-            throw new InvalidOperationException(
-                "Maximum 7 gallery images are allowed.");
+                "At least one gallery image is required."
+            );
         }
 
-        if (request.Videos.Count > 2)
+
+        // -----------------------------------------
+        // Total gallery limit
+        // -----------------------------------------
+
+        if (
+            existingGalleryCount +
+            galleryImages.Count > 7
+        )
         {
             throw new InvalidOperationException(
-                "Maximum 2 videos are allowed.");
+                "Maximum 7 gallery images are allowed in total."
+            );
         }
 
-        if (request.FloorPlans.Count > 2)
+
+        // -----------------------------------------
+        // Total video limit
+        // -----------------------------------------
+
+        if (
+            existingVideoCount +
+            videos.Count > 2
+        )
         {
             throw new InvalidOperationException(
-                "Maximum 2 floor plans are allowed.");
+                "Maximum 2 videos are allowed in total."
+            );
         }
 
-        if (request.Documents.Count > 4)
+
+        // -----------------------------------------
+        // Total floor-plan limit
+        // -----------------------------------------
+
+        if (
+            existingFloorPlanCount +
+            floorPlans.Count > 2
+        )
         {
             throw new InvalidOperationException(
-                "Maximum 4 documents are allowed.");
+                "Maximum 2 floor plans are allowed in total."
+            );
         }
+
+
+        // -----------------------------------------
+        // Total document limit
+        // -----------------------------------------
+
+        if (
+            existingDocumentCount +
+            documents.Count > 4
+        )
+        {
+            throw new InvalidOperationException(
+                "Maximum 4 documents are allowed in total."
+            );
+        }
+
 
         List<PropertyMedia> mediaList = [];
 
-        const long FiveMB = 5 * 1024 * 1024;
 
-        const long TwentyFiveMB = 25 * 1024 * 1024;
+        const long FiveMB =
+            5 * 1024 * 1024;
 
-        // Cover Photo
 
-        string? coverError =
+        const long TwentyFiveMB =
+            25 * 1024 * 1024;
+
+        // COVER PHOTO
+
+
+        if (request.CoverPhoto != null)
+        {
+            string? coverError =
                 _mediaValidationService.ValidateImage(
                     request.CoverPhoto,
                     FiveMB);
 
-        if (coverError != null)
-        {
-            throw new InvalidOperationException(
-                coverError);
+            if (coverError != null)
+            {
+                throw new InvalidOperationException(
+                    coverError);
+            }
+
+
+            string coverPath =
+                await _fileStorageService.SaveFileAsync(
+                    request.CoverPhoto.OpenReadStream(),
+                    request.CoverPhoto.FileName,
+                    $"properties/{propertyId}"
+                );
+
+
+            PropertyMedia newCover =
+                new PropertyMedia
+                {
+                    PropertyID = propertyId,
+                    MediaType = "CoverPhoto",
+                    FileName = request.CoverPhoto.FileName,
+                    FilePath = coverPath,
+                    ContentType = request.CoverPhoto.ContentType,
+                    FileSizeBytes = request.CoverPhoto.Length,
+                    DisplayOrder = 1
+                };
+
+
+            // Existing cover → UPDATE
+
+
+            if (existingCover != null)
+            {
+                newCover.MediaID =
+                    existingCover.MediaID;
+
+
+                bool updated =
+                    await _propertyRepository
+                        .UpdatePropertyCoverMediaAsync(
+                            newCover);
+
+
+                if (!updated)
+                {
+                    throw new InvalidOperationException(
+                        "Unable to update the existing cover photo."
+                    );
+                }
+            }
+            else
+            {
+
+                // No existing cover → INSERT
+                mediaList.Add(newCover);
+            }
         }
 
-        string coverPath =
-            await _fileStorageService.SaveFileAsync(
-                request.CoverPhoto.OpenReadStream(),
-                request.CoverPhoto.FileName,
-                $"properties/{propertyId}");
 
-        mediaList.Add(new PropertyMedia
-        {
-            PropertyID = propertyId,
-            MediaType = "CoverPhoto",
-            FileName = request.CoverPhoto.FileName,
-            FilePath = coverPath,
-            ContentType = request.CoverPhoto.ContentType,
-            FileSizeBytes = request.CoverPhoto.Length,
-            DisplayOrder = 1
-        });
-
-        // Gallery Image
+        // =========================================
+        // GALLERY
+        // =========================================
 
         int displayOrder = 2;
 
-        foreach (IFormFile galleryImage
-                 in request.GalleryImages)
+        for (int i = 0; i < request.GalleryImages.Count; i++)
         {
+            IFormFile galleryImage =
+                request.GalleryImages[i];
+
             string? galleryError =
                 _mediaValidationService.ValidateImage(
                     galleryImage,
@@ -641,23 +850,69 @@ public class PropertyService
                     galleryImage.FileName,
                     $"properties/{propertyId}");
 
-            mediaList.Add(new PropertyMedia
+            int replacementId =
+                i < request.GalleryReplacementIds.Count
+                    ? request.GalleryReplacementIds[i]
+                    : 0;
+
+            if (replacementId > 0)
             {
-                PropertyID = propertyId,
-                MediaType = "GalleryImage",
-                FileName = galleryImage.FileName,
-                FilePath = galleryPath,
-                ContentType = galleryImage.ContentType,
-                FileSizeBytes = galleryImage.Length,
-                DisplayOrder = displayOrder++
-            });
+                PropertyMedia? existing =
+                    existingMedia.FirstOrDefault(
+                        x =>
+                            x.MediaID == replacementId &&
+                            x.MediaType == "GalleryImage");
+
+                if (existing == null)
+                {
+                    throw new InvalidOperationException(
+                        "Gallery image to replace was not found.");
+                }
+
+                existing.FileName =
+                    galleryImage.FileName;
+
+                existing.FilePath =
+                    galleryPath;
+
+                existing.ContentType =
+                    galleryImage.ContentType;
+
+                existing.FileSizeBytes =
+                    galleryImage.Length;
+
+                bool updated =
+                    await _propertyRepository
+                        .UpdatePropertyMediaAsync(
+                            existing);
+
+                if (!updated)
+                {
+                    throw new InvalidOperationException(
+                        "Unable to update gallery image.");
+                }
+            }
+            else
+            {
+                mediaList.Add(new PropertyMedia
+                {
+                    PropertyID = propertyId,
+                    MediaType = "GalleryImage",
+                    FileName = galleryImage.FileName,
+                    FilePath = galleryPath,
+                    ContentType = galleryImage.ContentType,
+                    FileSizeBytes = galleryImage.Length,
+                    DisplayOrder = displayOrder++
+                });
+            }
         }
 
-        // Video
 
-
-        foreach (IFormFile video in request.Videos)
+        for (int i = 0; i < request.Videos.Count; i++)
         {
+            IFormFile video =
+                request.Videos[i];
+
             string? videoError =
                 _mediaValidationService.ValidateVideo(
                     video,
@@ -675,23 +930,72 @@ public class PropertyService
                     video.FileName,
                     $"properties/{propertyId}");
 
-            mediaList.Add(new PropertyMedia
+            int replacementId =
+                i < request.VideoReplacementIds.Count
+                    ? request.VideoReplacementIds[i]
+                    : 0;
+
+            if (replacementId > 0)
             {
-                PropertyID = propertyId,
-                MediaType = "Video",
-                FileName = video.FileName,
-                FilePath = videoPath,
-                ContentType = video.ContentType,
-                FileSizeBytes = video.Length,
-                DisplayOrder = null
-            });
+                PropertyMedia? existing =
+                    existingMedia.FirstOrDefault(
+                        x =>
+                            x.MediaID == replacementId &&
+                            x.MediaType == "Video");
+
+                if (existing == null)
+                {
+                    throw new InvalidOperationException(
+                        "Video to replace was not found.");
+                }
+
+                existing.FileName =
+                    video.FileName;
+
+                existing.FilePath =
+                    videoPath;
+
+                existing.ContentType =
+                    video.ContentType;
+
+                existing.FileSizeBytes =
+                    video.Length;
+
+                bool updated =
+                    await _propertyRepository
+                        .UpdatePropertyMediaAsync(
+                            existing);
+
+                if (!updated)
+                {
+                    throw new InvalidOperationException(
+                        "Unable to update video.");
+                }
+            }
+            else
+            {
+                mediaList.Add(new PropertyMedia
+                {
+                    PropertyID = propertyId,
+                    MediaType = "Video",
+                    FileName = video.FileName,
+                    FilePath = videoPath,
+                    ContentType = video.ContentType,
+                    FileSizeBytes = video.Length
+                });
+            }
         }
 
 
-        // Floor Plan
+        // =========================================
+        // FLOOR PLANS
+        // =========================================
 
-        foreach (IFormFile floorPlan in request.FloorPlans)
+        for (int i = 0; i < request.FloorPlans.Count; i++)
         {
+            IFormFile floorPlan =
+                request.FloorPlans[i];
+
             string? floorPlanError =
                 _mediaValidationService.ValidateDocument(
                     floorPlan,
@@ -709,23 +1013,68 @@ public class PropertyService
                     floorPlan.FileName,
                     $"properties/{propertyId}");
 
-            mediaList.Add(new PropertyMedia
+            int replacementId =
+                i < request.FloorPlanReplacementIds.Count
+                    ? request.FloorPlanReplacementIds[i]
+                    : 0;
+
+            if (replacementId > 0)
             {
-                PropertyID = propertyId,
-                MediaType = "FloorPlan",
-                FileName = floorPlan.FileName,
-                FilePath = floorPlanPath,
-                ContentType = floorPlan.ContentType,
-                FileSizeBytes = floorPlan.Length,
-                DisplayOrder = null
-            });
+                PropertyMedia? existing =
+                    existingMedia.FirstOrDefault(
+                        x =>
+                            x.MediaID == replacementId &&
+                            x.MediaType == "FloorPlan");
+
+                if (existing == null)
+                {
+                    throw new InvalidOperationException(
+                        "Floor plan to replace was not found.");
+                }
+
+                existing.FileName =
+                    floorPlan.FileName;
+
+                existing.FilePath =
+                    floorPlanPath;
+
+                existing.ContentType =
+                    floorPlan.ContentType;
+
+                existing.FileSizeBytes =
+                    floorPlan.Length;
+
+                bool updated =
+                    await _propertyRepository
+                        .UpdatePropertyMediaAsync(
+                            existing);
+
+                if (!updated)
+                {
+                    throw new InvalidOperationException(
+                        "Unable to update floor plan.");
+                }
+            }
+            else
+            {
+                mediaList.Add(new PropertyMedia
+                {
+                    PropertyID = propertyId,
+                    MediaType = "FloorPlan",
+                    FileName = floorPlan.FileName,
+                    FilePath = floorPlanPath,
+                    ContentType = floorPlan.ContentType,
+                    FileSizeBytes = floorPlan.Length
+                });
+            }
         }
-        // Documents
 
 
-        foreach (IFormFile document
-          in request.Documents)
+        for (int i = 0; i < request.Documents.Count; i++)
         {
+            IFormFile document =
+                request.Documents[i];
+
             string? documentError =
                 _mediaValidationService.ValidateDocument(
                     document,
@@ -743,22 +1092,86 @@ public class PropertyService
                     document.FileName,
                     $"properties/{propertyId}");
 
-            mediaList.Add(new PropertyMedia
+            int replacementId =
+                i < request.DocumentReplacementIds.Count
+                    ? request.DocumentReplacementIds[i]
+                    : 0;
+
+            if (replacementId > 0)
             {
-                PropertyID = propertyId,
-                MediaType = "Document",
-                FileName = document.FileName,
-                FilePath = documentPath,
-                ContentType = document.ContentType,
-                FileSizeBytes = document.Length,
-                DisplayOrder = null
-            });
+                PropertyMedia? existing =
+                    existingMedia.FirstOrDefault(
+                        x =>
+                            x.MediaID == replacementId &&
+                            x.MediaType == "Document");
+
+                if (existing == null)
+                {
+                    throw new InvalidOperationException(
+                        "Document to replace was not found.");
+                }
+
+                existing.FileName =
+                    document.FileName;
+
+                existing.FilePath =
+                    documentPath;
+
+                existing.ContentType =
+                    document.ContentType;
+
+                existing.FileSizeBytes =
+                    document.Length;
+
+                bool updated =
+                    await _propertyRepository
+                        .UpdatePropertyMediaAsync(
+                            existing);
+
+                if (!updated)
+                {
+                    throw new InvalidOperationException(
+                        "Unable to update document.");
+                }
+            }
+            else
+            {
+                mediaList.Add(new PropertyMedia
+                {
+                    PropertyID = propertyId,
+                    MediaType = "Document",
+                    FileName = document.FileName,
+                    FilePath = documentPath,
+                    ContentType = document.ContentType,
+                    FileSizeBytes = document.Length
+                });
+            }
         }
 
-        bool saved =
-     await _propertyRepository
-         .SavePropertyMediaAsync(
-             mediaList);
+
+        // =========================================
+        // Nothing new to save
+        //
+        // Existing DB media already satisfies
+        // the property requirements.
+        // =========================================
+
+        if (mediaList.Count == 0)
+        {
+            return true;
+        }
+
+
+        bool saved = true;
+
+        if (mediaList.Count > 0)
+        {
+            saved =
+                await _propertyRepository
+                    .SavePropertyMediaAsync(
+                        mediaList);
+        }
+
 
         if (saved)
         {
@@ -769,10 +1182,28 @@ public class PropertyService
                 propertyId,
                 property.PropertyTitle,
                 "Success",
-                "Property media was updated.");
+                "Property media was updated."
+            );
         }
 
+
         return saved;
+    }
+    private static bool IsRealFile(IFormFile? file)
+    {
+        return file != null &&
+               file.Length > 0 &&
+               !string.IsNullOrWhiteSpace(file.FileName);
+    }
+
+
+    private static List<IFormFile> GetRealFiles(
+        IEnumerable<IFormFile>? files)
+    {
+        return files?
+            .Where(IsRealFile)
+            .ToList()
+            ?? [];
     }
     public async Task<IEnumerable<PropertyMedia>> GetPropertyMediaAsync(
     int propertyId,

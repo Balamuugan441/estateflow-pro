@@ -58,9 +58,7 @@ public class CreatePropertyRequest
     [Required(ErrorMessage = "Bedrooms is required.")]
     public string Bedrooms { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Bathrooms is required.")]
-    [Range(0, 100)]
-    public decimal Bathrooms { get; set; }
+    public decimal Bathrooms { get; set; } = 2m;
 
     public int? Balconies { get; set; }
 

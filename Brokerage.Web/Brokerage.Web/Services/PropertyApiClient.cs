@@ -244,17 +244,32 @@ public class PropertyApiClient
     }
 
     public async Task<ApiMessageResponse>
-        UploadPropertyMediaAsync(
-            int propertyId,
-            IFormFile? coverPhoto,
-            IEnumerable<IFormFile> galleryImages,
-            IEnumerable<IFormFile> videos,
-            IEnumerable<IFormFile> floorPlans,
-            IEnumerable<IFormFile> documents,
-            CancellationToken cancellationToken = default)
+    UploadPropertyMediaAsync(
+        int propertyId,
+        IFormFile? coverPhoto,
+        IEnumerable<IFormFile> galleryImages,
+        IEnumerable<IFormFile> videos,
+        IEnumerable<IFormFile> floorPlans,
+        IEnumerable<IFormFile> documents,
+        IEnumerable<int> removedMediaIds,
+        IEnumerable<int> galleryReplacementIds,
+        IEnumerable<int> videoReplacementIds,
+        IEnumerable<int> floorPlanReplacementIds,
+        IEnumerable<int> documentReplacementIds,
+        CancellationToken cancellationToken = default)
     {
         using MultipartFormDataContent content =
-            BuildMultipartContent(coverPhoto, galleryImages, videos, floorPlans, documents);
+     BuildMultipartContent(
+         coverPhoto,
+         galleryImages,
+         videos,
+         floorPlans,
+         documents,
+         removedMediaIds,
+         galleryReplacementIds,
+         videoReplacementIds,
+         floorPlanReplacementIds,
+         documentReplacementIds);
 
         HttpResponseMessage response =
             await _httpClient.PostAsync(
@@ -268,17 +283,32 @@ public class PropertyApiClient
     }
 
     public async Task<ApiMessageResponse>
-        UploadPropertyMediaAsync(
-            Guid propertyGuid,
-            IFormFile? coverPhoto,
-            IEnumerable<IFormFile> galleryImages,
-            IEnumerable<IFormFile> videos,
-            IEnumerable<IFormFile> floorPlans,
-            IEnumerable<IFormFile> documents,
-            CancellationToken cancellationToken = default)
+     UploadPropertyMediaAsync(
+         Guid propertyGuid,
+         IFormFile? coverPhoto,
+         IEnumerable<IFormFile> galleryImages,
+         IEnumerable<IFormFile> videos,
+         IEnumerable<IFormFile> floorPlans,
+         IEnumerable<IFormFile> documents,
+         IEnumerable<int> removedMediaIds,
+         IEnumerable<int> galleryReplacementIds,
+         IEnumerable<int> videoReplacementIds,
+         IEnumerable<int> floorPlanReplacementIds,
+         IEnumerable<int> documentReplacementIds,
+         CancellationToken cancellationToken = default)
     {
         using MultipartFormDataContent content =
-            BuildMultipartContent(coverPhoto, galleryImages, videos, floorPlans, documents);
+     BuildMultipartContent(
+         coverPhoto,
+         galleryImages,
+         videos,
+         floorPlans,
+         documents,
+         removedMediaIds,
+         galleryReplacementIds,
+         videoReplacementIds,
+         floorPlanReplacementIds,
+         documentReplacementIds);
 
         HttpResponseMessage response =
             await _httpClient.PostAsync(
@@ -595,52 +625,123 @@ public class PropertyApiClient
 
 
 
-    private static MultipartFormDataContent BuildMultipartContent(
-        IFormFile? coverPhoto,
-        IEnumerable<IFormFile> galleryImages,
-        IEnumerable<IFormFile> videos,
-        IEnumerable<IFormFile> floorPlans,
-        IEnumerable<IFormFile> documents)
+    private static MultipartFormDataContent
+     BuildMultipartContent(
+         IFormFile? coverPhoto,
+         IEnumerable<IFormFile> galleryImages,
+         IEnumerable<IFormFile> videos,
+         IEnumerable<IFormFile> floorPlans,
+         IEnumerable<IFormFile> documents,
+         IEnumerable<int> removedMediaIds,
+         IEnumerable<int> galleryReplacementIds,
+         IEnumerable<int> videoReplacementIds,
+         IEnumerable<int> floorPlanReplacementIds,
+         IEnumerable<int> documentReplacementIds)
     {
         MultipartFormDataContent content = new();
 
         if (coverPhoto != null)
         {
-            content.Add(CreateFileContent(coverPhoto), "CoverPhoto", coverPhoto.FileName);
+            content.Add(
+                CreateFileContent(coverPhoto),
+                "CoverPhoto",
+                coverPhoto.FileName);
         }
 
         foreach (IFormFile file in galleryImages)
         {
-            content.Add(CreateFileContent(file), "GalleryImages", file.FileName);
+            content.Add(
+                CreateFileContent(file),
+                "GalleryImages",
+                file.FileName);
         }
 
         foreach (IFormFile file in videos)
         {
-            content.Add(CreateFileContent(file), "Videos", file.FileName);
+            content.Add(
+                CreateFileContent(file),
+                "Videos",
+                file.FileName);
         }
 
         foreach (IFormFile file in floorPlans)
         {
-            content.Add(CreateFileContent(file), "FloorPlans", file.FileName);
+            content.Add(
+                CreateFileContent(file),
+                "FloorPlans",
+                file.FileName);
         }
 
         foreach (IFormFile file in documents)
         {
-            content.Add(CreateFileContent(file), "Documents", file.FileName);
+            content.Add(
+                CreateFileContent(file),
+                "Documents",
+                file.FileName);
+        }
+
+        foreach (int id in removedMediaIds ?? [])
+        {
+            content.Add(
+                new StringContent(id.ToString()),
+                "RemovedMediaIds");
+        }
+
+        foreach (int id in galleryReplacementIds)
+        {
+            content.Add(
+                new StringContent(id.ToString()),
+                "GalleryReplacementIds");
+        }
+
+        foreach (int id in videoReplacementIds)
+        {
+            content.Add(
+                new StringContent(id.ToString()),
+                "VideoReplacementIds");
+        }
+
+        foreach (int id in floorPlanReplacementIds)
+        {
+            content.Add(
+                new StringContent(id.ToString()),
+                "FloorPlanReplacementIds");
+        }
+
+        foreach (int id in documentReplacementIds)
+        {
+            content.Add(
+                new StringContent(id.ToString()),
+                "DocumentReplacementIds");
         }
 
         return content;
     }
-
-    private static StreamContent CreateFileContent(IFormFile file)
+    private static bool IsRealFile(IFormFile? file)
     {
-        StreamContent content = new(file.OpenReadStream());
+        return file != null &&
+               file.Length > 0 &&
+               !string.IsNullOrWhiteSpace(file.FileName);
+    }
 
-        content.Headers.ContentType = new MediaTypeHeaderValue(
-            file.ContentType ?? "application/octet-stream");
+    private static StreamContent CreateFileContent(
+        IFormFile file)
+    {
+        StreamContent content =
+            new StreamContent(
+                file.OpenReadStream()
+            );
+
+        content.Headers.ContentType =
+            new MediaTypeHeaderValue(
+                file.ContentType ??
+                "application/octet-stream"
+            );
 
         return content;
     }
+
+
 
     private static void AddQueryParameter(
         List<string> queryParameters,

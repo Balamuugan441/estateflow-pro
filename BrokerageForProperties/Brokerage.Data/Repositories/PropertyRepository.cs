@@ -435,6 +435,85 @@ public class PropertyRepository : IPropertyRepository
 
         return true;
     }
+    public async Task<bool> UpdatePropertyCoverMediaAsync(
+    PropertyMedia media)
+    {
+        const string query = """
+        UPDATE PropertyMedia
+        SET
+            FileName = @FileName,
+            FilePath = @FilePath,
+            ContentType = @ContentType,
+            FileSizeBytes = @FileSizeBytes,
+            DisplayOrder = 1
+        WHERE
+            MediaID = @MediaID
+            AND PropertyID = @PropertyID
+            AND MediaType = 'CoverPhoto';
+        """;
+
+        using var connection =
+            _connectionFactory.CreateConnection();
+
+        int rowsAffected =
+            await connection.ExecuteAsync(
+                query,
+                media);
+
+        return rowsAffected > 0;
+    }
+    public async Task<bool> UpdatePropertyMediaAsync(
+    PropertyMedia media)
+    {
+        const string query = """
+        UPDATE PropertyMedia
+        SET
+            FileName = @FileName,
+            FilePath = @FilePath,
+            ContentType = @ContentType,
+            FileSizeBytes = @FileSizeBytes
+        WHERE
+            MediaID = @MediaID
+            AND PropertyID = @PropertyID
+            AND MediaType = @MediaType;
+        """;
+
+        using var connection =
+            _connectionFactory.CreateConnection();
+
+        int rowsAffected =
+            await connection.ExecuteAsync(
+                query,
+                media);
+
+        return rowsAffected > 0;
+    }
+    public async Task<bool> DeletePropertyMediaAsync(
+    int propertyId,
+    int mediaId)
+    {
+        const string query = """
+        DELETE FROM PropertyMedia
+        WHERE
+            PropertyID = @PropertyID
+            AND MediaID = @MediaID
+            AND MediaType <> 'CoverPhoto';
+        """;
+
+        using var connection =
+            _connectionFactory.CreateConnection();
+
+        int rowsAffected =
+            await connection.ExecuteAsync(
+                query,
+                new
+                {
+                    PropertyID = propertyId,
+                    MediaID = mediaId
+                });
+
+        return rowsAffected > 0;
+    }
     // Fetches the media details of the particular Property
     public async Task<IEnumerable<PropertyMedia>> GetPropertyMediaAsync(
     int propertyId)

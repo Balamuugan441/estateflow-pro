@@ -22,8 +22,7 @@ public class AddPropertyDetailsViewModel
 
     public string Bedrooms { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Bathrooms are required.")]
-    public decimal? Bathrooms { get; set; }
+    public decimal? Bathrooms { get; set; } = 2m;
 
     public int? Balconies { get; set; }
 

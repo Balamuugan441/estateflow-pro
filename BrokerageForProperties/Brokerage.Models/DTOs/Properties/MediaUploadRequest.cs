@@ -13,4 +13,13 @@ public class MediaUploadRequest
     public List<IFormFile> FloorPlans { get; set; } = [];
 
     public List<IFormFile> Documents { get; set; } = [];
+    public List<int> RemovedMediaIds { get; set; } = [];
+
+    public List<int> GalleryReplacementIds { get; set; } = [];
+
+    public List<int> VideoReplacementIds { get; set; } = [];
+
+    public List<int> FloorPlanReplacementIds { get; set; } = [];
+
+    public List<int> DocumentReplacementIds { get; set; } = [];
 }

@@ -1688,3 +1688,68 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: inherit;
     cursor: pointer;
 }
+.cover-action-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.cover-replace-button,
+.cover-remove-button {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cover-replace-button {
+    padding: 7px 14px;
+    border-radius: 7px;
+    background: #2563eb;
+    color: #ffffff;
+}
+
+    .cover-replace-button:hover {
+        background: #1d4ed8;
+    }
+
+.cover-remove-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 30px;
+    padding: 0;
+}
+
+    .cover-remove-button:hover {
+        background: #dc2626;
+    }
+.media-action-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.media-replace-button {
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+    .media-replace-button:hover {
+        opacity: 0.9;
+    }
+
+.gallery-remove-button,
+.media-file-remove {
+    cursor: pointer;
+}

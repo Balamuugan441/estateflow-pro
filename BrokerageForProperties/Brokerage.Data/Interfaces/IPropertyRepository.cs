@@ -21,6 +21,9 @@ public interface IPropertyRepository
     Task<bool> SavePropertyAmenitiesAsync(int propertyId, IEnumerable<int> amenityIds);
     Task<bool> SavePropertyMediaAsync(IEnumerable<PropertyMedia> media);
     Task<IEnumerable<PropertyMedia>> GetPropertyMediaAsync(int propertyId);
+    Task<bool> UpdatePropertyCoverMediaAsync(PropertyMedia media);
+    Task<bool> UpdatePropertyMediaAsync(PropertyMedia media);
+    Task<bool> DeletePropertyMediaAsync(int propertyId, int mediaId);
     Task<IEnumerable<Amenity>> GetPropertyAmenitiesAsync(int propertyId);
     Task<AdminPropertyListResponse> GetPropertiesForAdminAsync(AdminPropertyQueryRequest request);
     Task<AdminPendingApprovalListResponse> GetPendingApprovalsAsync(int pageNumber);

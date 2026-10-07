@@ -50,6 +50,20 @@ public class IndexModel : PageModel
     public List<IFormFile> Documents { get; set; } = [];
     [BindProperty]
     public int PropertyID { get; set; }
+    [BindProperty]
+    public List<int> RemovedMediaIds { get; set; } = [];
+
+    [BindProperty]
+    public List<int> GalleryReplacementIds { get; set; } = [];
+
+    [BindProperty]
+    public List<int> VideoReplacementIds { get; set; } = [];
+
+    [BindProperty]
+    public List<int> FloorPlanReplacementIds { get; set; } = [];
+
+    [BindProperty]
+    public List<int> DocumentReplacementIds { get; set; } = [];
 
     public int CurrentStep { get; private set; } = 1;
 
@@ -410,11 +424,49 @@ public class IndexModel : PageModel
 
         return Page();
     }
+    private async Task<bool> LoadExistingReviewAsync(
+    CancellationToken cancellationToken)
+    {
+        if (PropertyID <= 0)
+        {
+            Review = null;
+            return true;
+        }
+
+        Review =
+            await _propertyApiClient
+                .GetPropertyReviewAsync(
+                    PropertyID,
+                    cancellationToken);
+
+        return Review != null;
+    }
     public async Task<IActionResult> OnPostAsync(
     CancellationToken cancellationToken)
     {
         try
         {
+            //If property is created reloads the existing property details from the database
+            if (PropertyID > 0)
+            {
+                bool reviewLoaded =
+                    await LoadExistingReviewAsync(
+                        cancellationToken);
+
+                if (!reviewLoaded)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to reload the existing property data."
+                    );
+
+                    CurrentStep = 1;
+
+                    return Page();
+                }
+            }
+
+            // Step 1 - Basics
             // Step 1 - Basics
 
             if (FormAction == "ValidateStep1")
@@ -462,7 +514,6 @@ public class IndexModel : PageModel
                 return Page();
             }
 
-
             //STEP 3 - AMENITIES
 
 
@@ -500,95 +551,178 @@ public class IndexModel : PageModel
                 return Page();
             }
 
-
-
-            //STEP 4 - SAVE PROPERTY
-
+            //Step 4
 
             if (FormAction == "SaveForReview")
             {
                 ModelState.Clear();
 
-                TryValidateModel(Input, nameof(Input));
-                ValidateDetailsModel(); // Ensures Step 2 rules apply during Step 4 save
+                CoverPhoto =
+                    IsRealFile(CoverPhoto)
+                        ? CoverPhoto
+                        : null;
 
-                if (SelectedAmenities == null || SelectedAmenities.Count == 0)
+                GalleryImages =
+                    GetRealFiles(GalleryImages);
+
+                Videos =
+                    GetRealFiles(Videos);
+
+                FloorPlans =
+                    GetRealFiles(FloorPlans);
+
+                Documents =
+                    GetRealFiles(Documents);
+
+
+                TryValidateModel(
+                    Input,
+                    nameof(Input)
+                );
+
+
+                ValidateDetailsModel();
+
+
+                if (SelectedAmenities == null ||
+                    SelectedAmenities.Count == 0)
                 {
-                    ModelState.AddModelError(string.Empty, "Please select at least one amenity.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Please select at least one amenity."
+                    );
                 }
+
+                // Read existing media from database
 
 
                 bool hasExistingCover = false;
-
                 bool hasExistingGallery = false;
-
+                int existingGalleryCount = 0;
 
                 if (PropertyID > 0)
                 {
-                    Review =
-                        await _propertyApiClient
-                            .GetPropertyReviewAsync(
-                                PropertyID,
-                                cancellationToken
-                            );
+                    List<PropertyMediaApiModel> existingMedia =
+                    await _propertyApiClient.GetPropertyMediaAsync(PropertyID, cancellationToken);
+
+                    hasExistingCover =
+                        existingMedia.Any(
+                            x => x.MediaType == "CoverPhoto");
+
+                    existingGalleryCount =
+                        existingMedia.Count(
+                            x =>
+                                x.MediaType == "GalleryImage" &&
+                                !RemovedMediaIds.Contains(x.MediaID));
+
+                    hasExistingGallery =
+                        existingGalleryCount > 0;
+                }
+
+                // COVER PHOTO VALIDATION
+
+                bool hasNewCover =
+                    IsRealFile(CoverPhoto);
 
 
-                    if (Review != null)
+                if (PropertyID == 0)
+                {
+                    // Brand-new property.
+                    if (!hasNewCover)
                     {
-                        hasExistingCover =
-                            Review.Media.Any(
-                                x =>
-                                    x.MediaType ==
-                                    "CoverPhoto"
-                            );
+                        ModelState.AddModelError(
+                            nameof(CoverPhoto),
+                            "Cover photo is required."
+                        );
+                    }
+                }
+                else
+                {
+                    // Existing property.
+                    //
+                    // Existing DB cover OR a newly selected
+                    // cover is enough.
 
-
-                        hasExistingGallery =
-                            Review.Media.Any(
-                                x =>
-                                    x.MediaType ==
-                                    "GalleryImage"
-                            );
+                    if (!hasExistingCover &&
+                        !hasNewCover)
+                    {
+                        ModelState.AddModelError(
+                            nameof(CoverPhoto),
+                            "Cover photo is required."
+                        );
                     }
                 }
 
+                // Gallery validation
 
-                if (
-                    CoverPhoto == null &&
-                    !hasExistingCover
-                )
+                int newGalleryCount =
+                    GalleryImages.Count;
+
+
+                if (PropertyID == 0)
                 {
-                    ModelState.AddModelError(
-                        nameof(CoverPhoto),
-                        "Cover photo is required."
-                    );
+                    if (newGalleryCount == 0)
+                    {
+                        ModelState.AddModelError(
+                            nameof(GalleryImages),
+                            "At least one gallery image is required."
+                        );
+                    }
+                }
+                else
+                {
+                    if (!hasExistingGallery &&
+                        newGalleryCount == 0)
+                    {
+                        ModelState.AddModelError(
+                            nameof(GalleryImages),
+                            "At least one gallery image is required."
+                        );
+                    }
                 }
 
+                // TOTAL GALLERY LIMIT
+                // Existing + New <= 7
 
-                if (
-                    (GalleryImages == null ||
-                     GalleryImages.Count == 0) &&
-                    !hasExistingGallery
-                )
+
+                int totalGalleryCount =
+                    existingGalleryCount +
+                    newGalleryCount;
+
+
+                if (totalGalleryCount > 7)
                 {
                     ModelState.AddModelError(
                         nameof(GalleryImages),
-                        "At least one gallery image is required."
+                        "Maximum 7 gallery images are allowed in total."
                     );
                 }
+
+                // Stop if Step 4 validation failed
+
 
                 if (!ModelState.IsValid)
                 {
                     CurrentStep = 4;
 
+                    if (PropertyID > 0)
+                    {
+                        Review =
+                            await _propertyApiClient
+                                .GetPropertyReviewAsync(
+                                    PropertyID,
+                                    cancellationToken
+                                );
+                    }
+
                     return Page();
                 }
+
 
                 return await SaveForReviewAsync(
                     cancellationToken
                 );
             }
-
 
             /* STEP 5 - SUBMIT PROPERTY */
 
@@ -680,7 +814,7 @@ public class IndexModel : PageModel
         Area = Details.Area,
         AreaUnit = Details.AreaUnit,
         Bedrooms = Details.Bedrooms,
-        Bathrooms = Details.Bathrooms,
+        Bathrooms = Details.Bathrooms ?? 2m,
 
         Balconies = Details.Balconies,
         Floor = Details.Floor,
@@ -777,7 +911,7 @@ public class IndexModel : PageModel
                             Details.Bedrooms,
 
                         Bathrooms =
-                            Details.Bathrooms,
+                            Details.Bathrooms ?? 2m,
 
                         Balconies =
                             Details.Balconies,
@@ -861,15 +995,20 @@ public class IndexModel : PageModel
             }
 
 
-            bool hasNewMedia =
-     CoverPhoto != null ||
-     GalleryImages.Count > 0 ||
-     Videos.Count > 0 ||
-     FloorPlans.Count > 0 ||
-     Documents.Count > 0;
+            bool hasMediaChanges =
+    IsRealFile(CoverPhoto) ||
+    GalleryImages.Any(IsRealFile) ||
+    Videos.Any(IsRealFile) ||
+    FloorPlans.Any(IsRealFile) ||
+    Documents.Any(IsRealFile) ||
+    RemovedMediaIds.Count > 0 ||
+    GalleryReplacementIds.Count > 0 ||
+    VideoReplacementIds.Count > 0 ||
+    FloorPlanReplacementIds.Count > 0 ||
+    DocumentReplacementIds.Count > 0;
 
 
-            if (PropertyID == 0 || hasNewMedia)
+            if (PropertyID == 0 || hasMediaChanges)
             {
                 /*
                    New property:
@@ -881,15 +1020,20 @@ public class IndexModel : PageModel
                 */
 
                 ApiMessageResponse mediaResponse =
-                    await _propertyApiClient
-                        .UploadPropertyMediaAsync(
-                            propertyId,
-                            CoverPhoto,
-                            GalleryImages,
-                            Videos,
-                            FloorPlans,
-                            Documents,
-                            cancellationToken);
+    await _propertyApiClient
+        .UploadPropertyMediaAsync(
+            propertyId,
+            CoverPhoto,
+            GalleryImages,
+            Videos,
+            FloorPlans,
+            Documents,
+            RemovedMediaIds,
+            GalleryReplacementIds,
+            VideoReplacementIds,
+            FloorPlanReplacementIds,
+            DocumentReplacementIds,
+            cancellationToken);
 
 
                 if (!mediaResponse.Success)
@@ -1094,6 +1238,39 @@ public class IndexModel : PageModel
                     x => x.AmenityName
                 )
                 .ToList();
+    }
+    private static bool IsRealFile(IFormFile? file)
+    {
+        return file != null &&
+               file.Length > 0 &&
+               !string.IsNullOrWhiteSpace(file.FileName);
+    }
+
+    private static List<IFormFile> GetRealFiles(
+        IEnumerable<IFormFile>? files)
+    {
+        return files?
+            .Where(IsRealFile)
+            .ToList()
+            ?? [];
+    }
+    private void RestoreExistingDetailsIfMissing()
+    {
+        if (PropertyID <= 0 ||
+            Review?.Property == null)
+        {
+            return;
+        }
+
+        if (!Details.Bathrooms.HasValue)
+        {
+            Details.Bathrooms =
+                Review.Property.Bathrooms;
+
+            ModelState.Remove(
+                "Details.Bathrooms"
+            );
+        }
     }
     private void ValidateDetailsModel()
     {

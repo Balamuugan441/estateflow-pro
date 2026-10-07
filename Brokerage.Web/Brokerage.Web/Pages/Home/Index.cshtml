@@ -1,0 +1,659 @@
+﻿@page "/"
+@model Brokerage.Web.Pages.Home.IndexModel
+@{
+    ViewData["Title"] = "EstateFlow Pro - Find Your Perfect Property";
+    
+    
+    var heroBackgroundImage = Url.Content("~/images/backgrounds/back.webp");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/seller/seller-footer.css" />
+}
+
+<div class="page-wrapper">
+    <!-- Header Layout -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="/" class="header-brand" aria-label="EstateFlow Pro">
+                    <img src="~/images/branding/estateflow-pro-logo.png"
+                         alt="EstateFlow Pro"
+                         class="brand-logo-icon" />
+                    <span class="brand-text">
+                        EstateFlow <span>Pro</span>
+                    </span>
+                </a>
+
+            </div>
+
+            <div class="header-right">
+
+                <div class="auth-actions">
+                    <a href="/Account/Login" class="btn-signin">Sign In</a>
+                    <a href="/Account/Register" class="btn-register">Register</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="hero-section" style="background-image: url('@heroBackgroundImage');">
+        <div class="hero-overlay"></div>
+        <div class="hero-container">
+            <div class="hero-header-content">
+                <h1 class="hero-title">
+                    Find Your Perfect Property
+                    <span class="highlight-text">with Confidence</span>
+                </h1>
+                <p class="hero-description">
+                    Explore thousands of verified homes, apartments, villas, and commercial spaces. Search, compare, connect with trusted sellers and brokers, and discover the right property for your next investment or dream home.
+                </p>
+            </div>
+
+            <div class="hero-search-card">
+                <form method="get" action="/Listings" class="search-form">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" name="q" class="search-input" placeholder="Search by city, neighborhood, or ZIP..." />
+                    </div>
+
+                    <button type="button" class="btn-filter">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="4" y1="21" x2="4" y2="14"></line>
+                            <line x1="4" y1="10" x2="4" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12" y2="3"></line>
+                            <line x1="20" y1="21" x2="20" y2="16"></line>
+                            <line x1="20" y1="12" x2="20" y2="3"></line>
+                            <line x1="1" y1="14" x2="7" y2="14"></line>
+                            <line x1="9" y1="8" x2="15" y2="8"></line>
+                            <line x1="17" y1="16" x2="23" y2="16"></line>
+                        </svg>
+                        <span>Filters</span>
+                    </button>
+
+                    <button type="submit" class="btn-explore">
+                        Explore Listings
+                    </button>
+                </form>
+            </div>
+
+            <div class="hero-stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value stat-value-accent">@Model.TotalUsers+</span>
+                    <span class="stat-label">TOTAL USERS</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">@Model.ApprovedProperties+</span>
+                    <span class="stat-label">ACTIVE LISTINGS</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">98.2%</span>
+                    <span class="stat-label">SUCCESS RATE</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value stat-value-accent">100+</span>
+                    <span class="stat-label">GLOBAL PARTNERS</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Featured Opportunities Section -->
+    <section class="featured-section">
+        <div class="featured-container">
+            <h2 class="section-title">Featured Opportunities</h2>
+
+           <div class="filter-pills">
+
+    <button
+        type="button"
+        class="pill-btn active"
+        data-city="">
+        All Listings
+    </button>
+
+    <button
+        type="button"
+        class="pill-btn"
+        data-city="Delhi">
+        Delhi
+    </button>
+
+    <button
+        type="button"
+        class="pill-btn"
+        data-city="Mumbai">
+        Mumbai
+    </button>
+
+    <button
+        type="button"
+        class="pill-btn"
+        data-city="Kolkata">
+        Kolkata
+    </button>
+
+    <button
+        type="button"
+        class="pill-btn"
+        data-city="Bengaluru">
+        Bengaluru
+    </button>
+
+    <button
+        type="button"
+        class="pill-btn"
+        data-city="Chennai">
+        Chennai
+    </button>
+
+</div>
+
+            <div class="property-grid" id="propertyGrid">
+                @if (Model.Properties.Count == 0)
+                {
+                    <div class="property-empty-state">
+                        No approved properties are available.
+                    </div>
+                }
+                else
+                {
+                    @foreach (var property in Model.Properties)
+                    {
+                        <div class="property-card">
+                            <div class="card-image-wrapper">
+                                @if (!string.IsNullOrWhiteSpace(property.CoverImagePath))
+                                {
+                                    <img src="@Url.Content(property.CoverImagePath)"
+                                         alt="@property.PropertyTitle"
+                                         class="card-image" />
+                                }
+                                else
+                                {
+                                    <div class="card-image card-image-placeholder">
+                                        No Image
+                                    </div>
+                                }
+
+                                <span class="card-badge">
+                                    @property.ListingType.ToUpperInvariant()
+                                </span>
+
+                                <button type="button" class="btn-favorite" aria-label="Favorite property">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="card-content">
+                                <div class="card-header-row">
+                                    <h3 class="property-title">@property.PropertyTitle</h3>
+                                    <span class="property-price">@property.Price.ToString("N0")</span>
+                                </div>
+
+                                <div class="property-location">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    <span>@property.LocationAddress, @property.City</span>
+                                </div>
+
+                                <div class="property-specs">
+                                    <div class="spec-item">
+                                        <span>@property.Bedrooms Beds</span>
+                                    </div>
+                                    <div class="spec-item">
+                                        <span>@property.Bathrooms Baths</span>
+                                    </div>
+                                    <div class="spec-item">
+                                        <span>@property.Area @property.AreaUnit</span>
+                                    </div>
+                                </div>
+
+                                <a href="/Listings/Details/@property.PropertyID" class="btn-view-details">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </section>
+</div>
+    <!-- Excellence & Features Section -->
+    <section class="excellence-section">
+        <div class="section-container">
+            
+            <!-- Section Header -->
+            <div class="excellence-header">
+                <h2 class="excellence-title">Redefining Real Estate Excellence</h2>
+                <p class="excellence-subtitle">
+                    We combine deep market intelligence with a bespoke concierge experience to ensure your assets reach their full potential.
+                </p>
+            </div>
+
+            <!-- 3-Column Features Grid -->
+            <div class="features-grid">
+
+              
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                   
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M18 9l-5 5-4-4-3 3"></path>
+                        </svg>
+
+       
+                    </div>
+                    <h3 class="feature-title">Institutional Data</h3>
+                    <p class="feature-description">
+                        Access real-time pricing models, liquidity analysis, and off-market opportunities powered by our proprietary algorithms.
+                    </p>
+                </div>
+
+                <!-- Feature 2: Bespoke Advisory -->
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+       
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            <polyline points="9 12 11 14 15 10"></polyline>
+                        </svg>
+
+      
+                    </div>
+                    <h3 class="feature-title">Bespoke Advisory</h3>
+                    <p class="feature-description">
+                        Every client is paired with a dedicated specialist who manages every detail of the transaction lifecycle with total discretion.
+                    </p>
+                </div>
+
+                <!-- Feature 3: Global Network -->
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                  
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+
+                       
+                    </div>
+                    <h3 class="feature-title">Global Network</h3>
+                    <p class="feature-description">
+                        Connect with a worldwide network of high-net-worth investors and sovereign wealth funds through our premium brokerage portals.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Stories -->
+    <section class="stories-section">
+        <div class="section-container">
+            <div class="stories-grid">
+
+                <!-- Left Content Area -->
+                <div class="stories-left">
+                    <span class="stories-kicker">SUCCESS STORIES</span>
+                    <h2 class="stories-title">Trusted by the World's Most Discerning Clients</h2>
+                    <blockquote class="stories-quote">
+                        "EstateFlow Pro has transformed how we manage our global portfolio. Their data is unmatched, and the execution is flawless."
+                    </blockquote>
+
+                    <!-- CEO Profile Box -->
+                    <div class="ceo-profile">
+                        <div class="ceo-avatar-wrapper">
+                        
+                            <img src="~/images/avatars/default-avatar.jpg" 
+                                 alt="G Balamurugan" 
+                                 class="ceo-avatar" 
+                                 onerror="this.src='https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=150&q=80';" />
+                        </div>
+                        <div class="ceo-info">
+                            <h4 class="ceo-name">G Balamurugan</h4>
+                            <p class="ceo-role">Marlensoft Private Limited</p>
+                        </div>
+                    </div>
+
+                  
+     
+                </div>
+
+                <!-- Right Review Card -->
+                <div class="stories-right">
+                    <div class="review-card">
+                        
+                      
+                        <div class="review-header">
+                            <span class="rating-score">5.0/5.0</span>
+                            <div class="star-rating">
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    <svg viewBox="0 0 24 24" fill="#3b82f6" class="star-icon">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                }
+                            </div>
+                        </div>
+
+                        <p class="review-text">
+                            "The property analysis tools provided by EstateFlow Pro saved us months of due diligence on our London acquisitions. A true game changer for commercial real estate."
+                        </p>
+
+                        <div class="review-divider"></div>
+
+                        <!-- Card Footer Metrics -->
+                        <div class="review-metrics">
+                            <div class="metric-block">
+                                <span class="metric-val">500+</span>
+                                <span class="metric-lbl">PROPERTIES CLOSED</span>
+                            </div>
+                            <div class="metric-block">
+                                <span class="metric-val">12 Days</span>
+                                <span class="metric-lbl">AVG. SALE TIME</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    <footer class="seller-footer">
+
+    <div class="footer-container">
+
+        <!--TOP FOOTER CONTENT-->
+
+        <div class="footer-content">
+
+            <div class="footer-brand-section">
+
+                <a asp-area="Seller"
+                   asp-page="/MyProperties/Index"
+                   class="footer-brand">
+
+  
+
+                    <img src="~/images/branding/estateflow-pro-logo.png"
+                         alt="EstateFlow Pro"
+                         class="footer-logo" />
+
+                    <span class="footer-brand-name">
+                        EstateFlow <span>Pro</span>
+                    </span>
+
+                </a>
+
+
+                <p class="footer-description">
+                    Setting the standard for international real estate
+                    brokerage and asset management since 2012.
+                </p>
+
+
+                <!-- Social / Utility Icons -->
+
+                <div class="footer-social">
+
+                    <button type="button"
+                            class="footer-social-button"
+                            aria-label="Share">
+
+                        <img src="~/images/icons/Share.png"
+                             alt=""
+                             class="footer-social-icon" />
+
+                    </button>
+
+
+                    <button type="button"
+                            class="footer-social-button"
+                            aria-label="Website">
+
+                        <img src="~/images/icons/globe.png"
+                             alt=""
+                             class="footer-social-icon" />
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!--PLATFORM -->
+
+            <div class="footer-column">
+
+                <h3 class="footer-title">
+                    PLATFORM
+                </h3>
+
+                <ul class="footer-links">
+
+                    <li>
+                        <a asp-page="/Buy">
+                            Buy Property
+                        </a>
+                    </li>
+
+                    <li>
+                        <a asp-page="/Rent">
+                            Rent Listings
+                        </a>
+                    </li>
+
+                    <li>
+                        <a asp-area="Seller"
+                           asp-page="/MyProperties/Index">
+                            Sell Your Asset
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#">
+                            Commercial Portal
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+        
+
+            <div class="footer-column">
+
+                <h3 class="footer-title">
+                    SUPPORT
+                </h3>
+
+                <ul class="footer-links">
+
+                    <li>
+                        <a href="#">
+                            Help Center
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#">
+                            Privacy Policy
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#">
+                            Broker Portal
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#">
+                            Affiliate Program
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- SUBSCRIBE -->
+
+            <div class="footer-column footer-subscribe">
+
+                <h3 class="footer-title">
+                    SUBSCRIBE
+                </h3>
+
+
+                <p class="footer-subscribe-description">
+                    Join our newsletter for exclusive off-market
+                    listings and market insights.
+                </p>
+
+
+                <form class="footer-subscribe-form"
+                      method="post">
+
+                    <input type="email"
+                           name="email"
+                           placeholder="Email Address"
+                           aria-label="Email Address"
+                           autocomplete="email" />
+
+
+                    <button type="submit"
+                            class="footer-subscribe-button"
+                            aria-label="Subscribe">
+
+                     
+
+                        <img src="~/images/icons/send-icon.png"
+                             alt=""
+                             class="footer-send-icon" />
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+     
+
+        <div class="footer-divider"></div>
+
+
+        <!--FOOTER BOTTOM-->
+
+        <div class="footer-bottom">
+
+
+            <!-- Copyright -->
+
+            <div class="footer-copyright">
+
+                © 2026 EstateFlow Pro. All rights reserved.
+
+            </div>
+
+
+            <!-- Legal Links -->
+
+            <div class="footer-legal">
+
+                <a href="#">
+                    Terms of Service
+                </a>
+
+                <a href="#">
+                    Cookie Policy
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</footer>
+</div>
+
+ 
+<div id="loginModalOverlay" class="login-modal-overlay">
+    <div class="login-modal-card">
+
+        <button
+            type="button"
+            id="modalCloseBtn"
+            class="login-modal-close"
+            aria-label="Close modal">
+            &times;
+        </button>
+
+        <div class="login-modal-icon-box">
+            <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+
+                <rect
+                    x="3"
+                    y="11"
+                    width="18"
+                    height="11"
+                    rx="2"
+                    ry="2">
+                </rect>
+
+                <path
+                    d="M7 11V7a5 5 0 0 1 10 0v4">
+                </path>
+
+            </svg>
+        </div>
+
+        <h3 class="login-modal-title">
+            Access Restricted
+        </h3>
+
+        <p class="login-modal-msg">
+            Kindly Login To View the Service
+        </p>
+
+        <div class="login-modal-progress-track">
+            <div
+                id="modalProgressBar"
+                class="login-modal-progress-fill">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="~/js/home.js"
+            asp-append-version="true">
+    </script>
+}

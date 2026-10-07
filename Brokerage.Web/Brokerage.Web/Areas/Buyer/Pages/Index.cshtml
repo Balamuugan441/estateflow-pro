@@ -1,0 +1,383 @@
+﻿@page
+@model Brokerage.Web.Areas.Buyer.Pages.IndexModel
+@using Brokerage.Web.Models.ApiModels
+
+@{
+    ViewData["Title"] = "Properties";
+}
+
+
+@section Styles {
+
+    <link rel="stylesheet"
+          href="~/css/Buyer/buyer-main.css"
+          asp-append-version="true" />
+
+}
+
+<div class="brokerage-dashboard">
+    <!-- Top Search Bar -->
+    <div class="search-container">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text"
+               id="propertySearch"
+               placeholder="Search by city, state, or ZIP..."
+               class="search-input"
+               autocomplete="off" />
+    </div>
+
+    <div class="dashboard-content">
+        <!-- Sidebar Filters -->
+        <aside class="filters-sidebar">
+            <div class="filter-header">
+                <h3>Filters</h3>
+                <button type="button" class="btn-reset">RESET</button>
+            </div>
+
+            <!-- Location Filter -->
+            <div class="filter-group">
+                <label class="filter-label">LOCATION</label>
+
+                <div class="location-search-wrapper">
+
+                    <input type="text"
+                           id="locationSearch"
+                           class="filter-input"
+                           placeholder="Search state or city..."
+                           autocomplete="off" />
+
+                    <input type="hidden"
+                           id="locationType" />
+
+                    <input type="hidden"
+                           id="locationValue" />
+
+                    <div id="locationSuggestions"
+                         class="location-suggestions">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="filter-group">
+          <label class="filter-label">PRICE RANGE</label>
+              <div class="price-inputs">
+         <input type="number" placeholder="Min" class="filter-input" min="0" inputmode="numeric" />
+        <span class="price-separator">-</span>
+         <input type="number" placeholder="Max" class="filter-input" min="0" inputmode="numeric" />
+           </div>
+             </div>
+
+            <!-- Property Type -->
+     
+            <div class="filter-group">
+                <label class="filter-label">PROPERTY TYPE</label>
+
+                <div class="chip-grid">
+                    <button type="button"
+                            class="chip-btn active"
+                            data-property-type="">
+                        All
+                    </button>
+
+                    <button type="button"
+                            class="chip-btn"
+                            data-property-type="Studio Apartment">
+                        Studio Apartment
+                    </button>
+
+                    <button type="button"
+                            class="chip-btn"
+                            data-property-type="Apartment">
+                        Apartment
+                    </button>
+
+                    <button type="button"
+                            class="chip-btn"
+                            data-property-type="Villa">
+                        Villa
+                    </button>
+
+                    <button type="button"
+                            class="chip-btn"
+                            data-property-type="Independent House">
+                        Independent House
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bedrooms -->
+           <div class="filter-group">
+    <label class="filter-label">BEDROOMS</label>
+
+    <div class="chip-row">
+
+        <button type="button"
+                class="chip-btn"
+                data-bedrooms="1">
+            1+
+        </button>
+
+        <button type="button"
+                class="chip-btn"
+                data-bedrooms="2">
+            2+
+        </button>
+
+        <button type="button"
+                class="chip-btn"
+                data-bedrooms="3">
+            3+
+        </button>
+
+        <button type="button"
+                class="chip-btn"
+                data-bedrooms="4">
+            4+
+        </button>
+
+    </div>
+</div>
+
+            <!-- Status -->
+            <div class="filter-group">
+                <label class="filter-label">STATUS</label>
+
+                <div class="checkbox-group">
+
+                    <label class="checkbox-container">
+                        <input type="checkbox"
+                               class="listing-type-filter"
+                               value="For sale"
+                               checked />
+
+                        <span class="checkmark"></span>
+
+                        For Sale
+                    </label>
+
+                    <label class="checkbox-container">
+                        <input type="checkbox"
+                               class="listing-type-filter"
+                               value="For rent" />
+
+                        <span class="checkmark"></span>
+
+                        For Rent
+                    </label>
+
+                </div>
+            </div>
+            <button type="button"
+                    class="btn-apply-filter"
+                    id="applyFilterBtn">
+                APPLY FILTERS
+            </button>
+        </aside>
+
+        <!-- Main Property Display Area -->
+        <main class="properties-main">
+            <!-- Properties Header Bar -->
+            <div class="properties-bar">
+                <div class="bar-left">
+                    <h2 id="propertyCount">
+                        @Model.TotalRecords Properties
+                    </h2>
+                    <span class="status-pill">Available now</span>
+                </div>
+                <div class="bar-right">
+                    <div class="select-wrapper sort-wrapper">
+                        <select class="filter-select sort-select">
+                            <option value="latest">Sort by: Latest</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Grid -->
+            <div class="property-grid" id="propertyGrid">
+                @if (Model.Properties.Count == 0)
+                {
+                    <div class="property-empty-state">
+                        No approved properties are available.
+                    </div>
+                }
+                else
+                {
+                    foreach (BuyerPropertyApiModel property in Model.Properties)
+                    {
+                        string location =
+                            string.Join(
+                                ", ",
+                                new[]
+                                {
+                        property.LocationAddress,
+                        property.City,
+                        property.State
+                                }
+                                .Where(x => !string.IsNullOrWhiteSpace(x)));
+
+                        string imageUrl =
+                            string.IsNullOrWhiteSpace(property.CoverImagePath)
+                                ? string.Empty
+                                : Url.Page(
+                                    "/Buyer/Index",
+                                    "PropertyImage",
+                                    new
+                                    {
+                                        area = "Buyer",
+                                        path = property.CoverImagePath
+                                    });
+
+                        <div class="property-card" data-property-guid="@property.PropertyGUID" role="link" tabindex="0">
+
+                            <div class="card-image-wrapper">
+
+                                @if (!string.IsNullOrWhiteSpace(imageUrl))
+                                {
+                                    <img src="@imageUrl"
+                                         alt="@property.PropertyTitle"
+                                         class="card-image"
+                                         loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="card-image">
+                                        No Image
+                                    </div>
+                                }
+
+                                <div class="badge-group">
+                                    <span class="badge badge-sale">
+                                        @property.ListingType.ToUpperInvariant()
+                                    </span>
+                                </div>
+
+                                <button type="button"
+                                        class="btn-favorite"
+                                        aria-label="Favorite property">
+                                    <svg viewBox="0 0 24 24"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         stroke-width="2">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                    </svg>
+                                </button>
+
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="card-header">
+
+                                    <div>
+
+                                        <h3 class="property-title">
+                                            @property.PropertyTitle
+                                        </h3>
+
+                                        <div class="property-location">
+
+                                            <svg viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z">
+                                                </path>
+                                                <circle cx="12"
+                                                        cy="10"
+                                                        r="3">
+                                                </circle>
+                                            </svg>
+
+                                            <span>
+                                                @location
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                    <span class="property-price">
+                                        @property.Price.ToString("N0")
+
+                                        @if (property.ListingType.Equals(
+                                            "For rent",
+                                            StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <small>/month</small>
+                                        }
+                                    </span>
+
+                                </div>
+
+                                <div class="property-specs">
+
+                                    <div class="spec-item">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                            <path d="M3 7v11M21 7v11M3 13h18M3 10h18M7 10V7a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3"/>
+                                        </svg>
+                                        <span>
+                                            @property.Bedrooms Beds
+                                        </span>
+                                    </div>
+
+                                    <div class="spec-item">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                            <path d="M4 12h16a1 1 0 0 1 1 1v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-3a1 1 0 0 1 1-1z"/>
+                                            <path d="M6 12V5a2 2 0 0 1 2-2h3v3"/>
+                                        </svg>
+                                        <span>
+                                            @property.Bathrooms Baths
+                                        </span>
+                                    </div>
+
+                                    <div class="spec-item">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                            <path d="M3 9h18M9 21V9"/>
+                                        </svg>
+                                        <span>
+                                            @property.Area @property.AreaUnit
+                                        </span>
+                                    </div>
+
+                                </div>
+
+                                <div class="card-action">
+                                    <span>Get Full Details &rarr;</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Bottom Pagination UI -->
+            <div class="pagination-container"
+                 id="paginationContainer">
+            </div>
+        </main>
+    </div>
+    @Html.AntiForgeryToken()
+    <div id="buyerPreviewUrl"
+     data-url="@Url.Page(
+         "/Properties/Preview",
+         new { area = "Buyer" })">
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/js/Buyer/buyer-main.js"
+            asp-append-version="true"></script>
+}

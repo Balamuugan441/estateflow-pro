@@ -1,0 +1,2290 @@
+﻿@page
+@model Brokerage.Web.Areas.Seller.Pages.AddProperty.IndexModel
+@inject IConfiguration Configuration
+
+@{
+  Layout =
+        "/Areas/Seller/Pages/Shared/_SellerLayout.cshtml";
+
+    ViewData["Title"] =
+        "Add Property";
+
+    bool showSuccess =
+        bool.TryParse(
+            Request.Query["success"],
+            out bool successValue
+        )
+        && successValue;
+}
+
+@section Styles {
+
+    <link rel="stylesheet"
+          href="~/css/seller/add-property.css"
+          asp-append-version="true" />
+}
+
+<div class="add-property-page">
+
+    <div class="add-property-container">
+
+        <h1 class="add-property-title">
+            Add property
+        </h1>
+
+        <div class="property-wizard-card">
+
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+
+                <div class="step-item
+            @(Model.CurrentStep == 1
+                ? "active"
+                : Model.CurrentStep > 1
+                    ? "completed"
+                    : "")"
+     data-step="1">
+
+                    <div class="step-circle">
+                        1
+                    </div>
+
+                    <div class="step-label">
+                        Basics
+                    </div>
+
+                </div>
+
+                <div class="step-line"></div>
+
+                <div class="step-item
+            @(Model.CurrentStep == 2
+                ? "active"
+                : Model.CurrentStep > 2
+                    ? "completed"
+                    : "")"
+                data-step="2">
+
+                    <div class="step-circle">
+                        2
+                    </div>
+
+                    <div class="step-label">
+                        Details
+                    </div>
+
+                </div>
+
+                <div class="step-line"></div>
+
+                <div class="step-item
+            @(Model.CurrentStep == 3
+                ? "active"
+                : Model.CurrentStep > 3
+                    ? "completed"
+                    : "")"
+     data-step="3">
+
+                    <div class="step-circle">
+                        3
+                    </div>
+
+                    <div class="step-label">
+                        Amenities
+                    </div>
+
+                </div>
+
+                <div class="step-line"></div>
+
+                <div class="step-item
+            @(Model.CurrentStep == 4
+                ? "active"
+                : Model.CurrentStep > 4
+                    ? "completed"
+                    : "")"
+     data-step="4">
+
+                    <div class="step-circle">
+                        4
+                    </div>
+
+                    <div class="step-label">
+                        Media
+                    </div>
+
+                </div>
+
+                <div class="step-line"></div>
+
+                <div class="step-item
+            @(Model.CurrentStep == 5
+                ? "active"
+                : "")"
+     data-step="5">
+
+                    <div class="step-circle">
+                        5
+                    </div>
+
+                    <div class="step-label">
+                        Review
+                    </div>
+
+                </div>
+
+            </div>
+
+         <form id="addPropertyForm"
+      method="post"
+      enctype="multipart/form-data"
+      data-location-api-base-url="https://countriesnow.space/api/v0.1"
+      data-api-base-url="@Configuration["ApiSettings:BaseUrl"]"
+      data-my-properties-url="@Url.Page("/MyProperties/Index", new { area = "Seller" })"
+      data-has-existing-cover="@(Model.Review?.Media?.Any(x => x.MediaType == "CoverPhoto") == true ? "true" : "false")"
+      data-existing-gallery-count="@(Model.Review?.Media?.Count(x => x.MediaType == "GalleryImage") ?? 0)">
+             <input type="hidden" asp-for="PropertyID" />
+
+               <input type="hidden"
+               id="formAction"
+                name="FormAction" />
+
+                <div id="propertyWizard"
+     data-current-step="@Model.CurrentStep">
+                <!-- Step 1 - Basics -->
+
+                <section id="step-1"
+                         class="wizard-step @(Model.CurrentStep == 1 ? "active" : "")">
+
+                    <div class="step-content">
+
+                        <h2 class="section-title">
+                            Property basics
+                        </h2>
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="validation-summary">
+                        </div>
+
+                        <!-- Row 1 -->
+
+                        <div class="form-grid two-columns">
+
+                            <!-- Property Title -->
+
+                            <div class="form-field">
+
+                                <label asp-for="Input.PropertyTitle">
+                                    Property title
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <input asp-for="Input.PropertyTitle"
+                                       class="form-control"
+                                       placeholder="Enter property title"
+                                       maxlength="150"
+                                        />
+
+                                <span asp-validation-for="Input.PropertyTitle"
+                                      class="validation-message">
+                                </span>
+
+                            </div>
+
+                            <!-- Property Type -->
+
+                            <div class="form-field">
+
+                               <label asp-for="Input.PropertyType">
+                            Property type
+                         <span class="required-mark">*</span>
+                            </label>
+
+                       <select asp-for="Input.PropertyType"
+        class="form-control"
+        >
+
+    <option value="">
+        Select property type
+    </option>
+
+    <option value="Studio Apartment">
+        Studio Apartment
+    </option>
+
+    <option value="Apartment">
+        Apartment
+    </option>
+
+    <option value="Villa">
+        Villa
+    </option>
+
+    <option value="Independent House">
+        Independent House
+    </option>
+
+</select>
+
+<span asp-validation-for="Input.PropertyType"
+      class="validation-message">
+</span>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Row 2 -->
+
+                        <div class="form-grid two-columns">
+
+                            <!-- Listing Type -->
+
+                            <div class="form-field">
+
+                                <label asp-for="Input.ListingType">
+                                    Listing type
+                                      <span class="required-mark">*</span>
+                                </label>
+
+                                <select asp-for="Input.ListingType"
+                                        class="form-control">
+
+                                    <option value="">
+                                        Select listing type
+                                    </option>
+
+                                    <option value="For Rent">
+                                        For rent
+                                    </option>
+
+                                    <option value="For Sale">
+                                        For sale
+                                    </option>
+
+
+                                </select>
+                                <span asp-validation-for="Input.ListingType"
+                                 class="validation-message">
+                                 </span>
+
+                            </div>
+
+                            <!-- Property Status -->
+
+                            <div class="form-field">
+
+                                <label asp-for="Input.PropertyStatus">
+                                    Property status
+                                     <span class="required-mark">*</span>
+                                </label>
+
+                                <select asp-for="Input.PropertyStatus"
+                                        class="form-control">
+
+                                    <option value="">
+                                        Select property status
+                                    </option>
+
+                                    <option value="Ready to Move">
+                                        Ready to Move
+                                    </option>
+
+                                    <option value="Under Construction">
+                                        Under Construction
+                                    </option>
+
+                                </select>
+                                 <span asp-validation-for="Input.ListingType"
+                                 class="validation-message">
+                                 </span>
+
+                            </div>
+
+                        </div>
+
+                        <!-- Location Address -->
+
+                        <div class="form-field full-width">
+
+                            <label asp-for="Input.LocationAddress">
+                                Location address
+                                <span class="required-mark">*</span>
+                            </label>
+
+                            <input asp-for="Input.LocationAddress"
+                                   class="form-control"
+                                   placeholder="Enter complete address"
+                                   />
+
+                            <span asp-validation-for="Input.LocationAddress"
+                                  class="validation-message">
+                            </span>
+
+                        </div>
+
+                        <!-- Country / State -->
+
+                        <div class="form-grid four-columns">
+
+                            <!-- Country -->
+
+                            <div class="form-field">
+
+                                <label>
+                                    Country
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <div class="searchable-select">
+
+                                    <input type="text"
+                                id="countrySearch"
+                            class="form-control"
+                          placeholder="Search country"
+                           autocomplete="off"
+                          value="@Model.Input.Country"
+                            aria-expanded="false" />
+
+                                    <div id="countryOptions"
+                                         class="search-options"
+                                         role="listbox">
+                                    </div>
+
+                                </div>
+
+                                <input asp-for="Input.Country"
+                                       type="hidden"
+                                       id="selectedCountry" />
+
+                                <span asp-validation-for="Input.Country"
+                                      class="validation-message">
+                                </span>
+
+                            </div>
+
+                            <!-- State -->
+
+                            <div class="form-field">
+
+                                <label>
+                                    State
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <div class="searchable-select">
+
+                                  <input type="text"
+       id="stateSearch"
+       class="form-control"
+       placeholder="Select country first"
+       autocomplete="off"
+       value="@Model.Input.State"
+       aria-expanded="false" />
+
+                                    <div id="stateOptions"
+                                         class="search-options"
+                                         role="listbox">
+                                    </div>
+
+                                </div>
+
+                                <input asp-for="Input.State"
+                                       type="hidden"
+                                       id="selectedState" />
+
+                                <span asp-validation-for="Input.State"
+                                      class="validation-message">
+                                </span>
+
+                            </div>
+
+                            <!-- City -->
+
+                            <div class="form-field">
+
+                                <label>
+                                    City
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <div class="searchable-select">
+
+                                    <input type="text"
+                                    id="citySearch"
+                                class="form-control"
+                                 placeholder="Select state first"
+                               autocomplete="off"
+                              value="@Model.Input.City"
+                                aria-expanded="false" />
+
+                                    <div id="cityOptions"
+                                         class="search-options"
+                                         role="listbox">
+                                    </div>
+
+                                </div>
+
+                                <input asp-for="Input.City"
+                                       type="hidden"
+                                       id="selectedCity" />
+
+                                <span asp-validation-for="Input.City"
+                                      class="validation-message">
+                                </span>
+
+                            </div>
+
+                            <!-- Zip Code -->
+
+                            <div class="form-field">
+
+                                <label asp-for="Input.ZipCode">
+                                    Zip code
+                                    <span class="required-mark">*</span>
+                                </label>
+
+                                <input asp-for="Input.ZipCode"
+                                       class="form-control"
+                                       placeholder="Enter zip code"
+                                       maxlength="10"
+                                    />
+
+                                <span asp-validation-for="Input.ZipCode"
+                                      class="validation-message">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+        
+
+               <!-- STEP 2 - DETAILS-->
+
+
+<section id="step-2"
+         class="wizard-step @(Model.CurrentStep == 2 ? "active" : "")">
+
+    <div class="step-content">
+
+        <h2 class="section-title">
+            Property details
+        </h2>
+
+        <div asp-validation-summary="ModelOnly"
+             class="validation-summary">
+        </div>
+
+        <!-- Row 1 -->
+
+        <div class="form-grid four-columns">
+
+            <!-- Rent Price -->
+
+            <div class="form-field">
+
+               <label asp-for="Details.Price">
+
+        <span id="priceFieldLabel">
+            Rent price / month
+        </span>
+
+        <span class="required-mark">*</span>
+
+    </label>
+
+    <input asp-for="Details.Price"
+           id="Details_Price"
+           class="form-control"
+           type="number"
+           min="1"
+           step="0.01"
+           placeholder="Enter rent price"
+        />
+
+    <span asp-validation-for="Details.Price"
+          class="validation-message">
+    </span>
+
+            </div>
+
+
+            <!-- Security Deposit -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.SecurityDeposit">
+                    Security deposit
+                    <span class="required-mark">*</span>
+                </label>
+
+                <input asp-for="Details.SecurityDeposit"
+                   
+                       class="form-control"
+                       type="number"
+                       min="0"
+                       step="0.01"
+                       placeholder="Enter security deposit"
+                  />
+
+                <span asp-validation-for="Details.SecurityDeposit"
+                      class="validation-message">
+                </span>
+
+            </div>
+
+
+            <!-- Area -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.Area">
+                    Area
+                    <span class="required-mark">*</span>
+                </label>
+
+                <input asp-for="Details.Area"
+                       class="form-control"
+                       type="number"
+                       min="1"
+                       step="0.01"
+                       placeholder="Enter area"
+                    />
+
+                <span asp-validation-for="Details.Area"
+                      class="validation-message">
+                </span>
+
+            </div>
+
+
+            <!-- Area Unit -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.AreaUnit">
+                    Area unit
+                    <span class="required-mark">*</span>
+                </label>
+
+                <select asp-for="Details.AreaUnit"
+                        class="form-control"
+                    >
+
+                    <option value="">
+                        Select area unit
+                    </option>
+
+                    <option value="Sq Ft">
+                        Sq Ft
+                    </option>
+
+                    <option value="Sq M">
+                        Sq M
+                    </option>
+
+                    <option value="Sq Yd">
+                        Sq Yd
+                    </option>
+
+                    <option value="Acres">
+                        Acres
+                    </option>
+
+                    <option value="Cents">
+                        Cents
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="Details.AreaUnit"
+                      class="validation-message">
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Row 2 -->
+
+        <div class="form-grid four-columns">
+
+            <!-- Bedrooms -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.Bedrooms">
+                    Bedrooms
+                     <span class="required-mark">*</span>
+                </label>
+
+                <select asp-for="Details.Bedrooms"
+                        class="form-control">
+
+                    <option value="">
+                        Select bedrooms
+                    </option>
+
+                    <option value="Studio">
+                        Studio
+                    </option>
+
+                    <option value="1">
+                        1
+                    </option>
+
+                    <option value="2">
+                        2
+                    </option>
+
+                    <option value="3">
+                        3
+                    </option>
+
+                    <option value="4">
+                        4
+                    </option>
+
+                    <option value="5">
+                        5
+                    </option>
+
+                    <option value="6+">
+                        6+
+                    </option>
+
+                </select>
+                <span asp-validation-for="Details.Bedrooms"
+      class="validation-message">
+</span>
+
+            </div>
+
+
+            <!-- Bathrooms -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.Bathrooms">
+                    Bathrooms
+                    <span class="required-mark">*</span>
+                </label>
+
+                <select asp-for="Details.Bathrooms"
+                        class="form-control">
+
+                    <option value="">
+                        Select bathrooms
+                    </option>
+
+                    <option value="1">
+                        1
+                    </option>
+
+                    <option value="2">
+                        2
+                    </option>
+
+                    <option value="3">
+                        3
+                    </option>
+
+                    <option value="4">
+                        4
+                    </option>
+
+                    <option value="5">
+                        5+
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="Details.Bathrooms"
+                      class="validation-message">
+                </span>
+
+            </div>
+
+
+            <!-- Balconies -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.Balconies">
+                    Balconies
+                </label>
+
+                <select asp-for="Details.Balconies"
+                        class="form-control">
+
+                    <option value="">
+                        Select balconies
+                    </option>
+
+                    <option value="0">
+                        0
+                    </option>
+
+                    <option value="1">
+                        1
+                    </option>
+
+                    <option value="2">
+                        2
+                    </option>
+
+                    <option value="3">
+                        3
+                    </option>
+
+                    <option value="4">
+                        4+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Floor -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.Floor">
+                    Floor
+                    <span class="required-mark">*</span>
+                </label>
+
+                <select asp-for="Details.Floor"
+                        class="form-control"
+                       >
+
+                    <option value="">
+                        Select floor
+                    </option>
+
+                    <option value="Ground Floor">
+                        Ground Floor
+                    </option>
+
+                    @for (int floor = 1; floor <= 20; floor++)
+                    {
+                        <option value="@floor">
+                            @floor
+                        </option>
+                    }
+
+                    <option value="21+">
+                        21+
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="Details.Floor"
+                      class="validation-message">
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Row 3 -->
+
+        <div class="form-grid four-columns">
+
+            <!-- Parking -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.ParkingSpaces">
+                    Parking spaces
+                    <span class="required-mark">*</span>
+                </label>
+
+                <select asp-for="Details.ParkingSpaces"
+                        class="form-control">
+
+                    <option value="">
+                        Select parking
+                    </option>
+
+                    <option value="0">
+                        0
+                    </option>
+
+                    <option value="1">
+                        1
+                    </option>
+
+                    <option value="2">
+                        2
+                    </option>
+
+                    <option value="3">
+                        3
+                    </option>
+
+                    <option value="4">
+                        4+
+                    </option>
+
+                </select>
+                <span asp-validation-for="Details.ParkingSpaces"
+      class="validation-message">
+</span>
+
+            </div>
+
+
+            <!-- Year Built -->
+
+            <div class="form-field">
+
+    <label asp-for="Details.YearBuilt">
+
+        Year built
+
+        <span class="required-mark">
+            *
+        </span>
+
+    </label>
+
+
+    <select asp-for="Details.YearBuilt"
+            class="form-control">
+
+        <option value="">
+            Select year
+        </option>
+
+        @for (
+            int year = DateTime.Today.Year;
+            year >= 1950;
+            year--
+        )
+        {
+            <option value="@year">
+                @year
+            </option>
+        }
+
+    </select>
+
+
+    <span asp-validation-for="Details.YearBuilt"
+          class="validation-message">
+    </span>
+
+</div>
+
+
+            <!-- Property Age -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.PropertyAgeYears">
+                    Property age
+                    <span class="required-mark">*</span>
+                </label>
+
+                <input asp-for="Details.PropertyAgeYears"
+                       class="form-control"
+                       type="number"
+                       min="0"
+                       max="200"
+                       placeholder="Age in years"
+                      />
+
+                <span asp-validation-for="Details.PropertyAgeYears"
+                      class="validation-message">
+                </span>
+
+            </div>
+
+
+            <!-- Possession Date -->
+
+            <div class="form-field">
+
+    <label asp-for="Details.PossessionDate">
+
+        Possession date
+
+        <span class="required-mark">
+            *
+        </span>
+
+    </label>
+
+
+    <input asp-for="Details.PossessionDate"
+           class="form-control"
+           type="date"
+           min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+
+
+    <span asp-validation-for="Details.PossessionDate"
+          class="validation-message">
+    </span>
+
+</div>
+
+        </div>
+
+
+        <!-- Row 4 -->
+
+        <div class="form-grid four-columns">
+
+            <!-- Furnishing -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.FurnishingType">
+                    Type of furnishing
+                </label>
+
+                <select asp-for="Details.FurnishingType"
+                        class="form-control">
+
+                    <option value="">
+                        Select furnishing
+                    </option>
+
+                    <option value="Unfurnished">
+                        Unfurnished
+                    </option>
+
+                    <option value="Semi Furnished">
+                        Semi furnished
+                    </option>
+
+                    <option value="Fully Furnished">
+                        Fully furnished
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Facing Direction -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.FacingDirection">
+                    Facing direction
+                </label>
+
+                <select asp-for="Details.FacingDirection"
+                        class="form-control">
+
+                    <option value="">
+                        Select direction
+                    </option>
+
+                    <option value="North">
+                        North
+                    </option>
+
+                    <option value="South">
+                        South
+                    </option>
+
+                    <option value="East">
+                        East
+                    </option>
+
+                    <option value="West">
+                        West
+                    </option>
+
+                    <option value="North-East">
+                        North-East
+                    </option>
+
+                    <option value="North-West">
+                        North-West
+                    </option>
+
+                    <option value="South-East">
+                        South-East
+                    </option>
+
+                    <option value="South-West">
+                        South-West
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Preferred Tenants -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.PreferredTenants">
+                    Preferred tenants
+                </label>
+
+                <select asp-for="Details.PreferredTenants"
+                        class="form-control">
+
+                    <option value="">
+                        Select preferred tenants
+                    </option>
+
+                    <option value="Anyone">
+                        Anyone
+                    </option>
+
+                    <option value="Family">
+                        Family
+                    </option>
+
+                    <option value="Bachelors">
+                        Bachelors
+                    </option>
+
+                    <option value="Students">
+                        Students
+                    </option>
+
+                    <option value="Working Professionals">
+                        Working professionals
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Food Preference -->
+
+            <div class="form-field">
+
+                <label asp-for="Details.TenantFoodPreference">
+                    Tenant food preference
+                </label>
+
+                <select asp-for="Details.TenantFoodPreference"
+                        class="form-control">
+
+                    <option value="">
+                        Select preference
+                    </option>
+
+                    <option value="Any">
+                        Any
+                    </option>
+
+                    <option value="Vegetarian">
+                        Vegetarian
+                    </option>
+
+                    <option value="Non-Vegetarian">
+                        Non-vegetarian
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- Description -->
+
+        <div class="form-field full-width">
+
+            <label asp-for="Details.Description">
+                Description
+            </label>
+
+            <textarea asp-for="Details.Description"
+                      class="form-control property-description"
+                      rows="4"
+                      maxlength="4000"
+                      placeholder="Describe the property">
+            </textarea>
+
+            <span asp-validation-for="Details.Description"
+                  class="validation-message">
+            </span>
+
+        </div>
+
+    </div>
+
+</section>
+
+                <!-- STEP 3  AMENITIES-->
+
+
+<section id="step-3"
+         class="wizard-step @(Model.CurrentStep == 3 ? "active" : "")">
+
+    <div class="amenities-step-content">
+
+        <h2 class="section-title amenities-title">
+            Amenities
+        </h2>
+
+        <p class="amenities-subtitle">
+            Select the amenities and nearby facilities available near your property.
+        </p>
+
+
+
+        <nav class="amenity-category-nav"
+             id="amenityCategoryNav"
+             aria-label="Amenity categories">
+
+            <button type="button"
+                    class="amenity-category-tab active"
+                    data-category="security">
+
+                Security
+
+            </button>
+
+            <button type="button"
+                    class="amenity-category-tab"
+                    data-category="recreation">
+
+                Recreation
+
+            </button>
+
+            <button type="button"
+                    class="amenity-category-tab"
+                    data-category="utilities">
+
+                Utilities
+
+            </button>
+
+            <button type="button"
+                    class="amenity-category-tab"
+                    data-category="nearby-facilities">
+
+                Nearby facilities
+
+            </button>
+
+        </nav>
+
+
+        <!-- SECURITY                   -->
+      
+
+        <section id="amenity-security"
+                 class="amenity-section"
+                 data-category-section="security">
+
+            <h3 class="amenity-section-title">
+                Security
+            </h3>
+
+
+            <div class="amenity-grid">
+
+                @foreach (var amenity in Model.Amenities
+                    .Where(x => x.Category == "Security"))
+                {
+                    var amenityId =
+                        "amenity-" +
+                        amenity.Name
+                            .ToLower()
+                            .Replace("/", "-")
+                            .Replace(" ", "-");
+
+                    bool isSelected =
+                        Model.SelectedAmenities.Any(
+                            x => string.Equals(
+                                x,
+                                amenity.Name,
+                                StringComparison.OrdinalIgnoreCase)
+                        );
+
+
+                    <label class="amenity-card @(isSelected ? "selected" : "")"
+                           for="@amenityId">
+
+                        <input type="checkbox"
+                               id="@amenityId"
+                               name="SelectedAmenities"
+                               value="@amenity.Name"
+                               class="amenity-checkbox"
+                               checked="@(isSelected ? "checked" : null)" />
+
+
+                        <div class="amenity-card-content">
+
+                            <div class="amenity-icon-wrapper">
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                    amenity.IconPath))
+                                {
+                                    <img src="@Url.Content(amenity.IconPath)"
+                                         alt=""
+                                         class="amenity-icon"
+                                         onerror="this.style.display='none';" />
+                                }
+                                else
+                                {
+                                    <span class="amenity-icon-placeholder">
+                                        ◈
+                                    </span>
+                                }
+
+                            </div>
+
+
+                            <span class="amenity-name">
+                                @amenity.Name
+                            </span>
+
+                        </div>
+
+
+                        <span class="amenity-checkmark">
+                            ✓
+                        </span>
+
+                    </label>
+                }
+
+            </div>
+
+        </section>
+
+
+    
+        <!-- RECREATION                 -->
+        
+
+        <section id="amenity-recreation"
+                 class="amenity-section"
+                 data-category-section="recreation">
+
+            <h3 class="amenity-section-title">
+                Recreation
+            </h3>
+
+
+            <div class="amenity-grid">
+
+                @foreach (var amenity in Model.Amenities
+                    .Where(x => x.Category == "Recreation"))
+                {
+                    var amenityId =
+                        "amenity-" +
+                        amenity.Name
+                            .ToLower()
+                            .Replace("/", "-")
+                            .Replace(" ", "-");
+
+                    bool isSelected =
+                        Model.SelectedAmenities.Any(
+                            x => string.Equals(
+                                x,
+                                amenity.Name,
+                                StringComparison.OrdinalIgnoreCase)
+                        );
+
+
+                    <label class="amenity-card @(isSelected ? "selected" : "")"
+                           for="@amenityId">
+
+                        <input type="checkbox"
+                               id="@amenityId"
+                               name="SelectedAmenities"
+                               value="@amenity.Name"
+                               class="amenity-checkbox"
+                               checked="@(isSelected ? "checked" : null)" />
+
+
+                        <div class="amenity-card-content">
+
+                            <div class="amenity-icon-wrapper">
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                    amenity.IconPath))
+                                {
+                                    <img src="@Url.Content(amenity.IconPath)"
+                                         alt=""
+                                         class="amenity-icon"
+                                         onerror="this.style.display='none';" />
+                                }
+                                else
+                                {
+                                    <span class="amenity-icon-placeholder">
+                                        ◈
+                                    </span>
+                                }
+
+                            </div>
+
+
+                            <span class="amenity-name">
+                                @amenity.Name
+                            </span>
+
+                        </div>
+
+
+                        <span class="amenity-checkmark">
+                            ✓
+                        </span>
+
+                    </label>
+                }
+
+            </div>
+
+        </section>
+
+
+        
+        <!-- UTILITIES                  -->
+  
+
+        <section id="amenity-utilities"
+                 class="amenity-section"
+                 data-category-section="utilities">
+
+            <h3 class="amenity-section-title">
+                Utilities
+            </h3>
+
+
+            <div class="amenity-grid">
+
+                @foreach (var amenity in Model.Amenities
+                    .Where(x => x.Category == "Utilities"))
+                {
+                    var amenityId =
+                        "amenity-" +
+                        amenity.Name
+                            .ToLower()
+                            .Replace("/", "-")
+                            .Replace(" ", "-");
+
+                    bool isSelected =
+                        Model.SelectedAmenities.Any(
+                            x => string.Equals(
+                                x,
+                                amenity.Name,
+                                StringComparison.OrdinalIgnoreCase)
+                        );
+
+
+                    <label class="amenity-card @(isSelected ? "selected" : "")"
+                           for="@amenityId">
+
+                        <input type="checkbox"
+                               id="@amenityId"
+                               name="SelectedAmenities"
+                               value="@amenity.Name"
+                               class="amenity-checkbox"
+                               checked="@(isSelected ? "checked" : null)" />
+
+
+                        <div class="amenity-card-content">
+
+                            <div class="amenity-icon-wrapper">
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                    amenity.IconPath))
+                                {
+                                    <img src="@Url.Content(amenity.IconPath)"
+                                         alt=""
+                                         class="amenity-icon"
+                                         onerror="this.style.display='none';" />
+                                }
+                                else
+                                {
+                                    <span class="amenity-icon-placeholder">
+                                        ◈
+                                    </span>
+                                }
+
+                            </div>
+
+
+                            <span class="amenity-name">
+                                @amenity.Name
+                            </span>
+
+                        </div>
+
+
+                        <span class="amenity-checkmark">
+                            ✓
+                        </span>
+
+                    </label>
+                }
+
+            </div>
+
+        </section>
+
+
+     
+        <!-- NEARBY FACILITIES          -->
+     
+
+        <section id="amenity-nearby-facilities"
+                 class="amenity-section"
+                 data-category-section="nearby-facilities">
+
+            <h3 class="amenity-section-title">
+                Nearby facilities
+            </h3>
+
+
+            <div class="amenity-grid">
+
+                @foreach (var amenity in Model.Amenities
+                    .Where(x => x.Category == "Nearby facilities"))
+                {
+                    var amenityId =
+                        "amenity-" +
+                        amenity.Name
+                            .ToLower()
+                            .Replace("/", "-")
+                            .Replace(" ", "-");
+
+                    bool isSelected =
+                        Model.SelectedAmenities.Any(
+                            x => string.Equals(
+                                x,
+                                amenity.Name,
+                                StringComparison.OrdinalIgnoreCase)
+                        );
+
+
+                    <label class="amenity-card @(isSelected ? "selected" : "")"
+                           for="@amenityId">
+
+                        <input type="checkbox"
+                               id="@amenityId"
+                               name="SelectedAmenities"
+                               value="@amenity.Name"
+                               class="amenity-checkbox"
+                               checked="@(isSelected ? "checked" : null)" />
+
+
+                        <div class="amenity-card-content">
+
+                            <div class="amenity-icon-wrapper">
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                    amenity.IconPath))
+                                {
+                                    <img src="@Url.Content(amenity.IconPath)"
+                                         alt=""
+                                         class="amenity-icon"
+                                         onerror="this.style.display='none';" />
+                                }
+                                else
+                                {
+                                    <span class="amenity-icon-placeholder">
+                                        ◈
+                                    </span>
+                                }
+
+                            </div>
+
+
+                            <span class="amenity-name">
+                                @amenity.Name
+                            </span>
+
+                        </div>
+
+
+                        <span class="amenity-checkmark">
+                            ✓
+                        </span>
+
+                    </label>
+                }
+
+            </div>
+
+        </section>
+
+
+        
+
+        <span asp-validation-for="SelectedAmenities"
+              class="validation-message">
+        </span>
+
+
+    </div>
+
+</section>
+               <!-- STEP 4 : MEDIA -->
+
+<section id="step-4"
+         class="wizard-step @(Model.CurrentStep == 4 ? "active" : "")">
+
+    <div class="media-step-content">
+
+        <!-- Heading -->
+        <div class="media-heading">
+            <h2 class="section-title">Media</h2>
+            <div asp-validation-summary="ModelOnly"
+     class="validation-summary">
+</div>
+            <p class="media-subtitle">
+                Add photos, videos, floor plans and other documents here
+            </p>
+        </div>
+
+
+     
+        <div class="media-top-grid">
+
+            <!--  COVER PHOTO  -->
+            <div class="media-field-group">
+
+                <label class="media-field-label">
+                    Cover photo <span class="required-star">*</span>
+                </label>
+
+                <input
+                    type="file"
+                    id="coverPhotoInput"
+                    name="CoverPhoto"
+                    accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                    hidden />
+
+                <div
+                    id="coverDropzone"
+                    class="media-dropzone cover-dropzone"
+                    tabindex="0">
+
+                    <!-- Empty state -->
+                    <div id="coverEmptyState" class="media-empty-state">
+
+                        <svg
+                            class="upload-image-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+
+                            <rect
+                                x="3"
+                                y="3"
+                                width="18"
+                                height="18"
+                                rx="2"
+                                stroke="currentColor"
+                                stroke-width="2" />
+
+                            <circle
+                                cx="8.5"
+                                cy="8.5"
+                                r="1.5"
+                                stroke="currentColor"
+                                stroke-width="2" />
+
+                            <path
+                                d="M21 15L16.5 10.5L8 19"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                        </svg>
+
+                        <span class="media-upload-text">
+                            Drag and drop image here or click here to upload
+                        </span>
+
+                        <span class="media-size-text">
+                            Max file size : 5MB (PNG, JPG, JPEG)
+                        </span>
+
+                    </div>
+
+
+                    <!-- Uploaded cover preview -->
+                    <div
+                        id="coverPreview"
+                        class="cover-preview"
+                        hidden>
+                    </div>
+
+                </div>
+
+             <span asp-validation-for="CoverPhoto"
+      id="coverError"
+      class="media-error">
+</span>
+
+            </div>
+
+
+            <!--GALLERY IMAGES -->
+            <div class="media-field-group">
+
+                <div class="media-label-row">
+
+                    <label class="media-field-label">
+                        Gallery images <span class="required-star">*</span>
+                    </label>
+
+                </div>
+
+
+                <input
+                    type="file"
+                    id="galleryImagesInput"
+                    name="GalleryImages"
+                    accept=".png,.jpg,.jpeg,image/png,image/jpeg"
+                    multiple
+                    hidden />
+
+
+                <!-- Gallery upload area -->
+                <div
+                    id="galleryDropzone"
+                    class="media-dropzone gallery-dropzone"
+                    tabindex="0">
+
+                    <div class="gallery-empty-state">
+
+                        <span class="media-upload-text">
+                            Drag and drop image here or click here to upload
+                        </span>
+
+                        <span class="media-size-text">
+                            Max file size : 5MB (PNG, JPG, JPEG)
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Gallery thumbnails -->
+                <div
+                    id="galleryPreviewGrid"
+                    class="gallery-preview-grid">
+                </div>
+
+
+               <span asp-validation-for="GalleryImages"
+      id="galleryError"
+      class="media-error">
+</span>
+
+            </div>
+
+        </div>
+
+
+
+     
+        <div class="media-bottom-grid">
+
+
+            <!-- VIDEO -->
+            <div class="media-field-group">
+
+                <label class="media-field-label">
+                    Video
+                </label>
+
+                <input
+                    type="file"
+                    id="videoInput"
+                    name="Videos"
+                    accept=".mp4,video/mp4"
+                    multiple
+                    hidden />
+
+                <div
+                    id="videoDropzone"
+                    class="media-dropzone small-media-dropzone"
+                    tabindex="0">
+
+                    <div class="small-media-empty-state">
+
+                        <svg
+                            class="small-media-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+
+                            <path
+                                d="M14 3H6C4.9 3 4 3.9 4 5V19C4 20.1 4.9 21 6 21H18C19.1 21 20 20.1 20 19V9L14 3Z"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linejoin="round" />
+
+                            <path
+                                d="M14 3V9H20"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linejoin="round" />
+
+                            <path
+                                d="M10 13L14 15L10 17V13Z"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linejoin="round" />
+
+                        </svg>
+
+                        <span class="small-media-upload-text">
+                            Upload video
+                        </span>
+
+                        <span class="media-size-text">
+                            Max file size : 25MB (MP4)
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="videoFileList"
+                    class="media-file-list">
+                </div>
+
+                <div
+                    id="videoError"
+                    class="media-error"
+                    aria-live="polite">
+                </div>
+
+            </div>
+
+
+
+            <div class="media-field-group">
+
+                <label class="media-field-label">
+                    Floor plan
+                </label>
+
+                <input
+                    type="file"
+                    id="floorPlanInput"
+                    name="FloorPlans"
+                    accept=".pdf,application/pdf"
+                    multiple
+                    hidden />
+
+
+                <div
+                    id="floorPlanDropzone"
+                    class="media-dropzone small-media-dropzone"
+                    tabindex="0">
+
+                    <div class="small-media-empty-state">
+
+                        <svg
+                            class="small-media-icon upload-file-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+
+                            <path
+                                d="M12 16V4"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round" />
+
+                            <path
+                                d="M7 9L12 4L17 9"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                            <path
+                                d="M4 14V19C4 20.1 4.9 21 6 21H18C19.1 21 20 20.1 20 19V14"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                        </svg>
+
+                        <span class="small-media-upload-text">
+                            Upload file
+                        </span>
+
+                        <span class="media-size-text">
+                            Max file size : 5MB (PDF)
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="floorPlanFileList"
+                    class="media-file-list">
+                </div>
+
+                <div
+                    id="floorPlanError"
+                    class="media-error"
+                    aria-live="polite">
+                </div>
+
+            </div>
+
+
+
+            <!-- DOCUMENTS  -->
+            <div class="media-field-group">
+
+                <label class="media-field-label">
+                    Other documents
+                </label>
+
+                <input
+                    type="file"
+                    id="documentsInput"
+                    name="Documents"
+                    accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    multiple
+                    hidden />
+
+
+                <div
+                    id="documentsDropzone"
+                    class="media-dropzone small-media-dropzone"
+                    tabindex="0">
+
+                    <div class="small-media-empty-state">
+
+                        <svg
+                            class="small-media-icon upload-file-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+
+                            <path
+                                d="M12 16V4"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round" />
+
+                            <path
+                                d="M7 9L12 4L17 9"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                            <path
+                                d="M4 14V19C4 20.1 4.9 21 6 21H18C19.1 21 20 20.1 20 19V14"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round" />
+
+                        </svg>
+
+                        <span class="small-media-upload-text">
+                            Upload file
+                        </span>
+
+                        <span class="media-size-text">
+                            Max file size : 5MB (PDF, DOCX, DOC)
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="documentsFileList"
+                    class="media-file-list">
+                </div>
+
+                <div
+                    id="documentsError"
+                    class="media-error"
+                    aria-live="polite">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+               <!-- STEP 5 - REVIEW -->
+
+<section id="step-5"
+         class="wizard-step @(Model.CurrentStep == 5 ? "active" : "")">
+
+    <div class="review-step-content">
+
+        <div class="review-heading">
+
+            <h2 class="section-title review-title">
+                Review and publish
+            </h2>
+
+            <p class="review-subtitle">
+                Review your property details and publish when ready.
+            </p>
+
+        </div>
+
+        <div class="review-property-summary">
+
+            <!-- images -->
+
+            <div class="review-gallery">
+
+                <div id="reviewCoverContainer"
+                     class="review-cover-container">
+
+                    <div id="reviewCoverPlaceholder"
+                         class="review-cover-placeholder">
+
+                        <span>
+                            No cover photo
+                        </span>
+
+                    </div>
+
+                    <img id="reviewCoverImage"
+                         class="review-cover-image"
+                         alt="Property cover photo"
+                         hidden />
+
+                </div>
+
+                <div id="reviewGalleryThumbnails"
+                     class="review-gallery-thumbnails">
+                </div>
+
+            </div>
+
+
+            <!-- property information -->
+
+            <div class="review-property-information">
+
+    <!-- Title + Price -->
+    <div class="review-title-price-row">
+
+        <h3 id="reviewPropertyTitle"
+            class="review-property-title">
+            —
+        </h3>
+
+        <div class="review-price-container">
+
+            <span id="reviewPrice"
+                  class="review-price">
+                —
+            </span>
+
+            <span id="reviewPriceLabel"
+                  class="review-price-label">
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- Listing type + property status -->
+    <div class="review-badge-row">
+
+        <span id="reviewListingType"
+              class="review-listing-badge">
+            —
+        </span>
+
+        <span id="reviewPropertyStatus"
+              class="review-status-badge"
+              hidden>
+        </span>
+
+    </div>
+
+
+    <!-- Description -->
+    <p id="reviewDescription"
+       class="review-description">
+        —
+    </p>
+
+
+    <!-- Property meta information -->
+    <div class="review-meta-row">
+
+        <!-- Security Deposit -->
+        <div class="review-meta-item">
+
+            <img src="~/images/icons/review/banknote.png"
+                 class="review-meta-icon"
+                 alt="" />
+
+            <span id="reviewSecurityDeposit">
+                —
+            </span>
+
+        </div>
+
+
+        <!-- Bedrooms -->
+        <div class="review-meta-item">
+
+            <img src="~/images/icons/review/bed-single.png"
+                 class="review-meta-icon"
+                 alt="" />
+
+            <span id="reviewBedrooms">
+                —
+            </span>
+
+        </div>
+
+
+        <!-- Bathrooms -->
+        <div class="review-meta-item">
+
+            <img src="~/images/icons/review/bath.png"
+                 class="review-meta-icon"
+                 alt="" />
+
+            <span id="reviewBathrooms">
+                —
+            </span>
+
+        </div>
+
+
+        <!-- Area -->
+        <div class="review-meta-item">
+
+            <img src="~/images/icons/review/ruler-dimension.png"
+                 class="review-meta-icon"
+                 alt="" />
+
+            <span id="reviewArea">
+                —
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- Location -->
+    <div class="review-location">
+
+        <img src="~/images/icons/review/location.png"
+             class="review-location-icon"
+             alt="" />
+
+        <span id="reviewLocation"></span>
+
+    </div>
+
+</div>
+</div>
+
+        <!-- Property details -->
+
+        <section class="review-section">
+
+            <h3 class="review-section-title">
+                Property details
+            </h3>
+
+            <div id="reviewDetailsGrid"
+                 class="review-details-grid">
+            </div>
+
+        </section>
+
+
+        <!-- Amenities -->
+
+        <section class="review-section">
+
+            <h3 class="review-section-title">
+                Amenities
+            </h3>
+
+            <div id="reviewAmenitiesList"
+                 class="review-amenities-list">
+            </div>
+
+        </section>
+
+
+        <!-- Documents -->
+
+        <section class="review-section review-documents-section">
+
+            <h3 class="review-section-title">
+                Documents
+            </h3>
+
+            <div id="reviewDocumentsList"
+                 class="review-documents-list">
+            </div>
+
+        </section>
+
+
+        <!-- Gallery modal -->
+
+        <div id="reviewGalleryModal"
+             class="review-gallery-modal"
+             hidden>
+
+            <div id="reviewGalleryModalBackdrop"
+                 class="review-gallery-modal-backdrop">
+            </div>
+
+            <div class="review-gallery-modal-content">
+
+                <button type="button"
+                        id="reviewGalleryModalClose"
+                        class="review-gallery-modal-close"
+                        aria-label="Close gallery">
+                    ×
+                </button>
+
+                <h3 class="review-gallery-modal-title">
+                    More gallery images
+                </h3>
+
+                <div id="reviewGalleryModalGrid"
+                     class="review-gallery-modal-grid">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+                <!-- Bottom Actions -->
+
+                <div class="wizard-actions">
+
+                    <button type="button"
+                            id="backButton"
+                            class="back-button"
+                            hidden>
+
+                        ← Back
+
+                    </button>
+
+                    <div class="wizard-actions-right">
+
+                        <button type="button"
+                                id="saveDraftButton"
+                                class="save-draft-button">
+
+                            Save as Draft
+
+                        </button>
+
+                        <button type="button"
+                                id="continueButton"
+                                class="continue-button">
+
+                            <span id="continueButtonText">
+                                Continue
+                            </span>
+
+                            <span class="continue-arrow">
+                                →
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div id="wizardMessage"
+                     class="wizard-message">
+                </div>
+              </div>
+           </form>
+
+        </div>
+
+    </div>
+
+</div>
+<div id="successOverlay"
+     class="success-overlay @(showSuccess ? "show" : "")">
+    <div class="success-card">
+
+        <div class="success-icon">
+            ✓
+        </div>
+
+        <h2>
+            Property Posted Successfully
+        </h2>
+
+        <p>
+            Your property has been submitted
+            for admin approval.
+        </p>
+
+    </div>
+
+</div>
+<script id="propertyReviewData"
+        type="application/json">
+    @Html.Raw(
+        System.Text.Json.JsonSerializer.Serialize(
+            Model.Review,
+            new System.Text.Json.JsonSerializerOptions(
+                System.Text.Json.JsonSerializerDefaults.Web
+            )
+        )
+    )
+</script>
+
+@section Scripts {
+
+
+    <script src="~/js/seller/add-property.js"
+            asp-append-version="true"></script>
+}

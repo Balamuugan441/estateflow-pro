@@ -1,0 +1,231 @@
+﻿@page
+@model Brokerage.Web.Areas.Seller.Pages.BuyRequests.IndexModel
+@using Brokerage.Web.Models.ApiModels
+
+@{
+    Layout = "/Areas/Seller/Pages/Shared/_SellerLayout.cshtml";
+    ViewData["Title"] = "Buy Requests";
+}
+
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/seller/seller-buyrequests.css"
+          asp-append-version="true" />
+}
+
+<div class="buy-requests-container">
+
+    <div class="buy-requests-header">
+        <div>
+            <h1 class="page-title">Buy Requests</h1>
+            <p class="page-subtitle">Review purchase requests received for your properties.</p>
+        </div>
+
+        <div class="request-summary">
+            <span class="summary-label">PENDING REQUESTS</span>
+            <span class="summary-value">@Model.Requests.Count</span>
+        </div>
+    </div>
+
+    @if (TempData["BuyRequestMessage"] != null)
+    {
+        <div class="buy-request-alert success">
+            @TempData["BuyRequestMessage"]
+        </div>
+    }
+
+    @if (TempData["BuyRequestError"] != null)
+    {
+        <div class="buy-request-alert error">
+            @TempData["BuyRequestError"]
+        </div>
+    }
+
+    @if (Model.Requests.Count == 0)
+    {
+        <div class="buy-request-empty">
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 4h2l2 12h10l3-9H6" />
+                    <circle cx="9" cy="20" r="1" />
+                    <circle cx="18" cy="20" r="1" />
+                </svg>
+            </div>
+            <h2>No buy requests</h2>
+            <p>New purchase requests will appear here.</p>
+        </div>
+    }
+    else
+    {
+        <div class="buy-request-grid">
+            @foreach (SellerBuyRequestApiModel request in Model.Requests)
+            {
+                string imageUrl = Model.BuildImageUrl(request.CoverImagePath);
+
+                <article class="buy-request-card">
+                    <div class="property-card">
+                        <div class="card-image-wrapper">
+                            @if (!string.IsNullOrWhiteSpace(imageUrl))
+                            {
+                                <img src="@imageUrl"
+                                     alt="@request.PropertyTitle"
+                                     class="card-image"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="card-image card-image-placeholder">
+                                    No Image
+                                </div>
+                            }
+
+                            <span class="card-badge">
+                                @request.ListingType.ToUpperInvariant()
+                            </span>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="card-header-row">
+                                <h3 class="property-title">@request.PropertyTitle</h3>
+                                <span class="property-price">@request.Price.ToString("N0")</span>
+                            </div>
+
+                            <div class="property-location">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                                <span>@request.LocationAddress, @request.City</span>
+                            </div>
+
+                            <div class="property-specs">
+                                <div class="spec-item">@request.Bedrooms Beds</div>
+                                <div class="spec-item">@request.Bathrooms Baths</div>
+                                <div class="spec-item">@request.Area @request.AreaUnit</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="buy-request-info">
+                        <div class="request-info-header">
+                            <div>
+                                <span class="request-label">BUY REQUEST</span>
+                                <h3 class="request-title">Purchase Request</h3>
+                            </div>
+                            <span class="request-status request-status-pending">
+                                @request.RequestStatus
+                            </span>
+                        </div>
+
+                        <div class="buyer-information">
+                            <div class="buyer-info-item">
+                                <span class="request-label">BUYER</span>
+                                <strong>@request.BuyerName</strong>
+                            </div>
+
+                            <div class="buyer-info-item">
+                                <span class="request-label">EMAIL</span>
+                                <strong>@request.BuyerEmail</strong>
+                            </div>
+
+                            <div class="buyer-info-item">
+                                <span class="request-label">MOBILE</span>
+                                <strong>@request.BuyerMobileNumber</strong>
+                            </div>
+
+                            <div class="buyer-info-item">
+                                <span class="request-label">REQUESTED</span>
+                                <strong>@(request.RequestedAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"))</strong>
+                            </div>
+                        </div>
+
+                        <div class="buy-request-actions">
+                            <form id="reject-form-@request.BuyRequestID"
+                                  method="post"
+                                  asp-page-handler="Reject">
+                                <input type="hidden" name="buyRequestId" value="@request.BuyRequestID" />
+                                <button type="button" 
+                                        class="btn-reject" 
+                                        onclick="showConfirmModal('reject-form-@request.BuyRequestID', 'Reject Buy Request', 'Are you sure you want to reject this purchase request?', 'Reject', 'danger')">
+                                    Reject
+                                </button>
+                            </form>
+
+                            <form id="approve-form-@request.BuyRequestID"
+                                  method="post"
+                                  asp-page-handler="Approve">
+                                <input type="hidden" name="buyRequestId" value="@request.BuyRequestID" />
+                                <button type="button" 
+                                        class="btn-approve" 
+                                        onclick="showConfirmModal('approve-form-@request.BuyRequestID', 'Approve Deal', 'Are you sure you want to approve this deal?', 'Approve Deal', 'success')">
+                                    Approve Deal
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</div>
+
+<!-- Confirmation Card Modal -->
+<div id="confirmationModal" class="modal-overlay" onclick="handleBackdropClick(event)">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 id="modalTitle" class="modal-title">Confirm Action</h3>
+            <button type="button" class="modal-close-btn" onclick="closeConfirmModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="modalMessage" class="modal-message">Are you sure you want to proceed?</p>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn-modal-cancel" onclick="closeConfirmModal()">Cancel</button>
+            <button type="button" id="modalConfirmBtn" class="btn-modal-confirm" onclick="submitConfirmedForm()">Confirm</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let targetFormId = null;
+
+        function showConfirmModal(formId, title, message, confirmBtnText, type) {
+            targetFormId = formId;
+
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+
+            const confirmBtn = document.getElementById('modalConfirmBtn');
+            confirmBtn.textContent = confirmBtnText;
+
+            // Apply contextual colors based on action type
+            if (type === 'danger') {
+                confirmBtn.className = 'btn-modal-confirm btn-modal-danger';
+            } else {
+                confirmBtn.className = 'btn-modal-confirm btn-modal-success';
+            }
+
+            const modal = document.getElementById('confirmationModal');
+            modal.classList.add('active');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmationModal');
+            modal.classList.remove('active');
+            targetFormId = null;
+        }
+
+        function submitConfirmedForm() {
+            if (targetFormId) {
+                document.getElementById(targetFormId).submit();
+            }
+        }
+
+        function handleBackdropClick(event) {
+            if (event.target === document.getElementById('confirmationModal')) {
+                closeConfirmModal();
+            }
+        }
+    </script>
+}

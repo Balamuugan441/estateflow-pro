@@ -1,0 +1,227 @@
+﻿.buyer-preview-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 22px;
+}
+
+    .buyer-preview-actions > button,
+    .buyer-preview-actions > .chat-form {
+        flex: 1;
+        min-width: 0;
+        margin: 0;
+    }
+
+.chat-form {
+    display: flex;
+    width: 100%;
+}
+
+.buyer-preview-action,
+.btn-start-chat,
+.your-existing-chat-button-class {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 44px;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    white-space: nowrap;
+}
+
+    .buyer-preview-action svg,
+    .chat-btn-icon {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        stroke: currentColor;
+        transition: transform 0.2s ease;
+    }
+
+    .buyer-preview-action:hover,
+    .btn-start-chat:hover,
+    .your-existing-chat-button-class:hover {
+        transform: translateY(-2px);
+    }
+
+        .buyer-preview-action:hover svg,
+        .btn-start-chat:hover .chat-btn-icon,
+        .your-existing-chat-button-class:hover .chat-btn-icon {
+            transform: scale(1.08);
+        }
+
+    .buyer-preview-action:active,
+    .btn-start-chat:active,
+    .your-existing-chat-button-class:active {
+        transform: translateY(0);
+    }
+
+.buyer-preview-action-primary {
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+    .buyer-preview-action-primary:hover {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+    }
+
+.btn-start-chat,
+.your-existing-chat-button-class {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+    .btn-start-chat:hover,
+    .your-existing-chat-button-class:hover {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.45);
+    }
+
+.buyer-preview-action-save {
+    min-width: unset;
+    background: var(--preview-card-soft, #161c2b);
+    border: 1px solid var(--preview-border-light, rgba(255, 255, 255, 0.1));
+    color: var(--preview-text-soft, #94a3b8);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+    .buyer-preview-action-save:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.25);
+    }
+
+    .buyer-preview-action-save.is-favorite {
+        color: #ef4444;
+        background-color: rgba(239, 68, 68, 0.12);
+        border-color: rgba(239, 68, 68, 0.35);
+    }
+
+        .buyer-preview-action-save.is-favorite svg {
+            fill: #ef4444;
+            stroke: #ef4444;
+        }
+
+        .buyer-preview-action-save.is-favorite:hover {
+            background-color: rgba(239, 68, 68, 0.20);
+            border-color: rgba(239, 68, 68, 0.50);
+        }
+
+.buy-request-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+    .buy-request-modal[hidden] {
+        display: none;
+    }
+
+.buy-request-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(3px);
+}
+
+.buy-request-modal-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(420px, 100%);
+    padding: 34px 30px 28px;
+    border: 1px solid rgba(59, 130, 246, 0.20);
+    border-radius: 16px;
+    background: #0b111b;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+    text-align: center;
+}
+
+.buy-request-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.buy-request-success-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.10);
+    color: #22c55e;
+}
+
+    .buy-request-success-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+.buy-request-modal-dialog h2 {
+    margin: 0 0 10px;
+    color: #ffffff;
+    font-size: 21px;
+    font-weight: 650;
+}
+
+.buy-request-modal-dialog p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.buy-request-modal-done {
+    width: 100%;
+    height: 42px;
+    margin-top: 24px;
+    border: 1px solid #2563eb;
+    border-radius: 8px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+    .buy-request-modal-done:hover {
+        background: #1d4ed8;
+    }
+
+@media (max-width: 520px) {
+    .buyer-preview-actions {
+        flex-direction: column;
+    }
+
+        .buyer-preview-actions > button,
+        .buyer-preview-actions > .chat-form {
+            width: 100%;
+        }
+}

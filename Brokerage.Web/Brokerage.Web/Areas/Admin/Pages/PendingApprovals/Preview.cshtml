@@ -1,0 +1,1027 @@
+﻿@page
+@model Brokerage.Web.Areas.Admin.Pages.PendingApprovals.PreviewModel
+
+@{
+    ViewData["Title"] = "Property Preview";
+
+    DateTime submittedAt =
+        Model.Property.UpdatedAt
+        ?? Model.Property.CreatedAt;
+
+    string listingStatus =
+        Model.Property.ListingStatus == "Approved"
+            ? "Accepted"
+            : Model.Property.ListingStatus;
+
+    string priceLabel =
+        Model.Property.ListingType == "For Sale"
+            ? string.Empty
+            : "/ month";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/admin/pending-approval-preview.css"
+          asp-append-version="true" />
+}
+
+<div class="admin-preview-container">
+
+    <div class="preview-topbar">
+
+        <a asp-page="./Index"
+           class="preview-back-link">
+
+            <span class="preview-back-arrow">
+                ←
+            </span>
+
+            Back to Pending Approvals
+
+        </a>
+
+        <span class="preview-status">
+            PENDING REVIEW
+        </span>
+
+    </div>
+
+    <div class="preview-heading">
+
+        <div>
+
+            <h1 class="preview-page-title">
+                Property Preview
+            </h1>
+
+            <p class="preview-page-subtitle">
+                Review the submitted property information before making an approval decision.
+            </p>
+
+        </div>
+
+        <div class="preview-property-id">
+            Property #@Model.Property.PropertyID
+        </div>
+
+    </div>
+
+    <section class="preview-hero-card">
+
+        <div class="preview-gallery-area">
+
+            <div class="preview-cover-wrapper">
+
+                @if (Model.CoverPhoto != null)
+                {
+                    <img src="@Model.BuildMediaUrl(Model.CoverPhoto.FilePath)"
+                         alt="@Model.Property.PropertyTitle"
+                         class="preview-cover-image" />
+                }
+                else
+                {
+                    <div class="preview-cover-empty">
+                        No cover photo available.
+                    </div>
+                }
+
+                <div class="preview-cover-overlay"></div>
+
+                <div class="preview-cover-status">
+                    @listingStatus.ToUpperInvariant()
+                </div>
+
+            </div>
+
+           @if (Model.GalleryImages.Count > 0)
+{
+    <div class="preview-gallery">
+
+        @{
+            int visibleCount =
+                Math.Min(
+                    4,
+                    Model.GalleryImages.Count);
+        }
+
+        @for (int index = 0;
+              index < visibleCount;
+              index++)
+        {
+            var image =
+                Model.GalleryImages[index];
+
+            <button type="button"
+                    class="preview-gallery-item gallery-trigger"
+                    data-gallery-index="@index"
+                    aria-label="Open gallery image @(index + 1)">
+
+                <img src="@Model.BuildMediaUrl(image.FilePath)"
+                     alt="Gallery image @(index + 1)"
+                     loading="lazy" />
+
+            </button>
+        }
+
+        @if (Model.GalleryImages.Count > 4)
+        {
+            var moreImage =
+                Model.GalleryImages[4];
+
+            int remainingCount =
+                Model.GalleryImages.Count - 4;
+
+            <button type="button"
+                    class="preview-gallery-more gallery-trigger"
+                    data-gallery-index="4"
+                    aria-label="Open remaining gallery images">
+
+                <img src="@Model.BuildMediaUrl(moreImage.FilePath)"
+                     alt="More gallery images"
+                     loading="lazy" />
+
+                <span class="preview-gallery-more-overlay">
+                    +@remainingCount
+                </span>
+
+            </button>
+        }
+
+    </div>
+}
+
+        </div>
+
+        <div class="preview-summary">
+
+            <div class="preview-title-row">
+
+                <div>
+
+                    <div class="preview-eyebrow">
+                        @Model.Property.PropertyType
+                    </div>
+
+                    <h2 class="preview-property-title">
+                        @Model.Property.PropertyTitle
+                    </h2>
+
+                </div>
+
+                <div class="preview-price-block">
+
+                    <span class="preview-price">
+                        @Model.Property.Price.ToString("N2")
+                    </span>
+
+                    @if (!string.IsNullOrWhiteSpace(priceLabel))
+                    {
+                        <span class="preview-price-label">
+                            @priceLabel
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+
+            <div class="preview-badges">
+
+                <span class="preview-badge preview-badge-primary">
+                    @Model.Property.ListingType
+                </span>
+
+                <span class="preview-badge preview-badge-status">
+                    @listingStatus
+                </span>
+
+                @if (!string.IsNullOrWhiteSpace(
+                    Model.Property.PropertyStatus))
+                {
+                    <span class="preview-badge preview-badge-muted">
+                        @Model.Property.PropertyStatus
+                    </span>
+                }
+
+            </div>
+
+            <p class="preview-description">
+                @(string.IsNullOrWhiteSpace(
+                    Model.Property.Description)
+                    ? "No description provided."
+                    : Model.Property.Description)
+            </p>
+
+            <div class="preview-key-details">
+
+                <div class="preview-key-detail">
+
+                    <span class="preview-key-label">
+                        Security deposit
+                    </span>
+
+                    <span class="preview-key-value">
+                        @(Model.Property.SecurityDeposit.HasValue
+                            ? Model.Property.SecurityDeposit.Value.ToString("N2")
+                            : "Not specified")
+                    </span>
+
+                </div>
+
+                <div class="preview-key-detail">
+
+                    <span class="preview-key-label">
+                        Bedrooms
+                    </span>
+
+                    <span class="preview-key-value">
+                        @Model.Property.Bedrooms
+                    </span>
+
+                </div>
+
+                <div class="preview-key-detail">
+
+                    <span class="preview-key-label">
+                        Bathrooms
+                    </span>
+
+                    <span class="preview-key-value">
+                        @Model.Property.Bathrooms
+                    </span>
+
+                </div>
+
+                <div class="preview-key-detail">
+
+                    <span class="preview-key-label">
+                        Area
+                    </span>
+
+                    <span class="preview-key-value">
+                        @Model.Property.Area @Model.Property.AreaUnit
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="preview-location">
+
+                <span class="preview-location-icon">
+                    ●
+                </span>
+
+                <div>
+
+                    <strong>
+                        @Model.Property.LocationAddress
+                    </strong>
+
+                    <span>
+                        @Model.Property.City,
+                        @Model.Property.State
+                        @Model.Property.ZipCode
+                    </span>
+
+                    <span>
+                        @Model.Property.Country
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="preview-submission-info">
+
+                <div>
+
+                    <span>
+                        SUBMITTED
+                    </span>
+
+                    <strong>
+                        @submittedAt.ToString("dd MMM yyyy, hh:mm tt")
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        SELLER ID
+                    </span>
+
+                    <strong>
+                        @Model.Property.SellerID
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="preview-section">
+
+        <div class="preview-section-heading">
+
+            <div>
+
+                <span class="preview-section-kicker">
+                    PROPERTY
+                </span>
+
+                <h2>
+                    Property details
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div class="preview-details-grid">
+
+            <div class="preview-detail">
+                <span>Property type</span>
+                <strong>@Model.Property.PropertyType</strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Listing type</span>
+                <strong>@Model.Property.ListingType</strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Property status</span>
+                <strong>@Model.Property.PropertyStatus</strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Listing status</span>
+                <strong>@listingStatus</strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Balconies</span>
+                <strong>
+                    @(Model.Property.Balconies?.ToString() ?? "Not specified")
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Floor</span>
+                <strong>
+                    @(string.IsNullOrWhiteSpace(Model.Property.Floor)
+                        ? "Not specified"
+                        : Model.Property.Floor)
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Parking spaces</span>
+                <strong>
+                    @(Model.Property.ParkingSpaces?.ToString()
+                        ?? "Not specified")
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Year built</span>
+                <strong>
+                    @(Model.Property.YearBuilt?.ToString()
+                        ?? "Not specified")
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Property age</span>
+                <strong>
+                    @(Model.Property.PropertyAgeYears?.ToString()
+                        ?? "Not specified")
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Possession date</span>
+                <strong>
+                    @(Model.Property.PossessionDate.HasValue
+                        ? Model.Property.PossessionDate.Value.ToString("dd MMM yyyy")
+                        : "Not specified")
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Furnishing</span>
+                <strong>
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Property.FurnishingType)
+                        ? "Not specified"
+                        : Model.Property.FurnishingType)
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Facing direction</span>
+                <strong>
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Property.FacingDirection)
+                        ? "Not specified"
+                        : Model.Property.FacingDirection)
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Preferred tenants</span>
+                <strong>
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Property.PreferredTenants)
+                        ? "Not specified"
+                        : Model.Property.PreferredTenants)
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Food preference</span>
+                <strong>
+                    @(string.IsNullOrWhiteSpace(
+                        Model.Property.TenantFoodPreference)
+                        ? "Not specified"
+                        : Model.Property.TenantFoodPreference)
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Area</span>
+                <strong>
+                    @Model.Property.Area @Model.Property.AreaUnit
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Zip code</span>
+                <strong>
+                    @Model.Property.ZipCode
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Created on</span>
+                <strong>
+                    @Model.Property.CreatedAt.ToString("dd MMM yyyy")
+                </strong>
+            </div>
+
+            <div class="preview-detail">
+                <span>Last updated</span>
+                <strong>
+                    @(Model.Property.UpdatedAt.HasValue
+                        ? Model.Property.UpdatedAt.Value.ToString("dd MMM yyyy")
+                        : "Not updated")
+                </strong>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="preview-section">
+
+        <div class="preview-section-heading">
+
+            <div>
+
+                <span class="preview-section-kicker">
+                    PROPERTY FEATURES
+                </span>
+
+                <h2>
+                    Amenities
+                </h2>
+
+            </div>
+
+            <span class="preview-section-count">
+                @Model.Amenities.Count
+            </span>
+
+        </div>
+
+        @if (Model.Amenities.Count == 0)
+        {
+            <div class="preview-empty">
+                No amenities were selected.
+            </div>
+        }
+        else
+        {
+            <div class="preview-amenities">
+
+                @foreach (var amenity in Model.Amenities)
+                {
+                    <span class="preview-amenity">
+                        @amenity.AmenityName
+                    </span>
+                }
+
+            </div>
+        }
+
+    </section>
+
+    <section class="preview-section">
+
+        <div class="preview-section-heading">
+
+            <div>
+
+                <span class="preview-section-kicker">
+                    UPLOADED FILES
+                </span>
+
+                <h2>
+                    Videos, floor plans and documents
+                </h2>
+
+            </div>
+
+        </div>
+
+        @if (Model.Videos.Count == 0 &&
+             Model.FloorPlans.Count == 0 &&
+             Model.Documents.Count == 0)
+        {
+            <div class="preview-empty">
+                No additional files were uploaded.
+            </div>
+        }
+        else
+        {
+            <div class="preview-file-groups">
+
+                @if (Model.Videos.Count > 0)
+                {
+                    <div class="preview-file-group">
+
+                        <h3>
+                            Videos
+                        </h3>
+
+                        <div class="preview-file-list">
+
+                            @foreach (var video in Model.Videos)
+                            {
+                                <a href="@Model.BuildMediaUrl(video.FilePath)"
+                                   class="preview-file"
+                                   target="_blank"
+                                   rel="noopener"
+                                   download="@video.FileName">
+
+                                    <span class="preview-file-type video">
+                                        MP4
+                                    </span>
+
+                                    <span class="preview-file-name">
+                                        @video.FileName
+                                    </span>
+
+                                    <span class="preview-file-action">
+                                        Download
+                                    </span>
+
+                                </a>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+
+                @if (Model.FloorPlans.Count > 0)
+                {
+                    <div class="preview-file-group">
+
+                        <h3>
+                            Floor plans
+                        </h3>
+
+                        <div class="preview-file-list">
+
+                            @foreach (var floorPlan in Model.FloorPlans)
+                            {
+                                <a href="@Model.BuildMediaUrl(floorPlan.FilePath)"
+                                   class="preview-file"
+                                   target="_blank"
+                                   rel="noopener"
+                                   download="@floorPlan.FileName">
+
+                                    <span class="preview-file-type">
+                                        FILE
+                                    </span>
+
+                                    <span class="preview-file-name">
+                                        @floorPlan.FileName
+                                    </span>
+
+                                    <span class="preview-file-action">
+                                        Download
+                                    </span>
+
+                                </a>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+
+                @if (Model.Documents.Count > 0)
+                {
+                    <div class="preview-file-group">
+
+                        <h3>
+                            Documents
+                        </h3>
+
+                        <div class="preview-file-list">
+
+                            @foreach (var document in Model.Documents)
+                            {
+                                <a href="@Model.BuildMediaUrl(document.FilePath)"
+                                   class="preview-file"
+                                   target="_blank"
+                                   rel="noopener"
+                                   download="@document.FileName">
+
+                                    <span class="preview-file-type">
+                                        DOC
+                                    </span>
+
+                                    <span class="preview-file-name">
+                                        @document.FileName
+                                    </span>
+
+                                    <span class="preview-file-action">
+                                        Download
+                                    </span>
+
+                                </a>
+                            }
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+
+    </section>
+
+    <section class="preview-system-section">
+
+        <div class="preview-system-item">
+
+            <span>
+                PROPERTY ID
+            </span>
+
+            <strong>
+                @Model.Property.PropertyID
+            </strong>
+
+        </div>
+
+        <div class="preview-system-item">
+
+            <span>
+                PROPERTY GUID
+            </span>
+
+            <strong>
+                @Model.Property.PropertyGUID
+            </strong>
+
+        </div>
+
+        <div class="preview-system-item">
+
+            <span>
+                SELLER ID
+            </span>
+
+            <strong>
+                @Model.Property.SellerID
+            </strong>
+
+        </div>
+
+        <div class="preview-system-item">
+
+            <span>
+                MEDIA FILES
+            </span>
+
+            <strong>
+                @Model.Media.Count
+            </strong>
+
+        </div>
+
+    </section>
+
+    <div class="preview-bottom-bar">
+
+        <a asp-page="./Index"
+           class="preview-bottom-back">
+            ← Back to Pending Approvals
+        </a>
+
+    </div>
+
+</div>
+
+<div id="galleryModal"
+     class="preview-gallery-modal"
+     hidden>
+
+    <div class="preview-gallery-backdrop"
+         id="galleryBackdrop">
+    </div>
+
+    <div class="preview-gallery-dialog">
+
+        <button type="button"
+                id="galleryClose"
+                class="preview-gallery-close"
+                aria-label="Close gallery">
+            ×
+        </button>
+
+        <div class="preview-gallery-main">
+
+            <button type="button"
+                    id="galleryPrevious"
+                    class="preview-gallery-nav"
+                    aria-label="Previous image">
+                ‹
+            </button>
+
+            <img id="galleryMainImage"
+                 class="preview-gallery-main-image"
+                 alt="Property gallery image" />
+
+            <button type="button"
+                    id="galleryNext"
+                    class="preview-gallery-nav"
+                    aria-label="Next image">
+                ›
+            </button>
+
+        </div>
+
+        <div id="galleryModalThumbnails"
+             class="preview-gallery-modal-thumbnails">
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script>
+        const galleryItems =
+            Array.from(
+                document.querySelectorAll(
+                    ".gallery-trigger"
+                )
+            );
+
+        const galleryData =
+            @Html.Raw(
+                System.Text.Json.JsonSerializer.Serialize(
+                    Model.GalleryImages.Select(
+                        image =>
+                            Model.BuildMediaUrl(
+                                image.FilePath)
+                    )
+                )
+            );
+
+        const galleryModal =
+            document.getElementById(
+                "galleryModal"
+            );
+
+        const galleryMainImage =
+            document.getElementById(
+                "galleryMainImage"
+            );
+
+        const galleryThumbnails =
+            document.getElementById(
+                "galleryModalThumbnails"
+            );
+
+        const galleryClose =
+            document.getElementById(
+                "galleryClose"
+            );
+
+        const galleryBackdrop =
+            document.getElementById(
+                "galleryBackdrop"
+            );
+
+        const galleryPrevious =
+            document.getElementById(
+                "galleryPrevious"
+            );
+
+        const galleryNext =
+            document.getElementById(
+                "galleryNext"
+            );
+
+        let currentGalleryIndex = 0;
+
+        function renderGalleryModal()
+        {
+            galleryMainImage.src =
+                galleryData[currentGalleryIndex];
+
+            galleryThumbnails.innerHTML =
+                "";
+
+            galleryData.forEach(
+                function (imageUrl, index)
+                {
+                    const button =
+                        document.createElement(
+                            "button"
+                        );
+
+                    button.type =
+                        "button";
+
+                    button.className =
+                        "preview-gallery-modal-thumb";
+
+                    if (
+                        index ===
+                        currentGalleryIndex
+                    )
+                    {
+                        button.classList.add(
+                            "active"
+                        );
+                    }
+
+                    const image =
+                        document.createElement(
+                            "img"
+                        );
+
+                    image.src =
+                        imageUrl;
+
+                    image.alt =
+                        `Gallery image ${index + 1}`;
+
+                    button.appendChild(
+                        image
+                    );
+
+                    button.addEventListener(
+                        "click",
+                        function ()
+                        {
+                            currentGalleryIndex =
+                                index;
+
+                            renderGalleryModal();
+                        }
+                    );
+
+                    galleryThumbnails.appendChild(
+                        button
+                    );
+                }
+            );
+        }
+
+        function openGallery(index)
+        {
+            if (
+                galleryData.length === 0
+            )
+            {
+                return;
+            }
+
+            currentGalleryIndex =
+                Number(index);
+
+            renderGalleryModal();
+
+            galleryModal.hidden =
+                false;
+
+            document.body.classList.add(
+                "preview-modal-open"
+            );
+        }
+
+        function closeGallery()
+        {
+            galleryModal.hidden =
+                true;
+
+            document.body.classList.remove(
+                "preview-modal-open"
+            );
+        }
+
+        galleryItems.forEach(
+            function (item)
+            {
+                item.addEventListener(
+                    "click",
+                    function ()
+                    {
+                        openGallery(
+                            item.dataset.galleryIndex
+                        );
+                    }
+                );
+            }
+        );
+
+        galleryPrevious.addEventListener(
+            "click",
+            function ()
+            {
+                currentGalleryIndex =
+                    currentGalleryIndex === 0
+                        ? galleryData.length - 1
+                        : currentGalleryIndex - 1;
+
+                renderGalleryModal();
+            }
+        );
+
+        galleryNext.addEventListener(
+            "click",
+            function ()
+            {
+                currentGalleryIndex =
+                    currentGalleryIndex ===
+                        galleryData.length - 1
+                        ? 0
+                        : currentGalleryIndex + 1;
+
+                renderGalleryModal();
+            }
+        );
+
+        galleryClose.addEventListener(
+            "click",
+            closeGallery
+        );
+
+        galleryBackdrop.addEventListener(
+            "click",
+            closeGallery
+        );
+
+        document.addEventListener(
+            "keydown",
+            function (event)
+            {
+                if (galleryModal.hidden)
+                {
+                    return;
+                }
+
+                if (event.key === "Escape")
+                {
+                    closeGallery();
+                }
+
+                if (event.key === "ArrowLeft")
+                {
+                    galleryPrevious.click();
+                }
+
+                if (event.key === "ArrowRight")
+                {
+                    galleryNext.click();
+                }
+            }
+        );
+    </script>
+}

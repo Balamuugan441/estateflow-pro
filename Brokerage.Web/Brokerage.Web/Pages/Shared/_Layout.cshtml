@@ -8,15 +8,14 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Brokerage.Web.styles.css" asp-append-version="true" />
+
+    <!-- Fix: Render custom Styles section here -->
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
+    <!-- Render Body directly so full-width hero layouts work seamlessly -->
+    @RenderBody()
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

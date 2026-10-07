@@ -1,0 +1,97 @@
+﻿/* =========================================================
+   ESTATEFLOW PRO - SELLER BASE
+   ========================================================= */
+
+
+/* -------------------------
+   Fonts
+   ------------------------- */
+
+@font-face {
+    font-family: "Inter";
+    src: url("/fonts/Inter_24pt-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Inter";
+    src: url("/fonts/Inter_24pt-Medium.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Inter";
+    src: url("/fonts/Inter_24pt-SemiBold.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+/* -------------------------
+   Global variables
+   ------------------------- */
+
+:root {
+    --font-primary: "Inter", Roboto, sans-serif;
+    --color-primary: #3B82F6;
+    --color-background: #000000;
+    --color-header: #0b0c10;
+    --color-surface: #181a20;
+    --color-surface-hover: #171922;
+    --color-border: #282c37;
+    --color-border-light: #1f232e;
+    --color-white: #ffffff;
+    --color-text-primary: #e5e7eb;
+    --color-text-secondary: #9ca3af;
+    --color-text-muted: #6b7280;
+}
+
+
+/* -------------------------
+   Reset
+   ------------------------- */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    font-family: var(--font-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* -------------------------
+   Links
+   ------------------------- */
+
+a {
+    color: inherit;
+}
+
+
+/* -------------------------
+   Main Seller Content
+   ------------------------- */
+
+.seller-main-content {
+    width: 100%;
+    min-height: calc(100vh - 64px);
+    padding: 0;
+}

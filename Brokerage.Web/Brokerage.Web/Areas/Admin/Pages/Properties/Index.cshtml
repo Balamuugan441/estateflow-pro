@@ -1,0 +1,498 @@
+﻿@page
+@model Brokerage.Web.Areas.Admin.Pages.Properties.IndexModel
+
+@{
+    ViewData["Title"] = "Property Listings";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/admin/properties.css"
+          asp-append-version="true" />
+}
+
+<div class="properties-container">
+
+    <div class="page-header">
+
+        <div class="header-text">
+
+            <h1 class="page-title">
+                Property Listings
+            </h1>
+
+            <p class="page-subtitle">
+                Manage and audit property inventory.
+            </p>
+
+        </div>
+
+        <div class="metrics-row">
+
+            <div class="metric-card">
+                <span class="metric-label">
+                    TOTAL LIVE
+                </span>
+
+                <span class="metric-value">
+                    @Model.TotalLive
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">
+                    PENDING
+                </span>
+
+                <span class="metric-value warning-text">
+                    @Model.TotalPending
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">
+                    REJECTED
+                </span>
+
+                <span class="metric-value danger-text">
+                    @Model.TotalRejected
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <form method="get">
+
+        <div class="filter-card">
+
+            <div class="filter-group">
+
+                <label class="filter-label">
+                    STATUS
+                </label>
+
+                <select asp-for="ListingStatus"
+                        class="filter-select">
+
+                    <option value="">
+                        All Statuses
+                    </option>
+
+                    <option value="Draft">
+                        Draft
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="Approved">
+                        Accepted
+                    </option>
+
+                    <option value="Rejected">
+                        Rejected
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="filter-group">
+
+                <label class="filter-label">
+                    PROPERTY TYPE
+                </label>
+
+                <select asp-for="PropertyType"
+                        class="filter-select">
+
+                    <option value="">
+                        All Types
+                    </option>
+
+                    <option value="Studio Apartment">
+                        Studio Apartment
+                    </option>
+
+                    <option value="Apartment">
+                        Apartment
+                    </option>
+
+                    <option value="Villa">
+                        Villa
+                    </option>
+
+                    <option value="Independent House">
+                        Independent House
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="filter-group location-group">
+
+                <label class="filter-label">
+                    SEARCH / LOCATION
+                </label>
+
+                <div class="input-icon-wrapper">
+
+                    <svg class="input-icon"
+                         xmlns="http://www.w3.org/2000/svg"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor">
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+
+                    </svg>
+
+                    <input asp-for="Search"
+                           class="filter-input"
+                           placeholder="Property name or city" />
+
+                </div>
+
+            </div>
+
+            <div class="filter-group price-group">
+
+                <label class="filter-label">
+                    PRICE RANGE
+                </label>
+
+                <div class="price-inputs">
+
+                    <input asp-for="MinPrice"
+                           type="number"
+                           step="0.01"
+                           class="filter-input"
+                           placeholder="Min" />
+
+                    <span class="price-separator">
+                        -
+                    </span>
+
+                    <input asp-for="MaxPrice"
+                           type="number"
+                           step="0.01"
+                           class="filter-input"
+                           placeholder="Max" />
+
+                </div>
+
+            </div>
+
+            <div class="filter-actions">
+
+                <button type="submit"
+                        class="btn-apply-filters">
+                    Apply Filters
+                </button>
+
+                <a asp-page="./Index"
+                   class="btn-refresh"
+                   aria-label="Reset Filters">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         fill="none"
+                         viewBox="0 0 24 24"
+                         stroke="currentColor"
+                         class="refresh-icon">
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+
+                    </svg>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+    <div class="table-card">
+
+        <div class="table-responsive">
+
+            <table class="properties-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            PROPERTY
+                        </th>
+
+                        <th>
+                            OWNER
+                        </th>
+
+                        <th>
+                            PRICE
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            LISTING TYPE
+                        </th>
+
+                        <th>
+                            DATE CREATED
+                        </th>
+
+                        <th class="text-right">
+                            PROPERTY ID
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Properties.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                No properties found.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var property in Model.Properties)
+                        {
+                            string statusClass =
+                                property.ListingStatus switch
+                                {
+                                    "Approved" => "badge-accepted",
+                                    "Pending" => "badge-pending",
+                                    "Rejected" => "badge-rejected",
+                                    "Draft" => "badge-draft",
+                                    _ => "badge-draft"
+                                };
+
+                            string statusText =
+                                property.ListingStatus switch
+                                {
+                                    "Approved" => "ACCEPTED",
+                                    _ => property.ListingStatus.ToUpperInvariant()
+                                };
+
+                            string? coverImageUrl = null;
+
+                            if (!string.IsNullOrWhiteSpace(property.CoverImagePath))
+                            {
+                                coverImageUrl = $"{Model.ApiBaseUrl.TrimEnd('/')}{property.CoverImagePath}";
+                            }
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="property-cell">
+
+                                        @if (!string.IsNullOrWhiteSpace(coverImageUrl))
+                                        {
+                                            <img src="@coverImageUrl"
+                                                 alt="@property.PropertyTitle"
+                                                 class="property-thumb" />
+                                        }
+                                        else
+                                        {
+                                            <img src="~/images/icons/property/prop.jpg"
+                                                 alt="@property.PropertyTitle"
+                                                 class="property-thumb" />
+                                        }
+
+                                        <div class="property-info">
+
+                                            <span class="property-name">
+                                                @property.PropertyTitle
+                                            </span>
+
+                                            <span class="property-subtext">
+                                                @property.PropertyType
+                                                •
+                                                @property.City
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="owner-cell">
+
+                                        <span class="owner-name">
+                                            @property.SellerName
+                                        </span>
+
+                                        <span class="owner-subtext">
+                                            Seller ID:
+                                            @property.SellerID
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="price-value">
+                                        @property.Price.ToString("N2")
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="status-badge @statusClass">
+                                        @statusText
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="views-value">
+                                        @property.ListingType
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <div class="date-cell">
+                                        @property.CreatedAt.ToString("dd.MM.yyyy")
+                                    </div>
+
+                                </td>
+
+                                <td class="text-right">
+
+                                    <span class="views-value">
+                                        #@property.PropertyID
+                                    </span>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        @if (Model.TotalPages > 0)
+        {
+            int firstRecord = ((Model.PageNumber - 1) * Model.PageSize) + 1;
+            int lastRecord = Math.Min(Model.PageNumber * Model.PageSize, Model.TotalRecords);
+
+            <div class="table-footer">
+
+                <span class="showing-count">
+                    Showing @firstRecord - @lastRecord of @Model.TotalRecords listings
+                </span>
+
+                <div class="pagination">
+
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a asp-page="./Index"
+                           asp-route-Search="@Model.Search"
+                           asp-route-ListingStatus="@Model.ListingStatus"
+                           asp-route-PropertyType="@Model.PropertyType"
+                           asp-route-MinPrice="@Model.MinPrice"
+                           asp-route-MaxPrice="@Model.MaxPrice"
+                           asp-route-PageNumber="@(Model.PageNumber - 1)"
+                           class="page-btn">
+                            &lt;
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="page-btn disabled">
+                            &lt;
+                        </span>
+                    }
+
+                    @foreach (int? pageItem in Model.GetPaginationSequence())
+                    {
+                        if (pageItem.HasValue)
+                        {
+                            string activeClass = pageItem.Value == Model.PageNumber ? "active" : string.Empty;
+
+                            <a asp-page="./Index"
+                               asp-route-Search="@Model.Search"
+                               asp-route-ListingStatus="@Model.ListingStatus"
+                               asp-route-PropertyType="@Model.PropertyType"
+                               asp-route-MinPrice="@Model.MinPrice"
+                               asp-route-MaxPrice="@Model.MaxPrice"
+                               asp-route-PageNumber="@pageItem.Value"
+                               class="page-btn @activeClass">
+                                @pageItem.Value
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="page-btn disabled">...</span>
+                        }
+                    }
+
+                    @if (Model.HasNextPage)
+                    {
+                        <a asp-page="./Index"
+                           asp-route-Search="@Model.Search"
+                           asp-route-ListingStatus="@Model.ListingStatus"
+                           asp-route-PropertyType="@Model.PropertyType"
+                           asp-route-MinPrice="@Model.MinPrice"
+                           asp-route-MaxPrice="@Model.MaxPrice"
+                           asp-route-PageNumber="@(Model.PageNumber + 1)"
+                           class="page-btn">
+                            &gt;
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="page-btn disabled">
+                            &gt;
+                        </span>
+                    }
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

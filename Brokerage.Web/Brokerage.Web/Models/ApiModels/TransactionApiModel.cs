@@ -1,0 +1,35 @@
+﻿namespace Brokerage.Web.Models.ApiModels;
+
+/// <summary>
+/// Represents a completed property transaction returned by the API.
+/// </summary>
+public class TransactionApiModel
+{
+    public int TransactionID { get; set; }
+
+    public int BuyRequestID { get; set; }
+
+    public int PropertyID { get; set; }
+
+    public Guid PropertyGUID { get; set; }
+
+    public string PropertyTitle { get; set; } = string.Empty;
+
+    public string? PropertyLocation { get; set; }
+
+    public int BuyerID { get; set; }
+
+    public string BuyerName { get; set; } = string.Empty;
+
+    public int SellerID { get; set; }
+
+    public string SellerName { get; set; } = string.Empty;
+
+    public decimal TransactionAmount { get; set; }
+
+    public string TransactionStatus { get; set; } = string.Empty;
+
+    public DateTime CompletionDate { get; set; }
+
+    public string? CoverImagePath { get; set; }
+}

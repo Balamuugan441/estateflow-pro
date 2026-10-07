@@ -1,0 +1,75 @@
+﻿@page
+@model Brokerage.Web.Areas.Buyer.Pages.Properties.UnavailableModel
+
+@{
+    ViewData["Title"] = "Property Not Available";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/Buyer/property-unavailable.css"
+          asp-append-version="true" />
+}
+
+<div class="property-unavailable-page">
+
+    <div class="property-unavailable-card">
+
+        <div class="property-unavailable-icon">
+
+            <svg viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8">
+
+                <path d="M12 9v4" />
+
+                <path d="M12 17h.01" />
+
+                <path d="M10.3 3.5 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.5a2 2 0 0 0-3.4 0Z" />
+
+            </svg>
+
+        </div>
+
+        <h1>
+            Property Not Available
+        </h1>
+
+        <p>
+            This property is no longer available for purchase.
+        </p>
+
+        <p class="property-unavailable-secondary">
+            It may have already been sold or is no longer listed.
+        </p>
+
+
+        @if (string.Equals(
+            Model.Source,
+            "favorites",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            <a asp-area="Buyer"
+               asp-page="/Favorites/Index"
+               class="property-unavailable-button">
+
+                Back to Favorites
+
+            </a>
+        }
+        else
+        {
+            <a asp-area="Buyer"
+               asp-page="/Index"
+               class="property-unavailable-button">
+
+                Back to Listings
+
+            </a>
+        }
+
+    </div>
+
+</div>

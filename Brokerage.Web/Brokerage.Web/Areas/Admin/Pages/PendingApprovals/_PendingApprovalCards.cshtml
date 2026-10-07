@@ -1,0 +1,171 @@
+﻿@model IEnumerable<Brokerage.Web.Models.ApiModels.AdminPendingApprovalApiModel>
+
+@{
+    string apiBaseUrl =
+        ViewData["ApiBaseUrl"] as string
+        ?? string.Empty;
+}
+
+@foreach (var property in Model)
+{
+    string? coverImageUrl = null;
+
+    if (!string.IsNullOrWhiteSpace(
+        property.CoverImagePath))
+    {
+        coverImageUrl =
+            $"{apiBaseUrl.TrimEnd('/')}" +
+            $"{property.CoverImagePath}";
+    }
+
+    <div class="approval-card">
+
+        <div class="card-image-wrapper">
+
+            @if (!string.IsNullOrWhiteSpace(
+                coverImageUrl))
+            {
+                <img src="@coverImageUrl"
+                     alt="@property.PropertyTitle"
+                     class="card-img" />
+            }
+            else
+            {
+                <img src="~/images/icons/property/prop.jpg"
+                     alt="@property.PropertyTitle"
+                     class="card-img" />
+            }
+
+            <div class="image-overlay"></div>
+
+            <span class="badge badge-submission">
+                PENDING REVIEW
+            </span>
+
+            <div class="card-price">
+                @property.Price.ToString("N2")
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="card-title-row">
+
+                <div>
+
+                    <h2 class="property-title">
+                        @property.PropertyTitle
+                    </h2>
+
+                    <div class="property-location">
+
+                        <img src="~/images/icons/property/location.png"
+                             alt="Location"
+                             class="ui-icon location-icon" />
+
+                        <span>
+                            @property.City, @property.State
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="submitted-info">
+
+                    <span class="meta-label">
+                        SUBMITTED
+                    </span>
+
+                    <span class="meta-value">
+                        @property.SubmittedAt.ToString("dd MMM, yyyy")
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="owner-status-row">
+
+                <div class="owner-info">
+
+                    <img src="~/images/avatars/default-avatar.jpg"
+                         alt="@property.SellerName"
+                         class="owner-avatar" />
+
+                    <div>
+
+                        <span class="meta-label">
+                            OWNER
+                        </span>
+
+                        <span class="owner-name">
+                            @property.SellerName
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="status-info text-right">
+
+                    <span class="meta-label">
+                        STATUS
+                    </span>
+
+                    <div class="status-tag status-warning">
+
+                        <span class="status-dot"></span>
+
+                        <span>
+                            Pending
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-actions">
+
+               <a asp-page="./Preview"
+              asp-route-propertyId="@property.PropertyID"
+               class="btn-card-secondary preview-link">
+                  Preview
+                 </a>
+
+                <form method="post"
+                      asp-page-handler="Approve"
+                      asp-route-propertyId="@property.PropertyID">
+
+                    <button type="submit"
+                            class="btn-card-primary">
+                        Approve
+                    </button>
+
+                </form>
+
+                <form method="post"
+                      asp-page-handler="Reject"
+                      asp-route-propertyId="@property.PropertyID">
+
+                    <button type="submit"
+                            class="btn-card-reject"
+                            aria-label="Reject">
+
+                        <img src="~/images/icons/reject.png"
+                             alt="Reject"
+                             class="ui-icon reject-icon" />
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+}

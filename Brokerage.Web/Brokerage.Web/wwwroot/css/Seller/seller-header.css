@@ -1,0 +1,451 @@
+﻿
+.header-action-svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+    flex-shrink: 0;
+}
+.main-header {
+    width: 100%;
+    height: 64px;
+    background-color: #10131A;
+    border-bottom: 1px solid #181a20;
+    font-family: var(--font-primary);
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 100;
+}
+
+
+/* -------------------------
+   Header container
+   ------------------------- */
+
+.header-container {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* -------------------------
+   Left section
+   ------------------------- */
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    min-width: 0;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+
+/*
+    Manual logo supplied by UI team.
+
+    Works with:
+    SVG
+    PNG
+    JPG
+    WebP
+*/
+
+.brand-logo-icon {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+}
+
+
+.brand-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-white);
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+}
+
+
+    .brand-text span {
+        color: var(--color-primary);
+    }
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+
+.nav-link {
+    font-size: 15px;
+    font-weight: 400;
+    color: #d1d5db;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+
+    .nav-link:hover {
+        color: var(--color-white);
+    }
+
+
+/* =========================================================
+   RIGHT SECTION
+   ========================================================= */
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   HEADER ACTIONS
+   ========================================================= */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+}
+
+
+    .action-btn:hover {
+        background-color: var(--color-surface-hover);
+    }
+
+
+/*
+    Manual icons supplied by UI team.
+
+    The same class is used for:
+    heart
+    notification
+    message
+*/
+
+.action-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+}
+
+
+/*
+    IMPORTANT
+
+    Because these are now external image files,
+    CSS color cannot change their color.
+
+    Therefore the UI team's heart icon itself
+    should already be blue.
+*/
+
+.heart-btn .action-icon {
+    /* No color property here */
+}
+
+
+/* =========================================================
+   DIVIDER
+   ========================================================= */
+
+.header-divider {
+    width: 1px;
+    height: 28px;
+    background-color: var(--color-border-light);
+    margin: 0 4px;
+}
+
+
+/* =========================================================
+   USER PROFILE
+   ========================================================= */
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 0;
+}
+
+
+.user-name {
+    max-width: 150px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-white);
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.user-role {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   AVATAR
+   ========================================================= */
+
+.user-avatar-wrapper {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    background-color: #171920;
+    display: block;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .header-left {
+        gap: 24px;
+    }
+
+    .header-nav {
+        gap: 18px;
+    }
+
+    .header-right {
+        gap: 12px;
+    }
+
+    .user-info {
+        display: none;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .header-container {
+        padding: 0 16px;
+    }
+
+    .header-left {
+        gap: 18px;
+    }
+
+    .header-nav {
+        gap: 14px;
+    }
+
+    .nav-link {
+        font-size: 14px;
+    }
+
+    .header-actions {
+        gap: 6px;
+    }
+
+    .header-divider {
+        display: none;
+    }
+
+    .user-profile {
+        gap: 6px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    .brand-text {
+        font-size: 17px;
+    }
+
+    .brand-logo-icon {
+        width: 22px;
+        height: 22px;
+    }
+
+    .header-nav {
+        display: none;
+    }
+}
+.user-profile-wrapper {
+    position: relative;
+}
+
+.user-profile {
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 6px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+    .user-profile:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+.profile-chevron {
+    width: 16px;
+    height: 16px;
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.user-profile-wrapper.active .profile-chevron {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu Container */
+.profile-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 210px;
+    background-color: #141822;
+    border: 1px solid #1e2638;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    padding: 8px;
+    z-index: 1000;
+    animation: fadeInDropdown 0.15s ease-out;
+}
+
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-user-header {
+    padding: 8px 10px 6px 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-user-role {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #1e2638;
+    margin: 6px 0;
+}
+
+/* Logout Button */
+.dropdown-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+    .dropdown-logout-btn:hover {
+        background-color: rgba(239, 68, 68, 0.12);
+        color: #f87171;
+    }
+
+.logout-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}

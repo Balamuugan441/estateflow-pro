@@ -1,0 +1,104 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - EstateFlow Pro
+    </title>
+
+    <!-- Seller common styles -->
+
+    <link rel="stylesheet"
+          href="~/css/seller/seller-base.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/seller/seller-header.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/seller/seller-footer.css"
+          asp-append-version="true" />
+
+    <!-- Notification styles -->
+
+    <link rel="stylesheet"
+          href="~/css/notifications/notification-center.css"
+          asp-append-version="true" />
+            <link rel="stylesheet"
+          href="~/css/chat/chat.css"
+          asp-append-version="true" />
+
+    <!-- Page-specific CSS -->
+
+    @RenderSection(
+        "Styles",
+        required: false)
+
+</head>
+
+<body>
+
+    @Html.AntiForgeryToken()
+
+    <!-- ==============================
+         SELLER HEADER
+         ============================== -->
+
+    <partial name="_SellerHeader" />
+
+    <main class="seller-main-content">
+
+        @RenderBody()
+
+    </main>
+
+    @await Html.PartialAsync(
+        "/Areas/Seller/Pages/Shared/_SellerFooter.cshtml"
+    )
+
+    <!-- Global JavaScript -->
+
+    <script src="~/js/auth/profile-logout.js"
+            asp-append-version="true"></script>
+
+    <script src="~/js/notifications/notification-center.js"
+            asp-append-version="true"></script>
+
+    <!-- Page-specific JavaScript -->
+    @section Scripts {
+
+    <div id="chatConfig"
+         data-conversation-id="@Model.ConversationId"
+         data-current-user-id="@User.FindFirst(
+             System.Security.Claims.ClaimTypes.NameIdentifier
+         )?.Value">
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@@10.0.0/dist/browser/signalr.min.js"></script>
+
+
+    <script src="~/js/chat/chat.js"
+            asp-append-version="true"></script>
+
+}
+
+    @RenderSection(
+        "Scripts",
+        required: false)
+
+</body>
+
+</html>

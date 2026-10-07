@@ -1,0 +1,746 @@
+﻿@page
+@model Brokerage.Web.Areas.Admin.Pages.Dashboard.IndexModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/admin/dashboard.css"
+          asp-append-version="true" />
+}
+
+<div class="dashboard-page">
+
+    <div class="dashboard-header">
+
+        <div>
+            <h1 class="dashboard-title">
+                Admin Dashboard
+            </h1>
+
+            <p class="dashboard-subtitle">
+                Monitor users, listings and approval activity across EstateFlow Pro.
+            </p>
+        </div>
+
+        <div class="dashboard-header-actions">
+
+            <span class="dashboard-updated">
+                Updated @Model.LastUpdated.ToString("dd MMM yyyy, hh:mm tt")
+            </span>
+
+            <button type="button"
+                    class="dashboard-refresh"
+                    onclick="window.location.reload()">
+                Refresh
+            </button>
+
+        </div>
+
+    </div>
+
+    <section class="dashboard-kpi-grid">
+
+        <article class="dashboard-kpi">
+
+            <span class="dashboard-kpi-label">
+                Total Users
+            </span>
+
+            <span class="dashboard-kpi-value kpi-blue">
+                @Model.Dashboard.Summary.TotalUsers
+            </span>
+
+            <span class="dashboard-kpi-detail">
+                @Model.Dashboard.Summary.ActiveUsers active
+                <span>• @(Model.Dashboard.Summary.TotalUsers - Model.Dashboard.Summary.ActiveUsers) inactive</span>
+            </span>
+
+        </article>
+
+        <article class="dashboard-kpi">
+
+            <span class="dashboard-kpi-label">
+                New Users · 7 Days
+            </span>
+
+            <span class="dashboard-kpi-value kpi-green">
+                @Model.Dashboard.Summary.NewUsersLast7Days
+            </span>
+
+            <span class="dashboard-kpi-detail">
+                Today @Model.Dashboard.Summary.NewUsersToday
+                <span>• 30d @Model.Dashboard.Summary.NewUsersLast30Days</span>
+            </span>
+
+        </article>
+
+        <article class="dashboard-kpi">
+
+            <span class="dashboard-kpi-label">
+                Total Properties
+            </span>
+
+            <span class="dashboard-kpi-value kpi-purple">
+                @Model.Dashboard.Summary.TotalProperties
+            </span>
+
+            <span class="dashboard-kpi-detail">
+                @Model.Dashboard.Summary.ApprovedProperties live
+                <span>• @Model.Dashboard.Summary.PendingProperties pending</span>
+            </span>
+
+        </article>
+
+        <article class="dashboard-kpi">
+
+            <span class="dashboard-kpi-label">
+                Pending Approvals
+            </span>
+
+            <span class="dashboard-kpi-value kpi-orange">
+                @Model.Dashboard.Summary.PendingProperties
+            </span>
+
+            <span class="dashboard-kpi-detail">
+                @Model.Dashboard.Summary.NewPropertiesLast7Days
+                <span>new listings in 7d</span>
+            </span>
+
+        </article>
+
+        <article class="dashboard-kpi">
+
+            <span class="dashboard-kpi-label">
+                Approved Listings
+            </span>
+
+            <span class="dashboard-kpi-value kpi-green">
+                @Model.Dashboard.Summary.ApprovedProperties
+            </span>
+
+            <span class="dashboard-kpi-detail">
+                @Model.Dashboard.Summary.RejectedProperties rejected
+                <span>• @Model.Dashboard.Summary.DraftProperties draft</span>
+            </span>
+
+        </article>
+
+    </section>
+
+    <section class="dashboard-card dashboard-trend-card">
+
+        <div class="dashboard-card-header">
+
+            <div>
+
+                <h2 class="dashboard-card-title">
+                    Growth Overview
+                </h2>
+
+                <p id="growthSubtitle"
+                   class="dashboard-card-subtitle">
+                    User registrations over the selected period.
+                </p>
+
+            </div>
+
+            <div class="dashboard-chart-controls">
+
+                <div class="chart-control-group"
+                     id="metricControls">
+
+                    <button type="button"
+                            class="chart-control active"
+                            data-metric="users">
+                        Users
+                    </button>
+
+                    <button type="button"
+                            class="chart-control"
+                            data-metric="properties">
+                        Properties
+                    </button>
+
+                </div>
+
+                <div class="chart-control-group"
+                     id="rangeControls">
+
+                    <button type="button"
+                            class="chart-control active"
+                            data-range="7d">
+                        7D
+                    </button>
+
+                    <button type="button"
+                            class="chart-control"
+                            data-range="30d">
+                        30D
+                    </button>
+
+                    <button type="button"
+                            class="chart-control"
+                            data-range="12m">
+                        12M
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="chart-canvas-wrap"
+             id="chartWrap">
+
+            <svg id="growthChart"
+                 class="growth-chart"
+                 viewBox="0 0 900 315"
+                 preserveAspectRatio="none">
+            </svg>
+
+            <div id="chartTooltip"
+                 class="chart-tooltip">
+
+                <span id="chartTooltipLabel"
+                      class="chart-tooltip-label">
+                </span>
+
+                <span id="chartTooltipValue"
+                      class="chart-tooltip-value">
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <div class="dashboard-two-column">
+
+        <section class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+
+                    <h2 class="dashboard-card-title">
+                        User Role Distribution
+                    </h2>
+
+                    <p class="dashboard-card-subtitle">
+                        Current user composition.
+                    </p>
+
+                </div>
+
+                <a asp-page="/Users/Index"
+                   class="dashboard-view-all">
+                    View users
+                </a>
+
+            </div>
+
+            @{
+                int totalUsers =
+                    Model.Dashboard.Summary.TotalUsers;
+
+                int buyers =
+                    Model.Dashboard.Summary.Buyers;
+
+                int sellers =
+                    Model.Dashboard.Summary.Sellers;
+
+                int admins =
+                    Model.Dashboard.Summary.Admins;
+
+                int maxRoleCount =
+                    Math.Max(
+                        Math.Max(
+                            buyers,
+                            sellers),
+                        admins);
+
+                maxRoleCount =
+                    Math.Max(
+                        maxRoleCount,
+                        1);
+            }
+
+            <div class="distribution-list">
+
+                <div class="distribution-row">
+
+                    <span class="distribution-label">
+                        Buyer
+                    </span>
+
+                    <div class="distribution-track">
+
+                        <div class="distribution-fill fill-buyer"
+                             style="width:@((buyers * 100.0 / maxRoleCount).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%">
+                        </div>
+
+                    </div>
+
+                    <span class="distribution-count">
+                        @buyers
+                    </span>
+
+                </div>
+
+                <div class="distribution-row">
+
+                    <span class="distribution-label">
+                        Seller
+                    </span>
+
+                    <div class="distribution-track">
+
+                        <div class="distribution-fill fill-seller"
+                             style="width:@((sellers * 100.0 / maxRoleCount).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%">
+                        </div>
+
+                    </div>
+
+                    <span class="distribution-count">
+                        @sellers
+                    </span>
+
+                </div>
+
+                <div class="distribution-row">
+
+                    <span class="distribution-label">
+                        Admin
+                    </span>
+
+                    <div class="distribution-track">
+
+                        <div class="distribution-fill fill-admin"
+                             style="width:@((admins * 100.0 / maxRoleCount).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%">
+                        </div>
+
+                    </div>
+
+                    <span class="distribution-count">
+                        @admins
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+
+                    <h2 class="dashboard-card-title">
+                        Property Status
+                    </h2>
+
+                    <p class="dashboard-card-subtitle">
+                        Current listing pipeline.
+                    </p>
+
+                </div>
+
+                <a asp-page="/Properties/Index"
+                   class="dashboard-view-all">
+                    View listings
+                </a>
+
+            </div>
+
+            @{
+                int totalPropertyCount =
+                    Math.Max(
+                        Model.Dashboard.Summary.TotalProperties,
+                        1);
+            }
+
+            <div class="distribution-list">
+
+                @foreach (
+                    var status
+                    in Model.Dashboard.PropertyStatuses)
+                {
+                    string fillClass =
+                        status.Name switch
+                        {
+                            "Approved" => "fill-approved",
+                            "Pending" => "fill-pending",
+                            "Draft" => "fill-draft",
+                            "Rejected" => "fill-rejected",
+                            _ => "fill-draft"
+                        };
+
+                    <div class="distribution-row">
+
+                        <span class="distribution-label">
+                            @status.Name
+                        </span>
+
+                        <div class="distribution-track">
+
+                            <div class="distribution-fill @fillClass"
+                                 style="width:@((status.Count * 100.0 / totalPropertyCount).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%">
+                            </div>
+
+                        </div>
+
+                        <span class="distribution-count">
+                            @status.Count
+                        </span>
+
+                    </div>
+                }
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <div class="dashboard-two-column">
+
+        <section class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+
+                    <h2 class="dashboard-card-title">
+                        User Registration Snapshot
+                    </h2>
+
+                    <p class="dashboard-card-subtitle">
+                        Rolling registration activity.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="snapshot-grid">
+
+                <div class="snapshot-item">
+                    <span class="snapshot-label">
+                        Today
+                    </span>
+
+                    <span class="snapshot-value">
+                        @Model.Dashboard.Summary.NewUsersToday
+                    </span>
+
+                    <span class="snapshot-description">
+                        New users
+                    </span>
+                </div>
+
+                <div class="snapshot-item">
+                    <span class="snapshot-label">
+                        7 Days
+                    </span>
+
+                    <span class="snapshot-value">
+                        @Model.Dashboard.Summary.NewUsersLast7Days
+                    </span>
+
+                    <span class="snapshot-description">
+                        New users
+                    </span>
+                </div>
+
+                <div class="snapshot-item">
+                    <span class="snapshot-label">
+                        30 Days
+                    </span>
+
+                    <span class="snapshot-value">
+                        @Model.Dashboard.Summary.NewUsersLast30Days
+                    </span>
+
+                    <span class="snapshot-description">
+                        New users
+                    </span>
+                </div>
+
+                <div class="snapshot-item">
+                    <span class="snapshot-label">
+                        365 Days
+                    </span>
+
+                    <span class="snapshot-value">
+                        @Model.Dashboard.Summary.NewUsersLast365Days
+                    </span>
+
+                    <span class="snapshot-description">
+                        New users
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+
+                    <h2 class="dashboard-card-title">
+                        Property Posting Snapshot
+                    </h2>
+
+                    <p class="dashboard-card-subtitle">
+                        New listing activity.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="snapshot-grid">
+
+                <div class="snapshot-item">
+                    <span class="snapshot-label">
+                        7 Days
+                    </span>
+
+                    <span class="snapshot-value">
+                        @Model.Dashboard.Summary.NewPropertiesLast7Days
+                    </span>
+
+                    <span class="snapshot-description">
+                        New listings
+                    </span>
+                </div>
+
+                <div class="snapshot-item">
+                    <span class="snapshot-label">
+                        30 Days
+                    </span>
+
+                    <span class="snapshot-value">
+                        @Model.Dashboard.Summary.NewPropertiesLast30Days
+                    </span>
+
+                    <span class="snapshot-description">
+                        New listings
+                    </span>
+                </div>
+
+                <div class="snapshot-item">
+                    <span class="snapshot-label">
+                        365 Days
+                    </span>
+
+                    <span class="snapshot-value">
+                        @Model.Dashboard.Summary.NewPropertiesLast365Days
+                    </span>
+
+                    <span class="snapshot-description">
+                        New listings
+                    </span>
+                </div>
+
+                <div class="snapshot-item">
+                    <span class="snapshot-label">
+                        Pending
+                    </span>
+
+                    <span class="snapshot-value">
+                        @Model.Dashboard.Summary.PendingProperties
+                    </span>
+
+                    <span class="snapshot-description">
+                        Awaiting review
+                    </span>
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <div class="dashboard-two-column">
+
+        <section class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+                    <h2 class="dashboard-card-title">
+                        Recent Users
+                    </h2>
+
+                    <p class="dashboard-card-subtitle">
+                        Latest registered accounts.
+                    </p>
+                </div>
+
+                <a asp-page="/Users/Index"
+                   class="dashboard-view-all">
+                    View all
+                </a>
+
+            </div>
+
+            <div class="dashboard-list">
+
+                @if (Model.Dashboard.RecentUsers.Count == 0)
+                {
+                    <div class="dashboard-empty">
+                        No users found.
+                    </div>
+                }
+                else
+                {
+                    @foreach (
+                        var user
+                        in Model.Dashboard.RecentUsers)
+                    {
+                        string roleClass =
+                            user.RoleName.ToLowerInvariant();
+
+                        string statusClass =
+                            user.IsActive
+                                ? "active"
+                                : "inactive";
+
+                        <div class="dashboard-list-item">
+
+                            <div class="dashboard-list-main">
+
+                                <span class="dashboard-list-title">
+                                    @user.FullName
+                                </span>
+
+                                <span class="dashboard-list-subtitle">
+                                    @user.Email
+                                </span>
+
+                            </div>
+
+                            <div class="dashboard-list-meta">
+
+                                <span class="role-pill @roleClass">
+                                    @user.RoleName
+                                </span>
+
+                                <span class="dashboard-list-date">
+                                    @user.CreatedAt.ToString("dd MMM yyyy")
+                                </span>
+
+                            </div>
+
+                        </div>
+                    }
+                }
+
+            </div>
+
+        </section>
+
+        <section class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+                    <h2 class="dashboard-card-title">
+                        Latest Pending Approvals
+                    </h2>
+
+                    <p class="dashboard-card-subtitle">
+                        Properties currently waiting for review.
+                    </p>
+                </div>
+
+                <a asp-page="/PendingApprovals/Index"
+                   class="dashboard-view-all">
+                    Review all
+                </a>
+
+            </div>
+
+            <div class="dashboard-list">
+
+                @if (Model.Dashboard.PendingProperties.Count == 0)
+                {
+                    <div class="dashboard-empty">
+                        No pending properties.
+                    </div>
+                }
+                else
+                {
+                    @foreach (
+                        var property
+                        in Model.Dashboard.PendingProperties)
+                    {
+                        <div class="dashboard-list-item">
+
+                            <div class="dashboard-list-main">
+
+                                <span class="dashboard-list-title">
+                                    @property.PropertyTitle
+                                </span>
+
+                                <span class="dashboard-list-subtitle">
+                                    @property.SellerName
+                                    ·
+                                    @property.City
+                                </span>
+
+                            </div>
+
+                            <div class="dashboard-list-meta">
+
+                                <span class="status-pill pending">
+                                    Pending
+                                </span>
+
+                                <span class="dashboard-list-value">
+                                    @property.Price.ToString("N0")
+                                </span>
+
+                                <span class="dashboard-list-date">
+                                    @property.SubmittedAt.ToString("dd MMM yyyy")
+                                </span>
+
+                            </div>
+
+                        </div>
+                    }
+                }
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script>
+        window.dashboardData = {
+            userDaily: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Dashboard.UserDailyTrend)),
+            userMonthly: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Dashboard.UserMonthlyTrend)),
+            propertyDaily: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Dashboard.PropertyDailyTrend)),
+            propertyMonthly: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Dashboard.PropertyMonthlyTrend))
+        };
+    </script>
+    <script src="~/js/Admin/dashboard.js" asp-append-version="true"></script>
+}

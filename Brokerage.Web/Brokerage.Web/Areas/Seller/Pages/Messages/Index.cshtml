@@ -1,0 +1,250 @@
+﻿@page
+@model Brokerage.Web.Areas.Seller.Pages.Messages.IndexModel
+
+@{
+     Layout = "/Areas/Seller/Pages/Shared/_SellerLayout.cshtml";
+    ViewData["Title"] = "Messages";
+}
+
+@section Styles {
+
+    <link rel="stylesheet"
+          href="~/css/chat/chat.css"
+          asp-append-version="true" />
+
+}
+
+<div class="chat-page">
+
+    <div class="chat-container">
+
+
+        <aside class="chat-conversations">
+
+            <div class="chat-conversations-header">
+
+                <h2>Messages</h2>
+
+            </div>
+
+            <div class="conversation-list">
+
+                @if (Model.Conversations.Count == 0)
+                {
+                    <div class="chat-empty">
+
+                        <p>
+                            No conversations yet.
+                        </p>
+
+                    </div>
+                }
+                else
+                {
+                    @foreach (var conversation in Model.Conversations)
+                    {
+                        bool isActive =
+                            Model.ActiveConversation?.ConversationID
+                            == conversation.ConversationID;
+
+                       <a asp-page="./Index"
+   asp-route-conversationId="@conversation.ConversationID"
+   id="conversation-@conversation.ConversationID"
+   data-conversation-id="@conversation.ConversationID"
+   class="conversation-item @(isActive ? "active" : "")">
+
+                            <div class="conversation-top">
+
+                                <div class="conversation-property">
+
+                                    @conversation.PropertyTitle
+
+                                </div>
+
+                               @if (conversation.LastMessageAt.HasValue)
+{
+    <span class="conversation-time">
+        @(conversation.LastMessageAt
+            .Value
+            .ToLocalTime()
+            .ToString("dd MMM"))
+    </span>
+}
+
+                            </div>
+
+                            <div class="conversation-person">
+
+                                @conversation.BuyerName
+
+                            </div>
+
+                            <div class="conversation-last-message">
+
+                                @(conversation.LastMessage ?? "No messages yet")
+
+                            </div>
+
+                           @if (conversation.UnreadCount > 0)
+{
+    <span class="unread-badge">
+        @conversation.UnreadCount
+    </span>
+}
+
+                        </a>
+                    }
+                }
+
+            </div>
+
+        </aside>
+
+
+
+        <section class="chat-main">
+
+            @if (Model.ActiveConversation is null)
+            {
+                <div class="chat-empty">
+
+                    <div>
+
+                        <h2>Select a conversation</h2>
+
+                        <p>
+                            Choose a conversation from the left
+                            to view the messages.
+                        </p>
+
+                    </div>
+
+                </div>
+            }
+            else
+            {
+                <!-- CHAT HEADER -->
+
+                <header class="chat-header">
+
+                    <h2 class="chat-header-title">
+
+                        @Model.ActiveConversation.BuyerName
+
+                    </h2>
+
+                    <div class="chat-header-subtitle">
+
+                        @Model.ActiveConversation.PropertyTitle
+
+                    </div>
+
+                </header>
+
+
+                <!-- CHAT MESSAGES -->
+
+                <div id="chatMessages"
+                     class="chat-messages">
+
+                    @if (Model.Messages.Count == 0)
+                    {
+                        <div id="chatEmptyMessages"
+                             class="chat-empty">
+
+                            <p>
+                                No messages in this conversation yet.
+                            </p>
+
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var message in Model.Messages)
+                        {
+                            bool isMine =
+                                message.SenderID
+                                == Model.ActiveConversation.SellerID;
+
+                            <div class="chat-message @(isMine ? "mine" : "theirs")">
+
+                                <div class="chat-bubble">
+
+                                    <div>
+                                        @message.MessageText
+                                    </div>
+
+                                    <div class="chat-message-time">
+    @(message.SentAt
+        .ToLocalTime()
+        .ToString("dd MMM yyyy, hh:mm tt"))
+</div>
+
+                                </div>
+
+                            </div>
+                        }
+                    }
+
+                </div>
+
+
+                <!-- READ ONLY -->
+
+                @if (Model.ActiveConversation.IsReadOnly)
+                {
+                    <div class="chat-readonly">
+
+                        This conversation is read-only.
+
+                    </div>
+                }
+                else
+                {
+                    <!-- MESSAGE COMPOSER -->
+
+                    <div class="chat-composer">
+
+                        <textarea id="chatMessageInput"
+                                  class="chat-message-input"
+                                  maxlength="2000"
+                                  rows="2"
+                                  placeholder="Type a message..."></textarea>
+
+                        <button id="chatSendButton"
+                                type="button"
+                                class="chat-send-button">
+
+                            Send
+
+                        </button>
+
+                    </div>
+                }
+
+            }
+
+        </section>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <div id="chatConfig"
+         data-conversation-id="@Model.ConversationId"
+         data-current-user-id="@User.FindFirst(
+             System.Security.Claims.ClaimTypes.NameIdentifier
+         )?.Value">
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@@10.0.0/dist/browser/signalr.min.js"></script>
+
+
+    <script src="~/js/chat/chat.js"
+            asp-append-version="true"></script>
+
+}

@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - EstateFlow Pro
+    </title>
+
+    <link rel="stylesheet"
+          href="~/css/seller/seller-base.css" />
+
+    <link rel="stylesheet"
+          href="~/css/seller/seller-header.css" />
+
+    <link rel="stylesheet"
+          href="~/css/seller/seller-footer.css" />
+           <link rel="stylesheet"
+          href="~/css/chat/chat.css" />
+          @await RenderSectionAsync("Styles", required: false)
+          <link rel="stylesheet"
+      href="~/css/notifications/notification-center.css"
+      asp-append-version="true" />
+</head>
+
+<body>
+    @Html.AntiForgeryToken()
+
+    <header>
+        <partial name="_BuyerHeader" />
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer>
+        <partial name="_BuyerFooter" />
+    </footer>
+    <script src="~/js/notifications/notification-center.js"
+        asp-append-version="true"></script>
+        <script src="~/js/auth/profile-logout.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Brokerage.Models.DTOs.Authentication;
+
+public class ResetPasswordRequest
+{
+    [Required]
+    public string Token { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(
+        100,
+        MinimumLength = 8,
+        ErrorMessage = "Password must be between 8 and 100 characters.")]
+    [RegularExpression(
+        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$",
+        ErrorMessage =
+            "Password must contain at least one uppercase letter, one lowercase letter, and one special character.")]
+    public string NewPassword { get; set; } = string.Empty;
+
+    [Required]
+    [Compare(
+        "NewPassword",
+        ErrorMessage = "Passwords do not match.")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}

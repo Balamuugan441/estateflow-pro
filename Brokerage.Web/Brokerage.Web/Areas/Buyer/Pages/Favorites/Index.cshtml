@@ -1,0 +1,249 @@
+﻿@page
+@model Brokerage.Web.Areas.Buyer.Pages.Favorites.IndexModel
+@using Brokerage.Web.Models.ApiModels
+
+@{
+    ViewData["Title"] = "Favorites";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/Buyer/buyer-favorites.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/Buyer/buyer-main.css"
+          asp-append-version="true" />
+}
+
+<div class="favorites-page">
+    <div class="favorites-topbar">
+        <a asp-area="Buyer"
+           asp-page="/Index"
+           class="favorites-back-button">
+            <svg class="back-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back to Properties</span>
+        </a>
+    </div>
+
+    <section class="favorites-header">
+        <div>
+            <h1 class="favorites-title">
+                My Favorites
+            </h1>
+            <p class="favorites-subtitle">
+                Properties you have saved for quick access and comparison.
+            </p>
+        </div>
+
+        <div class="favorites-count-badge">
+            <span class="count-number">@Model.TotalRecords</span>
+            <span class="count-label">@(Model.TotalRecords == 1 ? "Property Saved" : "Properties Saved")</span>
+        </div>
+    </section>
+
+    <section class="favorites-content">
+        @if (Model.Properties.Count == 0)
+        {
+            <div class="favorites-empty">
+                <div class="favorites-empty-icon">
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                        </path>
+                    </svg>
+                </div>
+
+                <h2>No favorites yet</h2>
+                <p>Explore listings and click the heart icon to save your favorite properties here.</p>
+
+                <a asp-area="Buyer"
+                   asp-page="/Index"
+                   class="favorites-browse-button">
+                    Browse Properties
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="property-grid favorites-property-grid">
+                @foreach (BuyerPropertyApiModel property in Model.Properties)
+                {
+                    string location = string.Join(
+                        ", ",
+                        new[]
+                        {
+                            property.LocationAddress,
+                            property.City,
+                            property.State
+                        }.Where(value => !string.IsNullOrWhiteSpace(value))
+                    );
+
+                    string imageUrl = string.IsNullOrWhiteSpace(property.CoverImagePath)
+                        ? string.Empty
+                        : Url.Page(
+                            "/Index",
+                            "PropertyImage",
+                            new
+                            {
+                                area = "Buyer",
+                                path = property.CoverImagePath
+                            }) ?? string.Empty;
+
+                    string listingType = property.ListingType ?? string.Empty;
+
+                    string priceSuffix = listingType.Equals("For rent", StringComparison.OrdinalIgnoreCase)
+                        ? "/month"
+                        : string.Empty;
+
+                    <div class="property-card favorites-property-card"
+                         data-property-guid="@property.PropertyGUID"
+                         role="link"
+                         tabindex="0">
+
+                        <div class="card-image-wrapper">
+                            @if (!string.IsNullOrWhiteSpace(imageUrl))
+                            {
+                                <img src="@imageUrl"
+                                     alt="@property.PropertyTitle"
+                                     class="card-image"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="card-image card-image-placeholder">
+                                    <span>No Image Available</span>
+                                </div>
+                            }
+
+                            <div class="badge-group">
+                                <span class="badge badge-sale">
+                                    @listingType.ToUpperInvariant()
+                                </span>
+                            </div>
+
+                            <button type="button"
+                                    class="btn-favorite is-favorite"
+                                    data-property-guid="@property.PropertyGUID"
+                                    aria-label="Remove property from favorites"
+                                    aria-pressed="true">
+                                <svg viewBox="0 0 24 24"
+                                     fill="currentColor"
+                                     stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="card-content">
+                            <div class="card-header-row">
+                                <h3 class="property-title">
+                                    @property.PropertyTitle
+                                </h3>
+                                <div class="property-price">
+                                    <span class="price-symbol">₹</span>@property.Price.ToString("N0")
+                                    @if (!string.IsNullOrWhiteSpace(priceSuffix))
+                                    {
+                                        <small class="price-suffix">@priceSuffix</small>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="property-location">
+                                <svg class="location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>@location</span>
+                            </div>
+
+                            <div class="property-specs">
+                                <div class="spec-item" title="Bedrooms">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M2 4v16M2 8h20v12M2 17h20M7 8V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3" />
+                                    </svg>
+                                    <span>@property.Bedrooms Beds</span>
+                                </div>
+
+                                <div class="spec-item" title="Bathrooms">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M4 12h16a1 1 0 0 1 1 1v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-3a1 1 0 0 1 1-1zM6 12V5a2 2 0 0 1 2-2h3" />
+                                    </svg>
+                                    <span>@property.Bathrooms Baths</span>
+                                </div>
+
+                                <div class="spec-item" title="Built Area">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M3 21h18M5 21V7l8-4 6 4v14M9 10h2M13 10h2M9 14h2M13 14h2" />
+                                    </svg>
+                                    <span>@property.Area @property.AreaUnit</span>
+                                </div>
+                            </div>
+
+                            <div class="card-footer-action">
+                                <span class="btn-view-details">
+                                    View Property
+                                    <svg class="action-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                        <path d="M5 12h14M12 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="favorites-pagination">
+                @if (Model.PageNumber > 1)
+                {
+                    <a asp-page="./Index"
+                       asp-route-pageNumber="@(Model.PageNumber - 1)"
+                       class="page-btn page-nav"
+                       aria-label="Previous page">
+                        ‹
+                    </a>
+                }
+
+                @for (int pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+                {
+                    <a asp-page="./Index"
+                       asp-route-pageNumber="@pageNumber"
+                       class="page-btn @(pageNumber == Model.PageNumber ? "active" : "")">
+                        @pageNumber
+                    </a>
+                }
+
+                @if (Model.PageNumber < Model.TotalPages)
+                {
+                    <a asp-page="./Index"
+                       asp-route-pageNumber="@(Model.PageNumber + 1)"
+                       class="page-btn page-nav"
+                       aria-label="Next page">
+                        ›
+                    </a>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@Html.AntiForgeryToken()
+
+<div id="buyerFavoritePreviewUrl"
+     data-url="@Url.Page("/Properties/Preview", new { area = "Buyer" })"></div>
+
+@section Scripts
+{
+    <script src="~/js/Buyer/buyer-favorites.js"
+            asp-append-version="true"></script>
+}

@@ -7,6 +7,7 @@ public class User
     public Guid UserGUID { get; set; }
 
     public int RoleID { get; set; }
+    public string RoleName { get; set; } = string.Empty;
 
     public string FullName { get; set; } = string.Empty;
 

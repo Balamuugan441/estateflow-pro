@@ -1,0 +1,180 @@
+﻿@page
+@model Brokerage.Web.Areas.Buyer.Pages.Notifications.IndexModel
+@using Brokerage.Web.Models.ApiModels
+
+@{
+    Layout = "/Areas/Buyer/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Notifications";
+}
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/notifications/notifications-page.css"
+          asp-append-version="true" />
+}
+
+<div class="notifications-container">
+
+    <div class="notifications-header">
+
+        <h1 class="page-title">
+            Notifications
+        </h1>
+
+        <p class="page-subtitle">
+            Stay updated on your brokerage activities and listings.
+        </p>
+
+    </div>
+
+
+    <div class="notifications-list">
+
+        @if (Model.Notifications.Count == 0)
+        {
+            <div class="notifications-empty">
+
+                <div class="notifications-empty-icon">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round">
+
+                        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+
+                    </svg>
+
+                </div>
+
+                <h2>
+                    No Notifications
+                </h2>
+
+                <p>
+                    New brokerage activity will appear here.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            @foreach (NotificationApiModel notification
+                     in Model.Notifications)
+            {
+                bool unread =
+                    !notification.IsRead;
+
+                string iconClass =
+                    Model.GetNotificationIconClass(
+                        notification.NotificationType);
+
+                <article class="notification-card @(unread ? "notification-unread" : "")"
+                         data-notification-id="@notification.NotificationID"
+                         data-unread="@unread">
+
+                    <div class="notification-icon @iconClass">
+
+                        @if (iconClass == "icon-rejected")
+                        {
+                            <svg viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round">
+
+                                <circle cx="12"
+                                        cy="12"
+                                        r="10" />
+
+                                <line x1="15"
+                                      y1="9"
+                                      x2="9"
+                                      y2="15" />
+
+                                <line x1="9"
+                                      y1="9"
+                                      x2="15"
+                                      y2="15" />
+
+                            </svg>
+                        }
+                        else if (iconClass == "icon-approved")
+                        {
+                            <svg viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round">
+
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+
+                                <polyline points="22 4 12 14.01 9 11.01" />
+
+                            </svg>
+                        }
+                        else
+                        {
+                            <svg viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round">
+
+                                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+
+                            </svg>
+                        }
+
+                    </div>
+
+
+                    <div class="notification-content">
+
+                        <div class="notification-header-row">
+
+                            <h3 class="notification-title">
+                                @notification.Title
+                            </h3>
+
+                            <div class="notification-meta">
+
+                                <span class="notification-time">
+                                    @Model.FormatNotificationTime(
+                                        notification.CreatedAt)
+                                </span>
+
+                                @if (unread)
+                                {
+                                    <span class="unread-dot"
+                                          aria-label="Unread">
+                                    </span>
+                                }
+
+                            </div>
+
+                        </div>
+
+
+                        <p class="notification-desc">
+                            @notification.Message
+                        </p>
+
+                    </div>
+
+                </article>
+            }
+        }
+
+    </div>
+
+</div>

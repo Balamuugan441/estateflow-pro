@@ -1,0 +1,373 @@
+﻿@page
+@model Brokerage.Web.Areas.Admin.Pages.Users.IndexModel
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<link rel="stylesheet"
+      href="~/css/admin/users.css"
+      asp-append-version="true" />
+
+<div class="user-management-container">
+
+    <form method="get"
+          id="userFilterForm">
+
+        <div class="page-header">
+
+            <div class="header-text">
+
+                <h1 class="page-title">
+                    User Management
+                </h1>
+
+                <p class="page-subtitle">
+                    Monitor and manage access across the brokerage ecosystem.
+                </p>
+
+            </div>
+
+            <div class="search-box">
+
+                <img src="~/images/icons/search.png"
+                     alt="Search"
+                     class="ui-icon search-icon" />
+
+                <input asp-for="Search"
+                       id="userSearch"
+                       type="text"
+                       placeholder="Search by user name..."
+                       class="search-input"
+                       autocomplete="off" />
+
+            </div>
+
+        </div>
+
+        <div class="filter-card">
+
+            <div class="filter-group">
+
+                <label class="filter-label">
+                    ROLE TYPE
+                </label>
+
+                <div class="select-wrapper">
+
+                    <select asp-for="RoleName"
+                            class="filter-select">
+
+                        <option value="">
+                            All Roles
+                        </option>
+
+                        <option value="Buyer">
+                            Buyer
+                        </option>
+
+                        <option value="Seller">
+                            Seller
+                        </option>
+
+                        <option value="Admin">
+                            Admin
+                        </option>
+
+                    </select>
+
+                    <img src="~/images/icons/dropdown.png"
+                         alt="Select"
+                         class="ui-icon select-chevron" />
+
+                </div>
+
+            </div>
+
+            <div class="filter-group">
+
+                <label class="filter-label">
+                    STATUS
+                </label>
+
+                <div class="select-wrapper">
+
+                    <select asp-for="IsActive"
+                            class="filter-select">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="true">
+                            Active
+                        </option>
+
+                        <option value="false">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                    <img src="~/images/icons/dropdown.png"
+                         alt="Select"
+                         class="ui-icon select-chevron" />
+
+                </div>
+
+            </div>
+
+            <div class="filter-group date-range-group">
+
+                <label class="filter-label">
+                    REGISTRATION RANGE
+                </label>
+
+                <div class="date-inputs-wrapper">
+
+                    <input asp-for="FromDate"
+                           type="date"
+                           class="date-input" />
+
+                    <span class="date-separator">
+                        —
+                    </span>
+
+                    <input asp-for="ToDate"
+                           type="date"
+                           class="date-input" />
+
+                </div>
+
+            </div>
+
+            <div class="filter-actions">
+
+                <button type="submit"
+                        class="btn-apply">
+                    Apply Filters
+                </button>
+
+                <a asp-page="./Index"
+                   class="btn-reset">
+                    Reset All
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+    <div class="table-card">
+
+        <table class="users-table">
+
+            <thead>
+
+                <tr>
+                    <th>User profile</th>
+                    <th>Email</th>
+                    <th>Phone number</th>
+                    <th>Role</th>
+                    <th>Registered on</th>
+                    <th>No of listings</th>
+                    <th>Status</th>
+                    <th class="action-col"></th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @if (Model.Users.Count == 0)
+                {
+                    <tr>
+
+                        <td colspan="8"
+                            class="empty-state">
+
+                            No users found.
+
+                        </td>
+
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var user in Model.Users)
+                    {
+                        string roleClass =
+                            user.RoleName switch
+                            {
+                                "Buyer" => "role-buyer",
+                                "Seller" => "role-seller",
+                                "Admin" => "role-admin",
+                                _ => string.Empty
+                            };
+
+                        string statusClass =
+                            user.IsActive
+                                ? "status-active"
+                                : "status-suspended";
+
+                        string statusText =
+                            user.IsActive
+                                ? "Active"
+                                : "Inactive";
+
+                        <tr>
+
+                            <td>
+
+                                <div class="user-profile">
+
+                                    <div class="user-info">
+
+                                        <span class="user-name">
+                                            @user.FullName
+                                        </span>
+
+                                        <span class="user-id">
+                                            ID: @user.UserID
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td class="text-secondary">
+                                @user.Email
+                            </td>
+
+                            <td class="text-secondary">
+                                @user.MobileNumber
+                            </td>
+
+                            <td>
+
+                                <span class="role-pill @roleClass">
+                                    @user.RoleName.ToUpperInvariant()
+                                </span>
+
+                            </td>
+
+                            <td class="text-secondary">
+                                @user.CreatedAt.ToString("dd.MM.yyyy")
+                            </td>
+
+                            <td class="text-secondary">
+                                @user.ListingCount
+                            </td>
+
+                            <td>
+
+                                <span class="status-badge @statusClass">
+
+                                    <span class="status-dot"></span>
+
+                                    @statusText
+
+                                </span>
+
+                            </td>
+
+                            <td class="action-col">
+
+                                <a href="#"
+                                   class="row-link">
+
+                                    <img src="~/images/icons/chevron-rightt.png"
+                                         alt="View"
+                                         class="ui-icon arrow-icon" />
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    @if (Model.TotalPages > 0)
+    {
+        <div class="pagination-wrapper">
+
+            <div class="pagination">
+
+                @if (Model.HasPreviousPage)
+                {
+                    <a asp-page="./Index"
+                       asp-route-Search="@Model.Search"
+                       asp-route-RoleName="@Model.RoleName"
+                       asp-route-IsActive="@Model.IsActive"
+                       asp-route-FromDate="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                       asp-route-ToDate="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                       asp-route-PageNumber="@(Model.PageNumber - 1)"
+                       class="page-btn">
+
+                        <span>‹</span>
+
+                    </a>
+                }
+
+                @for (int pageNumber = 1;
+                      pageNumber <= Model.TotalPages;
+                      pageNumber++)
+                {
+                    string activeClass =
+                        pageNumber == Model.PageNumber
+                            ? "active"
+                            : string.Empty;
+
+                    <a asp-page="./Index"
+                       asp-route-Search="@Model.Search"
+                       asp-route-RoleName="@Model.RoleName"
+                       asp-route-IsActive="@Model.IsActive"
+                       asp-route-FromDate="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                       asp-route-ToDate="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                       asp-route-PageNumber="@pageNumber"
+                       class="page-btn @activeClass">
+
+                        @pageNumber
+
+                    </a>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <a asp-page="./Index"
+                       asp-route-Search="@Model.Search"
+                       asp-route-RoleName="@Model.RoleName"
+                       asp-route-IsActive="@Model.IsActive"
+                       asp-route-FromDate="@(Model.FromDate?.ToString("yyyy-MM-dd"))"
+                       asp-route-ToDate="@(Model.ToDate?.ToString("yyyy-MM-dd"))"
+                       asp-route-PageNumber="@(Model.PageNumber + 1)"
+                       class="page-btn">
+
+                        <span>›</span>
+
+                    </a>
+                }
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@section Scripts
+{
+    <script src="~/js/Admin/users.js"
+            asp-append-version="true">
+    </script>
+}

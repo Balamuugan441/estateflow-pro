@@ -1,0 +1,229 @@
+﻿@page
+@model Brokerage.Web.Areas.Admin.Pages.Transactions.IndexModel
+
+@{
+    Layout = "/Areas/Admin/Pages/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Transactions";
+}
+
+@section Styles {
+    <link rel="stylesheet"
+          href="~/css/admin/transactions.css"
+          asp-append-version="true" />
+}
+
+<div class="transactions-container">
+
+    <!-- FILTER CARD -->
+    <form method="get" class="transactions-filter-card">
+        <div class="filter-group-wrapper">
+
+            <div class="filter-group">
+                <label class="filter-label">Completion Date Range</label>
+                <div class="date-range-inputs">
+                    <input type="date"
+                           name="fromDate"
+                           value="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                           class="form-control date-input" />
+                    <span class="range-separator">to</span>
+                    <input type="date"
+                           name="toDate"
+                           value="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                           class="form-control date-input" />
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Price Range (USD)</label>
+                <div class="price-range-inputs">
+                    <input type="number"
+                           name="minPrice"
+                           value="@Model.MinPrice"
+                           min="0"
+                           step="0.01"
+                           placeholder="Min"
+                           class="form-control" />
+                    <input type="number"
+                           name="maxPrice"
+                           value="@Model.MaxPrice"
+                           min="0"
+                           step="0.01"
+                           placeholder="Max"
+                           class="form-control" />
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter">
+                    Apply Filters
+                </button>
+                <a href="@Url.Page("/Transactions/Index", new { area = "Admin" })" class="btn-reset">
+                    Reset
+                </a>
+            </div>
+
+        </div>
+    </form>
+
+    <!-- TRANSACTIONS TABLE CARD -->
+    <section class="transactions-table-card">
+
+        <div class="card-header">
+            <h2 class="card-title">Completed Sales</h2>
+        </div>
+
+        <div class="table-responsive">
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Property Title</th>
+                        <th>Buyer Name</th>
+                        <th>Seller Name</th>
+                        <th>Transaction Amount</th>
+                        <th>Completion Date</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.Transactions.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="no-records-cell text-center">
+                                No completed transactions found.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var transaction in Model.Transactions)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="property-cell">
+                                        @if (!string.IsNullOrWhiteSpace(transaction.CoverImagePath))
+                                        {
+                                            <img src="@Model.BuildPropertyImageUrl(transaction.CoverImagePath)"
+                                                 alt="@transaction.PropertyTitle"
+                                                 class="property-thumbnail" />
+                                        }
+                                        else
+                                        {
+                                            <div class="property-thumbnail placeholder-thumb"></div>
+                                        }
+
+                                        <div class="property-info">
+                                            <span class="property-title">@transaction.PropertyTitle</span>
+                                            <span class="property-location">@transaction.PropertyLocation</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span class="person-name">@transaction.BuyerName</span>
+                                </td>
+
+                                <td>
+                                    <span class="person-name">@transaction.SellerName</span>
+                                </td>
+
+                                <td>
+                                    <span class="amount">
+                                        @transaction.TransactionAmount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="date-text">
+                                        @(transaction.CompletionDate.ToLocalTime().ToString("MMM dd, yyyy, hh:mm tt"))
+                                    </span>
+                                </td>
+
+                                <td class="text-center">
+                                    <span class="status-badge status-completed">Completed</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="card-footer">
+            <span class="pagination-info">
+                @if (Model.TotalRecords == 0)
+                {
+                    <text>Showing 0 of 0 transactions</text>
+                }
+                else
+                {
+                    int start = ((Model.PageNumber - 1) * Model.PageSize) + 1;
+                    int end = Math.Min(Model.PageNumber * Model.PageSize, Model.TotalRecords);
+                    <text>Showing @start-@end of @Model.TotalRecords transactions</text>
+                }
+            </span>
+
+            @if (Model.TotalPages > 0)
+            {
+                <div class="pagination-controls">
+
+                    <!-- Previous Page Button -->
+                    <a class="pagination-btn @(Model.PageNumber <= 1 ? "disabled" : "")"
+                       href="@(Model.PageNumber <= 1 ? "#" : Url.Page("/Transactions/Index", new {
+                           area = "Admin",
+                           pageNumber = Model.PageNumber - 1,
+                           fromDate = Model.FromDate?.ToString("yyyy-MM-dd"),
+                           toDate = Model.ToDate?.ToString("yyyy-MM-dd"),
+                           minPrice = Model.MinPrice,
+                           maxPrice = Model.MaxPrice
+                       }))"
+                       aria-label="Previous Page">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </a>
+
+                    <!-- Page Number Buttons -->
+                    @for (int pageNum = 1; pageNum <= Model.TotalPages; pageNum++)
+                    {
+                        <a class="pagination-btn @(pageNum == Model.PageNumber ? "active" : "")"
+                           href="@Url.Page("/Transactions/Index", new {
+                               area = "Admin",
+                               pageNumber = pageNum,
+                               fromDate = Model.FromDate?.ToString("yyyy-MM-dd"),
+                               toDate = Model.ToDate?.ToString("yyyy-MM-dd"),
+                               minPrice = Model.MinPrice,
+                               maxPrice = Model.MaxPrice
+                           })">
+                            @pageNum
+                        </a>
+                    }
+
+                    <!-- Next Page Button -->
+                    <a class="pagination-btn @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")"
+                       href="@(Model.PageNumber >= Model.TotalPages ? "#" : Url.Page("/Transactions/Index", new {
+                           area = "Admin",
+                           pageNumber = Model.PageNumber + 1,
+                           fromDate = Model.FromDate?.ToString("yyyy-MM-dd"),
+                           toDate = Model.ToDate?.ToString("yyyy-MM-dd"),
+                           minPrice = Model.MinPrice,
+                           maxPrice = Model.MaxPrice
+                       }))"
+                       aria-label="Next Page">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </a>
+
+                </div>
+            }
+        </div>
+
+    </section>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/admin/transactions.js" asp-append-version="true"></script>
+}

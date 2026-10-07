@@ -1,0 +1,116 @@
+﻿@page
+@model Brokerage.Web.Areas.Admin.Pages.PendingApprovals.IndexModel
+
+@{
+    ViewData["Title"] = "Pending Approvals";
+}
+
+@section Styles
+{
+    <link rel="stylesheet"
+          href="~/css/admin/pending-approvals.css"
+          asp-append-version="true" />
+}
+
+<div class="pending-approvals-container">
+
+    <div class="page-header">
+
+        <div class="header-text">
+
+            <h1 class="page-title">
+                Pending Approvals
+            </h1>
+
+            <p class="page-subtitle">
+                @Model.TotalPending properties awaiting verification and audit.
+            </p>
+
+        </div>
+
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="approval-message approval-success">
+            @successMessage
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="approval-message approval-error">
+            @errorMessage
+        </div>
+    }
+
+    @if (Model.TotalPending == 0)
+    {
+        <div class="empty-approvals">
+            No properties are waiting for approval.
+        </div>
+    }
+    else
+    {
+        <div id="approvalsGrid"
+             class="approvals-grid"
+             data-total-pages="@Model.TotalPages"
+             data-current-page="1"
+             data-total-records="@Model.TotalRecords">
+
+            @await Html.PartialAsync(
+                "_PendingApprovalCards",
+                Model.Properties,
+                new ViewDataDictionary(
+                    ViewData)
+                {
+                    ["ApiBaseUrl"] = Model.ApiBaseUrl
+                })
+            
+        </div>
+
+        <div class="page-footer-row">
+
+            <div class="load-more-container">
+
+                <span id="countIndicator"
+                      class="count-indicator">
+
+                    SHOWING
+                    @Model.Properties.Count
+                    OF
+                    @Model.TotalPending
+                    PENDING LISTINGS
+
+                </span>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <button type="button"
+                            id="loadMoreButton"
+                            class="btn-load-more">
+
+                        <span>
+                            Load More Listings
+                        </span>
+
+                        <img src="~/images/icons/chevron-down.png"
+                             alt="More"
+                             class="ui-icon chevron-icon" />
+
+                    </button>
+                }
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@section Scripts
+{
+    <script src="~/js/Admin/pending-approvals.js"
+            asp-append-version="true">
+    </script>
+}

@@ -1147,15 +1147,10 @@ public class PropertyService
                 });
             }
         }
-
-
-        // =========================================
         // Nothing new to save
         //
         // Existing DB media already satisfies
         // the property requirements.
-        // =========================================
-
         if (mediaList.Count == 0)
         {
             return true;

@@ -503,3 +503,104 @@ body {
     color: var(--text-muted);
     font-size: 13.5px;
 }
+.user-row-toggle {
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+    .user-row-toggle .arrow-icon {
+        transition: transform 0.2s ease;
+    }
+
+    .user-row-toggle.expanded .arrow-icon {
+        transform: rotate(90deg);
+    }
+
+.user-details-row td {
+    padding: 0 20px 16px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+}
+
+.user-action-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 18px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+}
+
+.user-action-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.user-action-title {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.user-action-message {
+    color: var(--text-secondary);
+    font-size: 12.5px;
+}
+
+.user-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.user-action-btn {
+    min-width: 68px;
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.user-action-yes {
+    border: 1px solid var(--primary-blue);
+    background-color: var(--primary-blue);
+    color: #ffffff;
+}
+
+    .user-action-yes:hover {
+        background-color: var(--primary-blue-hover);
+        border-color: var(--primary-blue-hover);
+    }
+
+.user-action-no {
+    border: 1px solid var(--border-light);
+    background-color: transparent;
+    color: var(--text-secondary);
+}
+
+    .user-action-no:hover {
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
+    }
+
+.user-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.user-role-toggle {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+    .user-role-toggle:hover {
+        filter: brightness(1.1);
+    }

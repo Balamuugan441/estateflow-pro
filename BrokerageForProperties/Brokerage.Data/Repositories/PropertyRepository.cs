@@ -5,6 +5,7 @@ using Brokerage.Models.DTOs.Home;
 using Brokerage.Models.DTOs.Properties;
 using Brokerage.Models.Entities;
 using Dapper;
+using System.Data;
 
 namespace Brokerage.Data.Repositories;
 
@@ -16,763 +17,359 @@ public class PropertyRepository : IPropertyRepository
     {
         _connectionFactory = connectionFactory;
     }
-    //Post Property in Database
-    // Gets Property Details of Step 1 and Step 2 from the database Creates a Property as a draft stores it in the database and retiurns the propertyID
+
+    // Creates a new property using the property details collected from the seller.
     public async Task<int> CreatePropertyAsync(Property property)
     {
-        const string query = """
-        INSERT INTO Properties
-        (
-            SellerID,
-            PropertyTitle,
-            PropertyType,
-            ListingType,
-            PropertyStatus,
-            ListingStatus,
-            LocationAddress,
-            Country,
-            State,
-            City,
-            ZipCode,
-            Price,
-            SecurityDeposit,
-            Area,
-            AreaUnit,
-            Bedrooms,
-            Bathrooms,
-            Balconies,
-            Floor,
-            ParkingSpaces,
-            YearBuilt,
-            PropertyAgeYears,
-            PossessionDate,
-            FurnishingType,
-            FacingDirection,
-            PreferredTenants,
-            TenantFoodPreference,
-            Description
-        )
-        OUTPUT INSERTED.PropertyID
-        VALUES
-        (
-            @SellerID,
-            @PropertyTitle,
-            @PropertyType,
-            @ListingType,
-            @PropertyStatus,
-            @ListingStatus,
-            @LocationAddress,
-            @Country,
-            @State,
-            @City,
-            @ZipCode,
-            @Price,
-            @SecurityDeposit,
-            @Area,
-            @AreaUnit,
-            @Bedrooms,
-            @Bathrooms,
-            @Balconies,
-            @Floor,
-            @ParkingSpaces,
-            @YearBuilt,
-            @PropertyAgeYears,
-            @PossessionDate,
-            @FurnishingType,
-            @FacingDirection,
-            @PreferredTenants,
-            @TenantFoodPreference,
-            @Description
-        );
-        """;
-
-        using var connection =
-            _connectionFactory.CreateConnection();
+        using var connection = _connectionFactory.CreateConnection();
 
         return await connection.ExecuteScalarAsync<int>(
-            query,
-            property);
-    }
-    public async Task<Property?> GetPropertyByIdAsync(
-    int propertyId)
+    "dbo.usp_Property_Create",
+    new
     {
-        const string query = """
-        SELECT
-            PropertyID,
-            PropertyGUID,
-            SellerID,
-            PropertyTitle,
-            PropertyType,
-            ListingType,
-            PropertyStatus,
-            ListingStatus,
-            LocationAddress,
-            Country,
-            State,
-            City,
-            ZipCode,
-            Price,
-            SecurityDeposit,
-            Area,
-            AreaUnit,
-            Bedrooms,
-            Bathrooms,
-            Balconies,
-            Floor,
-            ParkingSpaces,
-            YearBuilt,
-            PropertyAgeYears,
-            PossessionDate,
-            FurnishingType,
-            FacingDirection,
-            PreferredTenants,
-            TenantFoodPreference,
-            Description,
-            CreatedAt,
-            UpdatedAt
-        FROM Properties
-        WHERE PropertyID = @PropertyID;
-        """;
+        property.SellerID,
+        property.PropertyTitle,
+        property.PropertyType,
+        property.ListingType,
+        property.PropertyStatus,
+        property.ListingStatus,
+        property.LocationAddress,
+        property.Country,
+        property.State,
+        property.City,
+        property.ZipCode,
+        property.Price,
+        property.SecurityDeposit,
+        property.Area,
+        property.AreaUnit,
+        property.Bedrooms,
+        property.Bathrooms,
+        property.Balconies,
+        property.Floor,
+        property.ParkingSpaces,
+        property.YearBuilt,
+        property.PropertyAgeYears,
+        property.PossessionDate,
+        property.FurnishingType,
+        property.FacingDirection,
+        property.PreferredTenants,
+        property.TenantFoodPreference,
+        property.Description
+    },
+    commandType: CommandType.StoredProcedure);
+    }
 
-        using var connection =
-            _connectionFactory.CreateConnection();
+    // Retrieves a property by its database PropertyID.
+    public async Task<Property?> GetPropertyByIdAsync(int propertyId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
 
         return await connection.QuerySingleOrDefaultAsync<Property>(
-            query,
-            new { PropertyID = propertyId });
+            "dbo.usp_Property_Get",
+            new
+            {
+                PropertyID = propertyId
+            },
+            commandType: CommandType.StoredProcedure);
     }
-    //Returns The Property Details Whose ID matches the Supplied ID
-    public async Task<Property?> GetPropertyByGuidAsync(
-    Guid propertyGuid)
+
+    // Retrieves a property by its public PropertyGUID.
+    public async Task<Property?> GetPropertyByGuidAsync(Guid propertyGuid)
     {
-        const string query = """
-        SELECT
-            PropertyID,
-            PropertyGUID,
-            SellerID,
-            PropertyTitle,
-            PropertyType,
-            ListingType,
-            PropertyStatus,
-            ListingStatus,
-            LocationAddress,
-            Country,
-            State,
-            City,
-            ZipCode,
-            Price,
-            SecurityDeposit,
-            Area,
-            AreaUnit,
-            Bedrooms,
-            Bathrooms,
-            Balconies,
-            Floor,
-            ParkingSpaces,
-            YearBuilt,
-            PropertyAgeYears,
-            PossessionDate,
-            FurnishingType,
-            FacingDirection,
-            PreferredTenants,
-            TenantFoodPreference,
-            Description,
-            CreatedAt,
-            UpdatedAt
-        FROM Properties
-        WHERE PropertyGUID = @PropertyGUID;
-        """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        return await connection
-            .QuerySingleOrDefaultAsync<Property>(
-                query,
-                new
-                {
-                    PropertyGUID = propertyGuid
-                });
+        return await connection.QuerySingleOrDefaultAsync<Property>(
+            "dbo.usp_Property_Get",
+            new
+            {
+                PropertyGUID = propertyGuid
+            },
+            commandType: CommandType.StoredProcedure);
     }
-    //Returns all the Property Details of a Particualr seller
-    public async Task<IEnumerable<Property>> GetPropertiesBySellerAsync(
-    int sellerId)
-    {
-        const string query = """
-        SELECT
-            PropertyID,
-            PropertyGUID,
-            SellerID,
-            PropertyTitle,
-            PropertyType,
-            ListingType,
-            PropertyStatus,
-            ListingStatus,
-            LocationAddress,
-            Country,
-            State,
-            City,
-            ZipCode,
-            Price,
-            SecurityDeposit,
-            Area,
-            AreaUnit,
-            Bedrooms,
-            Bathrooms,
-            Balconies,
-            Floor,
-            ParkingSpaces,
-            YearBuilt,
-            PropertyAgeYears,
-            PossessionDate,
-            FurnishingType,
-            FacingDirection,
-            PreferredTenants,
-            TenantFoodPreference,
-            Description,
-            CreatedAt,
-            UpdatedAt
-        FROM Properties
-        WHERE SellerID = @SellerID
-        ORDER BY CreatedAt DESC;
-        """;
 
-        using var connection =
-            _connectionFactory.CreateConnection();
+    // Retrieves all properties created by a particular seller.
+    public async Task<IEnumerable<Property>> GetPropertiesBySellerAsync(int sellerId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<Property>(
-            query,
-            new { SellerID = sellerId });
+            "dbo.usp_Property_GetBySeller",
+            new
+            {
+                SellerID = sellerId
+            },
+            commandType: CommandType.StoredProcedure);
     }
-    //Used To Update the Property Details Which is already Created
+
+    // Updates the editable property details and returns whether the database update succeeded.
     public async Task<bool> UpdatePropertyAsync(Property property)
     {
-        const string query = """
-        UPDATE Properties
-        SET
-            PropertyTitle = @PropertyTitle,
-            PropertyType = @PropertyType,
-            ListingType = @ListingType,
-            PropertyStatus = @PropertyStatus,
-            LocationAddress = @LocationAddress,
-            Country = @Country,
-            State = @State,
-            City = @City,
-            ZipCode = @ZipCode,
-            Price = @Price,
-            SecurityDeposit = @SecurityDeposit,
-            Area = @Area,
-            AreaUnit = @AreaUnit,
-            Bedrooms = @Bedrooms,
-            Bathrooms = @Bathrooms,
-            Balconies = @Balconies,
-            Floor = @Floor,
-            ParkingSpaces = @ParkingSpaces,
-            YearBuilt = @YearBuilt,
-            PropertyAgeYears = @PropertyAgeYears,
-            PossessionDate = @PossessionDate,
-            FurnishingType = @FurnishingType,
-            FacingDirection = @FacingDirection,
-            PreferredTenants = @PreferredTenants,
-            TenantFoodPreference = @TenantFoodPreference,
-            Description = @Description,
-            UpdatedAt = GETUTCDATE()
-        WHERE PropertyID = @PropertyID;
-        """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        int rowsAffected =
-            await connection.ExecuteAsync(
-                query,
-                property);
+        int rowsAffected = await connection.ExecuteScalarAsync<int>(
+            "dbo.usp_Property_Update",
+            new
+            {
+                property.PropertyID,
+                property.PropertyTitle,
+                property.PropertyType,
+                property.ListingType,
+                property.PropertyStatus,
+                property.LocationAddress,
+                property.Country,
+                property.State,
+                property.City,
+                property.ZipCode,
+                property.Price,
+                property.SecurityDeposit,
+                property.Area,
+                property.AreaUnit,
+                property.Bedrooms,
+                property.Bathrooms,
+                property.Balconies,
+                property.Floor,
+                property.ParkingSpaces,
+                property.YearBuilt,
+                property.PropertyAgeYears,
+                property.PossessionDate,
+                property.FurnishingType,
+                property.FacingDirection,
+                property.PreferredTenants,
+                property.TenantFoodPreference,
+                property.Description
+            },
+            commandType: CommandType.StoredProcedure);
 
         return rowsAffected > 0;
     }
-    // Updates The Property Listing Status From Draft->Pending->Approved/Rejected->Completed/Sold
+
+    // Updates a property's listing status and returns whether the database changed the property.
     public async Task<bool> UpdateListingStatusAsync(
-    int propertyId,
-    string listingStatus)
+        int propertyId,
+        string listingStatus)
     {
-        const string query = """
-        UPDATE Properties
-        SET
-            ListingStatus = @ListingStatus,
-            UpdatedAt = GETUTCDATE()
-        WHERE PropertyID = @PropertyID;
-        """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        int rowsAffected =
-            await connection.ExecuteAsync(
-                query,
-                new
-                {
-                    PropertyID = propertyId,
-                    ListingStatus = listingStatus
-                });
+        int rowsAffected = await connection.ExecuteScalarAsync<int>(
+            "dbo.usp_Property_UpdateListingStatus",
+            new
+            {
+                PropertyID = propertyId,
+                ListingStatus = listingStatus,
+                ExpectedCurrentStatus = (string?)null
+            },
+            commandType: CommandType.StoredProcedure);
 
         return rowsAffected > 0;
     }
+
+    // Retrieves all available amenities or the amenities assigned to a specific property.
     public async Task<IEnumerable<Amenity>> GetAllAmenitiesAsync()
     {
-        const string query = """
-        SELECT
-            AmenityID,
-            Category,
-            AmenityName,
-            CreatedAt
-        FROM Amenities
-        ORDER BY Category, AmenityName;
-        """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        return await connection.QueryAsync<Amenity>(query);
-    }
-    //Used to save the Amenities details to database
-    //Inserts In the Amenities Table The seller ID and the Amenity Id he selected
-    public async Task<bool> SavePropertyAmenitiesAsync(
-    int propertyId,
-    IEnumerable<int> amenityIds)
-    {
-        using var connection =
-            _connectionFactory.CreateConnection();
-        connection.Open();
-
-        using var transaction =
-            connection.BeginTransaction();
-
-        try
-        {
-            const string deleteQuery = """
-            DELETE FROM PropertyAmenities
-            WHERE PropertyID = @PropertyID;
-            """;
-
-            await connection.ExecuteAsync(
-                deleteQuery,
-                new { PropertyID = propertyId },
-                transaction);
-
-
-            const string insertQuery = """
-            INSERT INTO PropertyAmenities
-            (
-                PropertyID,
-                AmenityID
-            )
-            VALUES
-            (
-                @PropertyID,
-                @AmenityID
-            );
-            """;
-
-            foreach (int amenityId in amenityIds)
+        return await connection.QueryAsync<Amenity>(
+            "dbo.usp_Amenity_Get",
+            new
             {
-                await connection.ExecuteAsync(
-                    insertQuery,
-                    new
-                    {
-                        PropertyID = propertyId,
-                        AmenityID = amenityId
-                    },
-                    transaction);
-            }
-
-            transaction.Commit();
-
-            return true;
-        }
-        catch
-        {
-            transaction.Rollback();
-
-            throw;
-        }
+                PropertyID = (int?)null
+            },
+            commandType: CommandType.StoredProcedure);
     }
-    //Stores the Property Media Information into the database Such as Its file path ,Id, Type, Name, GUID etc..
-    public async Task<bool> SavePropertyMediaAsync(
-    IEnumerable<PropertyMedia> media)
-    {
-        const string query = """
-        INSERT INTO PropertyMedia
-        (
-            PropertyID,
-            MediaType,
-            FileName,
-            FilePath,
-            ContentType,
-            FileSizeBytes,
-            DisplayOrder
-        )
-        VALUES
-        (
-            @PropertyID,
-            @MediaType,
-            @FileName,
-            @FilePath,
-            @ContentType,
-            @FileSizeBytes,
-            @DisplayOrder
-        );
-        """;
 
-        using var connection =
-            _connectionFactory.CreateConnection();
+    // Replaces the complete amenity selection for a property inside one database transaction.
+    public async Task<bool> SavePropertyAmenitiesAsync(
+        int propertyId,
+        IEnumerable<int> amenityIds)
+    {
+        DataTable amenityTable = CreateIntListTable(amenityIds);
+
+        using var connection = _connectionFactory.CreateConnection();
+
+        await connection.ExecuteAsync(
+            "dbo.usp_PropertyAmenities_Replace",
+            new
+            {
+                PropertyID = propertyId,
+                AmenityIDs = amenityTable.AsTableValuedParameter(
+                    "dbo.IntListTableType")
+            },
+            commandType: CommandType.StoredProcedure);
+
+        return true;
+    }
+
+    // Inserts each uploaded media record using the common property media insert procedure.
+    public async Task<bool> SavePropertyMediaAsync(
+        IEnumerable<PropertyMedia> media)
+    {
+        using var connection = _connectionFactory.CreateConnection();
 
         foreach (PropertyMedia item in media)
         {
             await connection.ExecuteAsync(
-                query,
-                item);
+                "dbo.usp_PropertyMedia_Insert",
+                new
+                {
+                    item.PropertyID,
+                    item.MediaType,
+                    item.FileName,
+                    item.FilePath,
+                    item.ContentType,
+                    item.FileSizeBytes,
+                    item.DisplayOrder
+                },
+                commandType: CommandType.StoredProcedure);
         }
 
         return true;
     }
+
+    // Updates an existing cover photo while forcing its display order to one.
     public async Task<bool> UpdatePropertyCoverMediaAsync(
-    PropertyMedia media)
+        PropertyMedia media)
     {
-        const string query = """
-        UPDATE PropertyMedia
-        SET
-            FileName = @FileName,
-            FilePath = @FilePath,
-            ContentType = @ContentType,
-            FileSizeBytes = @FileSizeBytes,
-            DisplayOrder = 1
-        WHERE
-            MediaID = @MediaID
-            AND PropertyID = @PropertyID
-            AND MediaType = 'CoverPhoto';
-        """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        int rowsAffected =
-            await connection.ExecuteAsync(
-                query,
-                media);
+        int rowsAffected = await connection.ExecuteAsync(
+            "dbo.usp_PropertyMedia_Update",
+            new
+            {
+                media.MediaID,
+                media.PropertyID,
+                MediaType = "CoverPhoto",
+                media.FileName,
+                media.FilePath,
+                media.ContentType,
+                media.FileSizeBytes
+            },
+            commandType: CommandType.StoredProcedure);
 
         return rowsAffected > 0;
     }
+
+    // Updates an existing gallery, video, floor plan, or document without changing its display order.
+
     public async Task<bool> UpdatePropertyMediaAsync(
-    PropertyMedia media)
+        PropertyMedia media)
     {
-        const string query = """
-        UPDATE PropertyMedia
-        SET
-            FileName = @FileName,
-            FilePath = @FilePath,
-            ContentType = @ContentType,
-            FileSizeBytes = @FileSizeBytes
-        WHERE
-            MediaID = @MediaID
-            AND PropertyID = @PropertyID
-            AND MediaType = @MediaType;
-        """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        int rowsAffected =
-            await connection.ExecuteAsync(
-                query,
-                media);
+        int rowsAffected = await connection.ExecuteAsync(
+            "dbo.usp_PropertyMedia_Update",
+            new
+            {
+                media.MediaID,
+                media.PropertyID,
+                media.MediaType,
+                media.FileName,
+                media.FilePath,
+                media.ContentType,
+                media.FileSizeBytes
+            },
+            commandType: CommandType.StoredProcedure);
 
         return rowsAffected > 0;
     }
+
+    // Deletes an existing non-cover media record and returns whether SQL Server removed the row.
     public async Task<bool> DeletePropertyMediaAsync(
-    int propertyId,
-    int mediaId)
+        int propertyId,
+        int mediaId)
     {
-        const string query = """
-        DELETE FROM PropertyMedia
-        WHERE
-            PropertyID = @PropertyID
-            AND MediaID = @MediaID
-            AND MediaType <> 'CoverPhoto';
-        """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        int rowsAffected =
-            await connection.ExecuteAsync(
-                query,
-                new
-                {
-                    PropertyID = propertyId,
-                    MediaID = mediaId
-                });
+        int rowsAffected = await connection.ExecuteScalarAsync<int>(
+            "dbo.usp_PropertyMedia_Delete",
+            new
+            {
+                PropertyID = propertyId,
+                MediaID = mediaId
+            },
+            commandType: CommandType.StoredProcedure);
 
         return rowsAffected > 0;
     }
-    // Fetches the media details of the particular Property
-    public async Task<IEnumerable<PropertyMedia>> GetPropertyMediaAsync(
-    int propertyId)
-    {
-        const string query = """
-        SELECT
-            MediaID,
-            PropertyID,
-            MediaType,
-            FileName,
-            FilePath,
-            ContentType,
-            FileSizeBytes,
-            DisplayOrder,
-            CreatedAt
-        FROM PropertyMedia
-        WHERE PropertyID = @PropertyID
-        ORDER BY
-            CASE
-                WHEN MediaType = 'CoverPhoto' THEN 1
-                WHEN MediaType = 'GalleryImage' THEN 2
-                WHEN MediaType = 'Video' THEN 3
-                WHEN MediaType = 'FloorPlan' THEN 4
-                WHEN MediaType = 'Document' THEN 5
-                ELSE 6
-            END,
-            DisplayOrder,
-            MediaID;
-        """;
 
-        using var connection =
-            _connectionFactory.CreateConnection();
+    // Retrieves all media associated with a property using the existing media display ordering.
+    public async Task<IEnumerable<PropertyMedia>> GetPropertyMediaAsync(
+        int propertyId)
+    {
+        using var connection = _connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<PropertyMedia>(
-            query,
+            "dbo.usp_PropertyMedia_Get",
             new
             {
                 PropertyID = propertyId
-            });
+            },
+            commandType: CommandType.StoredProcedure);
     }
+
+    // Retrieves amenities assigned to a particular property.
     public async Task<IEnumerable<Amenity>> GetPropertyAmenitiesAsync(int propertyId)
     {
-        const string query = """
-        SELECT
-            a.AmenityID,
-            a.Category,
-            a.AmenityName,
-            a.CreatedAt
-        FROM PropertyAmenities pa
-        INNER JOIN Amenities a
-            ON pa.AmenityID = a.AmenityID
-        WHERE pa.PropertyID = @PropertyID
-        ORDER BY
-            a.Category,
-            a.AmenityName;
-        """;
-
-        using var connection =
-            _connectionFactory.CreateConnection();
+        using var connection = _connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<Amenity>(
-            query,
+            "dbo.usp_Amenity_Get",
             new
             {
                 PropertyID = propertyId
-            });
-
+            },
+            commandType: CommandType.StoredProcedure);
     }
-    public async Task<AdminPropertyListResponse>
-    GetPropertiesForAdminAsync(
+
+    // Retrieves filtered and paginated property records together with admin property statistics.
+    public async Task<AdminPropertyListResponse> GetPropertiesForAdminAsync(
         AdminPropertyQueryRequest request)
     {
         const int pageSize = 5;
 
-        int pageNumber =
-            request.PageNumber < 1
-                ? 1
-                : request.PageNumber;
+        int pageNumber = request.PageNumber < 1
+            ? 1
+            : request.PageNumber;
 
-        int offset =
-            (pageNumber - 1) * pageSize;
+        string? search = request.Search?.Trim();
 
-        List<string> filters = [];
+        using var connection = _connectionFactory.CreateConnection();
 
-        DynamicParameters parameters =
-            new DynamicParameters();
-
-        string? search =
-            request.Search?.Trim();
-
-        if (!string.IsNullOrWhiteSpace(search))
+        var parameters = new
         {
-            filters.Add(
-                """
-            (
-                p.PropertyTitle LIKE @Search
-                OR p.City LIKE @Search
-                OR p.State LIKE @Search
-                OR p.LocationAddress LIKE @Search
-            )
-            """);
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            Search = string.IsNullOrWhiteSpace(search)
+                ? null
+                : $"%{search}%",
+            ListingStatus = string.IsNullOrWhiteSpace(request.ListingStatus)
+                ? null
+                : request.ListingStatus,
+            PropertyType = string.IsNullOrWhiteSpace(request.PropertyType)
+                ? null
+                : request.PropertyType,
+            MinPrice = request.MinPrice,
+            MaxPrice = request.MaxPrice
+        };
 
-            parameters.Add(
-                "Search",
-                $"%{search}%");
-        }
+        using SqlMapper.GridReader grid = await connection.QueryMultipleAsync(
+            "dbo.usp_Admin_Property_GetPaged",
+            parameters,
+            commandType: CommandType.StoredProcedure);
 
-        if (!string.IsNullOrWhiteSpace(
-            request.ListingStatus))
-        {
-            filters.Add(
-                "p.ListingStatus = @ListingStatus");
-
-            parameters.Add(
-                "ListingStatus",
-                request.ListingStatus);
-        }
-
-        if (!string.IsNullOrWhiteSpace(
-            request.PropertyType))
-        {
-            filters.Add(
-                "p.PropertyType = @PropertyType");
-
-            parameters.Add(
-                "PropertyType",
-                request.PropertyType);
-        }
-
-        if (request.MinPrice.HasValue)
-        {
-            filters.Add(
-                "p.Price >= @MinPrice");
-
-            parameters.Add(
-                "MinPrice",
-                request.MinPrice.Value);
-        }
-
-        if (request.MaxPrice.HasValue)
-        {
-            filters.Add(
-                "p.Price <= @MaxPrice");
-
-            parameters.Add(
-                "MaxPrice",
-                request.MaxPrice.Value);
-        }
-
-        string whereClause =
-            filters.Count > 0
-                ? "WHERE " +
-                  string.Join(
-                      " AND ",
-                      filters)
-                : string.Empty;
-
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        string countSql = $"""
-        SELECT COUNT(1)
-        FROM Properties p
-        {whereClause};
-        """;
-
-        int totalRecords =
-            await connection.ExecuteScalarAsync<int>(
-                countSql,
-                parameters);
-
-        const string statsSql = """
-        SELECT
-            COUNT(
-                CASE
-                    WHEN ListingStatus = 'Approved'
-                    THEN 1
-                END) AS TotalLive,
-
-            COUNT(
-                CASE
-                    WHEN ListingStatus = 'Pending'
-                    THEN 1
-                END) AS TotalPending,
-
-            COUNT(
-                CASE
-                    WHEN ListingStatus = 'Rejected'
-                    THEN 1
-                END) AS TotalRejected
-        FROM Properties;
-        """;
+        int totalRecords = await grid.ReadSingleAsync<int>();
 
         AdminPropertyListResponse stats =
-            await connection.QuerySingleAsync<AdminPropertyListResponse>(
-                statsSql);
-
-        string dataSql = $"""
-    SELECT
-        p.PropertyID,
-        p.PropertyGUID,
-        p.SellerID,
-        u.FullName AS SellerName,
-        p.PropertyTitle,
-        p.PropertyType,
-        p.ListingType,
-        p.ListingStatus,
-        p.LocationAddress,
-        p.City,
-        p.State,
-        p.Price,
-        p.CreatedAt,
-        cover.FilePath AS CoverImagePath
-    FROM Properties p
-    INNER JOIN Users u
-        ON p.SellerID = u.UserID
-    OUTER APPLY
-    (
-        SELECT TOP 1
-            pm.FilePath
-        FROM PropertyMedia pm
-        WHERE pm.PropertyID = p.PropertyID
-          AND pm.MediaType = 'CoverPhoto'
-        ORDER BY
-            CASE
-                WHEN pm.DisplayOrder IS NULL THEN 999
-                ELSE pm.DisplayOrder
-            END,
-            pm.MediaID
-    ) cover
-    {whereClause}
-    ORDER BY
-        p.CreatedAt DESC,
-        p.PropertyID DESC
-    OFFSET @Offset ROWS
-    FETCH NEXT @PageSize ROWS ONLY;
-    """;
-        parameters.Add(
-            "Offset",
-            offset);
-
-        parameters.Add(
-            "PageSize",
-            pageSize);
+            await grid.ReadSingleAsync<AdminPropertyListResponse>();
 
         IEnumerable<AdminPropertyResponse> properties =
-            await connection.QueryAsync<AdminPropertyResponse>(
-                dataSql,
-                parameters);
+            await grid.ReadAsync<AdminPropertyResponse>();
 
-        List<AdminPropertyResponse> propertyList =
-            properties.ToList();
+        List<AdminPropertyResponse> propertyList = properties.ToList();
 
-        int totalPages =
-            totalRecords == 0
-                ? 0
-                : (int)Math.Ceiling(
-                    totalRecords /
-                    (double)pageSize);
+        int totalPages = totalRecords == 0
+            ? 0
+            : (int)Math.Ceiling(
+                totalRecords / (double)pageSize);
 
         return new AdminPropertyListResponse
         {
@@ -786,10 +383,10 @@ public class PropertyRepository : IPropertyRepository
             TotalRejected = stats.TotalRejected
         };
     }
-    // Retrives Property Whose Status is Set to Pending and also also adds pagination only loads 3 property cards per page
-    public async Task<AdminPendingApprovalListResponse>
-    GetPendingApprovalsAsync(
-        int pageNumber)
+
+    // Retrieves pending properties for admin approval using the existing three-card page size.
+    public async Task<AdminPendingApprovalListResponse> GetPendingApprovalsAsync(int pageNumber)
+
     {
         const int pageSize = 3;
 
@@ -798,84 +395,26 @@ public class PropertyRepository : IPropertyRepository
             pageNumber = 1;
         }
 
-        int offset =
-            (pageNumber - 1) * pageSize;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
+        using SqlMapper.GridReader grid = await connection.QueryMultipleAsync(
+            "dbo.usp_Admin_Property_GetPending",
+            new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            },
+            commandType: CommandType.StoredProcedure);
 
-        const string countSql = """
-        SELECT COUNT(1)
-        FROM Properties
-        WHERE ListingStatus = 'Pending';
-        """;
-
-        int totalRecords =
-            await connection.ExecuteScalarAsync<int>(
-                countSql);
-
-        string dataSql = """
-        SELECT
-            p.PropertyID,
-            p.PropertyGUID,
-            p.SellerID,
-            u.FullName AS SellerName,
-            p.PropertyTitle,
-            p.PropertyType,
-            p.ListingType,
-            p.LocationAddress,
-            p.City,
-            p.State,
-            p.Price,
-            COALESCE(
-                p.UpdatedAt,
-                p.CreatedAt
-            ) AS SubmittedAt,
-            cover.FilePath AS CoverImagePath
-        FROM Properties p
-        INNER JOIN Users u
-            ON p.SellerID = u.UserID
-        OUTER APPLY
-        (
-            SELECT TOP 1
-                pm.FilePath
-            FROM PropertyMedia pm
-            WHERE pm.PropertyID = p.PropertyID
-              AND pm.MediaType = 'CoverPhoto'
-            ORDER BY
-                CASE
-                    WHEN pm.DisplayOrder IS NULL
-                    THEN 999
-                    ELSE pm.DisplayOrder
-                END,
-                pm.MediaID
-        ) cover
-        WHERE p.ListingStatus = 'Pending'
-        ORDER BY
-            COALESCE(
-                p.UpdatedAt,
-                p.CreatedAt
-            ) DESC,
-            p.PropertyID DESC
-        OFFSET @Offset ROWS
-        FETCH NEXT @PageSize ROWS ONLY;
-        """;
+        int totalRecords = await grid.ReadSingleAsync<int>();
 
         IEnumerable<AdminPendingApprovalResponse> properties =
-            await connection.QueryAsync<AdminPendingApprovalResponse>(
-                dataSql,
-                new
-                {
-                    Offset = offset,
-                    PageSize = pageSize
-                });
+            await grid.ReadAsync<AdminPendingApprovalResponse>();
 
-        int totalPages =
-            totalRecords == 0
-                ? 0
-                : (int)Math.Ceiling(
-                    totalRecords /
-                    (double)pageSize);
+        int totalPages = totalRecords == 0
+            ? 0
+            : (int)Math.Ceiling(
+                totalRecords / (double)pageSize);
 
         return new AdminPendingApprovalListResponse
         {
@@ -886,179 +425,91 @@ public class PropertyRepository : IPropertyRepository
             TotalPages = totalPages
         };
     }
-    public async Task<bool>
-    UpdatePendingPropertyStatusAsync(
+
+    // Updates a pending property's status only when its current status is still Pending.
+    public async Task<bool> UpdatePendingPropertyStatusAsync(
         int propertyId,
         string listingStatus)
     {
-        const string query = """
-        UPDATE Properties
-        SET
-            ListingStatus = @ListingStatus,
-            UpdatedAt = GETUTCDATE()
-        WHERE PropertyID = @PropertyID
-          AND ListingStatus = 'Pending';
-        """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        int rowsAffected =
-            await connection.ExecuteAsync(
-                query,
-                new
-                {
-                    PropertyID = propertyId,
-                    ListingStatus = listingStatus
-                });
+        int rowsAffected = await connection.ExecuteScalarAsync<int>(
+            "dbo.usp_Property_UpdateListingStatus",
+            new
+            {
+                PropertyID = propertyId,
+                ListingStatus = listingStatus,
+                ExpectedCurrentStatus = "Pending"
+            },
+            commandType: CommandType.StoredProcedure);
 
         return rowsAffected > 0;
     }
+
+    // Retrieves the total number of properties currently approved for public listing.
     public async Task<int> GetApprovedPropertyCountAsync()
     {
-        const string sql = """
-    SELECT COUNT(1)
-    FROM Properties
-    WHERE ListingStatus = 'Approved';
-    """;
+        using var connection = _connectionFactory.CreateConnection();
 
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        return await connection.ExecuteScalarAsync<int>(sql);
+        return await connection.ExecuteScalarAsync<int>(
+            "dbo.usp_Property_GetApprovedCount",
+            commandType: CommandType.StoredProcedure);
     }
-    public async Task<IEnumerable<PublicPropertyResponse>>
-     GetLatestApprovedPropertiesAsync(
-         string? city,
-         int count)
+
+    // Retrieves the latest approved properties optionally filtered by city.
+    public async Task<IEnumerable<PublicPropertyResponse>> GetLatestApprovedPropertiesAsync(
+        string? city,
+        int count)
     {
-        const string sql = """
-    SELECT TOP (@Count)
-        p.PropertyID,
-        p.PropertyTitle,
-        p.PropertyType,
-        p.ListingType,
-        p.City,
-        p.State,
-        p.LocationAddress,
-        p.Price,
-        p.Bedrooms,
-        p.Bathrooms,
-        p.Area,
-        p.AreaUnit,
-        cover.FilePath AS CoverImagePath
-    FROM Properties p
-    OUTER APPLY
-    (
-        SELECT TOP 1
-            pm.FilePath
-        FROM PropertyMedia pm
-        WHERE pm.PropertyID = p.PropertyID
-          AND pm.MediaType = 'CoverPhoto'
-        ORDER BY
-            CASE
-                WHEN pm.DisplayOrder IS NULL THEN 999
-                ELSE pm.DisplayOrder
-            END,
-            pm.MediaID
-    ) cover
-    WHERE p.ListingStatus = 'Approved'
-      AND
-      (
-          @City IS NULL
-          OR p.City =
-              CASE @City
-                  WHEN 'Bengaluru'
-                      THEN 'Bangalore Urban'
-
-                  WHEN 'Mumbai'
-                      THEN 'Mumbai'
-
-                  WHEN 'Kolkata'
-                      THEN 'Kolkata'
-
-                  WHEN 'Chennai'
-                      THEN 'Chennai'
-
-                  WHEN 'Delhi'
-                      THEN 'Delhi'
-
-                  ELSE @City
-              END
-      )
-    ORDER BY
-        p.CreatedAt DESC,
-        p.PropertyID DESC;
-    """;
-
-        using var connection =
-            _connectionFactory.CreateConnection();
+        using var connection = _connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<PublicPropertyResponse>(
-            sql,
+            "dbo.usp_Property_GetLatestApproved",
             new
             {
                 City = string.IsNullOrWhiteSpace(city)
                     ? null
                     : city.Trim(),
-
                 Count = count
-            });
+            },
+            commandType: CommandType.StoredProcedure);
     }
-    /// <summary>
-    /// Retrieves approved properties matching the supplied Buyer search criteria.
-    /// </summary>
-    /// <remarks>
-    /// Data flow:
-    /// PropertyService
-    ///     → IPropertyRepository
-    ///     → SQL Server
-    ///
-    /// The query always restricts results to properties whose ListingStatus is Approved.
-    /// Pagination is applied at the database level with a fixed page size of six.
-    /// </remarks>
-    public async Task<BuyerPropertyListResponse>
-    SearchApprovedPropertiesAsync(
+
+    // Retrieves approved buyer properties using search, location, price, type, bedroom, listing type, sorting, and pagination filters.
+    public async Task<BuyerPropertyListResponse> SearchApprovedPropertiesAsync(
         BuyerPropertySearchRequest request,
         int buyerId,
         CancellationToken cancellationToken = default)
     {
         const int pageSize = 6;
 
-        int pageNumber =
-            request.PageNumber < 1
-                ? 1
-                : request.PageNumber;
+        int pageNumber = request.PageNumber < 1
+            ? 1
+            : request.PageNumber;
 
-        int offset =
-            (pageNumber - 1) * pageSize;
+        int offset = (pageNumber - 1) * pageSize;
 
-        string? search =
-            string.IsNullOrWhiteSpace(request.Search)
-                ? null
-                : request.Search.Trim();
+        string? search = string.IsNullOrWhiteSpace(request.Search)
+            ? null
+            : request.Search.Trim();
 
-        string? locationType =
-            string.IsNullOrWhiteSpace(request.LocationType)
-                ? null
-                : request.LocationType.Trim();
+        string? locationType = string.IsNullOrWhiteSpace(request.LocationType)
+            ? null
+            : request.LocationType.Trim();
 
-        string? locationValue =
-            string.IsNullOrWhiteSpace(request.LocationValue)
-                ? null
-                : request.LocationValue.Trim();
+        string? locationValue = string.IsNullOrWhiteSpace(request.LocationValue)
+            ? null
+            : request.LocationValue.Trim();
 
-        string sortBy =
-            string.IsNullOrWhiteSpace(request.SortBy)
-                ? "latest"
-                : request.SortBy.Trim().ToLowerInvariant();
+        string sortBy = string.IsNullOrWhiteSpace(request.SortBy)
+            ? "latest"
+            : request.SortBy.Trim().ToLowerInvariant();
 
-        List<string> listingTypes =
-            request.ListingTypes
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x.Trim())
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
+        List<string> listingTypes = request.ListingTypes
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
         if (sortBy != "latest" &&
             sortBy != "price-low" &&
@@ -1067,20 +518,19 @@ public class PropertyRepository : IPropertyRepository
             sortBy = "latest";
         }
 
-        List<string> listingTypesForSql =
-            listingTypes.Count == 0
-                ? ["__NO_LISTING_TYPE__"]
-                : listingTypes;
+        DataTable listingTypeTable = CreateStringListTable(listingTypes);
 
-        DynamicParameters parameters =
-            new DynamicParameters();
+        DynamicParameters parameters = new DynamicParameters();
+
         parameters.Add(
-               "UserID",
-          buyerId);
+            "UserID",
+            buyerId);
 
         parameters.Add(
             "SearchPattern",
-            search == null ? null : $"{search}%");
+            search == null
+                ? null
+                : $"{search}%");
 
         parameters.Add(
             "LocationType",
@@ -1114,7 +564,8 @@ public class PropertyRepository : IPropertyRepository
 
         parameters.Add(
             "ListingTypes",
-            listingTypesForSql);
+            listingTypeTable.AsTableValuedParameter(
+                "dbo.StringListTableType"));
 
         parameters.Add(
             "SortBy",
@@ -1128,163 +579,18 @@ public class PropertyRepository : IPropertyRepository
             "PageSize",
             pageSize);
 
-        const string whereClause = """
-        WHERE p.ListingStatus = 'Approved'
+        using var connection = _connectionFactory.CreateConnection();
 
-          AND
-          (
-              @SearchPattern IS NULL
-              OR p.Country LIKE @SearchPattern
-              OR p.State LIKE @SearchPattern
-              OR p.City LIKE @SearchPattern
-          )
-
-          AND
-          (
-              @LocationValue IS NULL
-
-              OR
-              (
-                  @LocationType = 'State'
-                  AND p.State = @LocationValue
-              )
-
-              OR
-              (
-                  @LocationType = 'City'
-                  AND
-                  (
-                      p.City = @LocationValue
-
-                      OR
-                      (
-                          @LocationValue = 'Bengaluru'
-                          AND p.City = 'Bangalore Urban'
-                      )
-                  )
-              )
-          )
-
-          AND
-          (
-              @MinPrice IS NULL
-              OR p.Price >= @MinPrice
-          )
-
-          AND
-          (
-              @MaxPrice IS NULL
-              OR p.Price <= @MaxPrice
-          )
-
-          AND
-          (
-              @PropertyType IS NULL
-              OR p.PropertyType = @PropertyType
-          )
-
-          AND
-          (
-              @MinBedrooms IS NULL
-              OR
-              TRY_CONVERT(int, p.Bedrooms) >= @MinBedrooms
-          )
-
-          AND
-          (
-              @HasListingTypeFilter = 0
-              OR p.ListingType IN @ListingTypes
-          )
-        """;
-
-        const string countSql = $"""
-        SELECT COUNT(1)
-        FROM Properties p
-        {whereClause};
-        """;
-
-        const string dataSql = $"""
-        SELECT
-        p.PropertyID,
-        p.PropertyGUID,
-        p.PropertyTitle,
-        p.PropertyType,
-        p.ListingType,
-        p.LocationAddress,
-        p.Country,
-        p.State,
-        p.City,
-        p.ZipCode,
-        p.Price,
-        p.Area,
-        p.AreaUnit,
-        p.Bedrooms,
-        p.Bathrooms,
-        cover.FilePath AS CoverImagePath,
-
-        CASE
-            WHEN EXISTS
-            (
-                SELECT 1
-                FROM BuyerFavorites bf
-                WHERE bf.UserID = @UserID
-                  AND bf.PropertyID = p.PropertyID
-            )
-            THEN CAST(1 AS BIT)
-            ELSE CAST(0 AS BIT)
-        END AS IsFavorite
-        FROM Properties p
-        OUTER APPLY
-        (
-            SELECT TOP 1
-                pm.FilePath
-            FROM PropertyMedia pm
-            WHERE pm.PropertyID = p.PropertyID
-              AND pm.MediaType = 'CoverPhoto'
-            ORDER BY
-                CASE
-                    WHEN pm.DisplayOrder IS NULL
-                    THEN 999
-                    ELSE pm.DisplayOrder
-                END,
-                pm.MediaID
-        ) cover
-        {whereClause}
-        ORDER BY
-            CASE
-                WHEN @SortBy = 'latest'
-                THEN COALESCE(p.UpdatedAt, p.CreatedAt)
-            END DESC,
-
-            CASE
-                WHEN @SortBy = 'price-low'
-                THEN p.Price
-            END ASC,
-
-            CASE
-                WHEN @SortBy = 'price-high'
-                THEN p.Price
-            END DESC,
-
-            p.PropertyID DESC
-        OFFSET @Offset ROWS
-        FETCH NEXT @PageSize ROWS ONLY;
-        """;
-
-        using var connection =
-            _connectionFactory.CreateConnection();
-
-        CommandDefinition command =
-            new(
-                $"{countSql}\n{dataSql}",
-                parameters,
-                cancellationToken: cancellationToken);
+        CommandDefinition command = new(
+            "dbo.usp_Buyer_Property_SearchApproved",
+            parameters,
+            commandType: CommandType.StoredProcedure,
+            cancellationToken: cancellationToken);
 
         using SqlMapper.GridReader grid =
             await connection.QueryMultipleAsync(command);
 
-        int totalRecords =
-            await grid.ReadSingleAsync<int>();
+        int totalRecords = await grid.ReadSingleAsync<int>();
 
         List<BuyerPropertyCardRow> propertyRows =
             (
@@ -1305,82 +611,36 @@ public class PropertyRepository : IPropertyRepository
             };
         }
 
-        List<int> propertyIds =
-            propertyRows
-                .Select(x => x.PropertyID)
-                .ToList();
+        List<int> propertyIds = propertyRows
+            .Select(x => x.PropertyID)
+            .ToList();
 
-        DynamicParameters detailParameters =
-            new DynamicParameters();
+        DataTable propertyIdTable = CreateIntListTable(propertyIds);
+
+        DynamicParameters detailParameters = new DynamicParameters();
 
         detailParameters.Add(
-            "PropertyIds",
-            propertyIds);
+            "PropertyIDs",
+            propertyIdTable.AsTableValuedParameter(
+                "dbo.IntListTableType"));
 
-        const string amenitiesSql = """
-        SELECT
-            pa.PropertyID,
-            a.AmenityID,
-            a.AmenityName,
-            a.Category
-        FROM PropertyAmenities pa
-        INNER JOIN Amenities a
-            ON pa.AmenityID = a.AmenityID
-        WHERE pa.PropertyID IN @PropertyIds
-        ORDER BY
-            pa.PropertyID,
-            a.Category,
-            a.AmenityName;
-        """;
-
-        const string mediaSql = """
-        SELECT
-            MediaID,
-            PropertyID,
-            MediaType,
-            FileName,
-            FilePath,
-            DisplayOrder
-        FROM PropertyMedia
-        WHERE PropertyID IN @PropertyIds
-          AND MediaType IN
-          (
-              'CoverPhoto',
-              'GalleryImage'
-          )
-        ORDER BY
-            PropertyID,
-            CASE
-                WHEN MediaType = 'CoverPhoto' THEN 1
-                ELSE 2
-            END,
-            CASE
-                WHEN DisplayOrder IS NULL THEN 999
-                ELSE DisplayOrder
-            END,
-            MediaID;
-        """;
-
-        CommandDefinition detailCommand =
-            new(
-                $"{amenitiesSql}\n{mediaSql}",
-                detailParameters,
-                cancellationToken: cancellationToken);
+        CommandDefinition detailCommand = new(
+            "dbo.usp_Buyer_Property_GetDetails",
+            detailParameters,
+            commandType: CommandType.StoredProcedure,
+            cancellationToken: cancellationToken);
 
         using SqlMapper.GridReader detailGrid =
-            await connection.QueryMultipleAsync(
-                detailCommand);
+            await connection.QueryMultipleAsync(detailCommand);
 
         List<BuyerPropertyAmenityRow> amenityRows =
             (
-                await detailGrid
-                    .ReadAsync<BuyerPropertyAmenityRow>()
+                await detailGrid.ReadAsync<BuyerPropertyAmenityRow>()
             ).ToList();
 
         List<BuyerPropertyMediaRow> mediaRows =
             (
-                await detailGrid
-                    .ReadAsync<BuyerPropertyMediaRow>()
+                await detailGrid.ReadAsync<BuyerPropertyMediaRow>()
             ).ToList();
 
         Dictionary<int, List<BuyerPropertyAmenityDto>> amenitiesByProperty =
@@ -1414,42 +674,38 @@ public class PropertyRepository : IPropertyRepository
                         .ToList());
 
         List<BuyerPropertyCardDto> properties =
-    propertyRows
-        .Select(row => new BuyerPropertyCardDto
-        {
-            PropertyID = row.PropertyID,
-            PropertyGUID = row.PropertyGUID,
-            PropertyTitle = row.PropertyTitle,
-            PropertyType = row.PropertyType,
-            ListingType = row.ListingType,
-            LocationAddress = row.LocationAddress,
-            Country = row.Country,
-            State = row.State,
-            City = row.City,
-            ZipCode = row.ZipCode,
-            Price = row.Price,
-            Area = row.Area,
-            AreaUnit = row.AreaUnit,
-            Bedrooms = row.Bedrooms,
-            Bathrooms = row.Bathrooms,
-            CoverImagePath = row.CoverImagePath,
-            IsFavorite = row.IsFavorite,
-
-            Amenities =
-                amenitiesByProperty.TryGetValue(
-                    row.PropertyID,
-                    out List<BuyerPropertyAmenityDto>? amenities)
-                    ? amenities
-                    : [],
-
-            Media =
-                mediaByProperty.TryGetValue(
-                    row.PropertyID,
-                    out List<BuyerPropertyMediaDto>? media)
-                    ? media
-                    : []
-        })
-        .ToList();
+            propertyRows
+                .Select(row => new BuyerPropertyCardDto
+                {
+                    PropertyID = row.PropertyID,
+                    PropertyGUID = row.PropertyGUID,
+                    PropertyTitle = row.PropertyTitle,
+                    PropertyType = row.PropertyType,
+                    ListingType = row.ListingType,
+                    LocationAddress = row.LocationAddress,
+                    Country = row.Country,
+                    State = row.State,
+                    City = row.City,
+                    ZipCode = row.ZipCode,
+                    Price = row.Price,
+                    Area = row.Area,
+                    AreaUnit = row.AreaUnit,
+                    Bedrooms = row.Bedrooms,
+                    Bathrooms = row.Bathrooms,
+                    CoverImagePath = row.CoverImagePath,
+                    IsFavorite = row.IsFavorite,
+                    Amenities = amenitiesByProperty.TryGetValue(
+                        row.PropertyID,
+                        out List<BuyerPropertyAmenityDto>? amenities)
+                        ? amenities
+                        : [],
+                    Media = mediaByProperty.TryGetValue(
+                        row.PropertyID,
+                        out List<BuyerPropertyMediaDto>? media)
+                        ? media
+                        : []
+                })
+                .ToList();
 
         return new BuyerPropertyListResponse
         {
@@ -1463,6 +719,49 @@ public class PropertyRepository : IPropertyRepository
         };
     }
 
+    // Converts an integer collection into the table-valued parameter format expected by SQL Server.
+    private static DataTable CreateIntListTable(IEnumerable<int> values)
+    {
+        DataTable table = new DataTable();
+
+        table.Columns.Add(
+            "ID",
+            typeof(int));
+
+        foreach (int value in values)
+        {
+            DataRow row = table.NewRow();
+
+            row["ID"] = value;
+
+            table.Rows.Add(row);
+        }
+
+        return table;
+    }
+
+    // Converts a string collection into the table-valued parameter format expected by SQL Server.
+    private static DataTable CreateStringListTable(IEnumerable<string> values)
+    {
+        DataTable table = new DataTable();
+
+        table.Columns.Add(
+            "ItemValue",
+            typeof(string));
+
+        foreach (string value in values)
+        {
+            DataRow row = table.NewRow();
+
+            row["ItemValue"] = value;
+
+            table.Rows.Add(row);
+        }
+
+        return table;
+    }
+
+    // Calculates the number of pages from the total matching record count.
     private static int CalculateTotalPages(
         int totalRecords,
         int pageSize)
@@ -1473,13 +772,13 @@ public class PropertyRepository : IPropertyRepository
                 totalRecords / (double)pageSize);
     }
 
+    // Holds the property columns returned by the buyer property search procedure.
     private sealed class BuyerPropertyCardRow
     {
         public int PropertyID { get; set; }
-        public Guid PropertyGUID
-        {
-            get; set;
-        }
+
+        public Guid PropertyGUID { get; set; }
+
         public string PropertyTitle { get; set; } = string.Empty;
 
         public string PropertyType { get; set; } = string.Empty;
@@ -1507,9 +806,11 @@ public class PropertyRepository : IPropertyRepository
         public decimal Bathrooms { get; set; }
 
         public string? CoverImagePath { get; set; }
+
         public bool IsFavorite { get; set; }
     }
 
+    // Holds the amenity columns returned for the properties displayed on the buyer page.
     private sealed class BuyerPropertyAmenityRow
     {
         public int PropertyID { get; set; }
@@ -1521,6 +822,7 @@ public class PropertyRepository : IPropertyRepository
         public string Category { get; set; } = string.Empty;
     }
 
+    // Holds the media columns returned for the properties displayed on the buyer page.
     private sealed class BuyerPropertyMediaRow
     {
         public int MediaID { get; set; }

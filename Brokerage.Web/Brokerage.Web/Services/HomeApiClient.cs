@@ -6,35 +6,26 @@ public class HomeApiClient
 {
     private readonly HttpClient _httpClient;
 
-    public HomeApiClient(
-        IHttpClientFactory httpClientFactory)
+    public HomeApiClient(IHttpClientFactory httpClientFactory)
     {
-        _httpClient =
-            httpClientFactory.CreateClient(
-                "BrokeragePublicApi");
+        _httpClient = httpClientFactory.CreateClient("BrokeragePublicApi");
+
     }
 
-    public async Task<PublicHomeStatsApiModel>
-        GetStatsAsync(
-            CancellationToken cancellationToken = default)
+    public async Task<PublicHomeStatsApiModel> GetStatsAsync(CancellationToken cancellationToken = default)
+
     {
-        HttpResponseMessage response =
-            await _httpClient.GetAsync(
-                "api/Home/stats",
-                cancellationToken);
+        HttpResponseMessage response = await _httpClient.GetAsync("api/Home/stats", cancellationToken);
 
         response.EnsureSuccessStatusCode();
 
-        return await response.Content
-            .ReadFromJsonAsync<PublicHomeStatsApiModel>(
-                cancellationToken)
-            ?? new PublicHomeStatsApiModel();
+        return await response.Content.ReadFromJsonAsync<PublicHomeStatsApiModel>(cancellationToken) ?? new PublicHomeStatsApiModel();
+
     }
 
     public async Task<List<PublicPropertyApiModel>>
-        GetLatestPropertiesAsync(
-            string? city,
-            CancellationToken cancellationToken = default)
+        GetLatestPropertiesAsync(string? city, CancellationToken cancellationToken = default)
+
     {
         string url =
             string.IsNullOrWhiteSpace(city)

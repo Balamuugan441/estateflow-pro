@@ -124,4 +124,32 @@ public class IndexModel : PageModel
 
         return pages;
     }
+    // Processes the status change requested from the expandable user action card.
+    public async Task<IActionResult> OnPostUpdateStatusAsync(int userId, bool isActive, CancellationToken cancellationToken)
+    {
+        try
+        {
+            AdminUserStatusApiResponse response =
+                await _adminApiClient.UpdateUserStatusAsync(userId, isActive, cancellationToken);
+
+            return new JsonResult(response)
+            {
+                StatusCode = response.Success ? StatusCodes.Status200OK : StatusCodes.Status404NotFound
+
+            };
+        }
+        catch (HttpRequestException ex)
+        {
+            return new JsonResult(
+                new
+                {
+                    success = false,
+                    message = ex.Message
+                })
+            {
+                StatusCode = (int?)ex.StatusCode ?? StatusCodes.Status500InternalServerError
+
+            };
+        }
+    }
 }

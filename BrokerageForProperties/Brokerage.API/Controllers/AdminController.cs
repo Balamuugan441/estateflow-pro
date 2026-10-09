@@ -53,6 +53,20 @@ public class AdminController : ControllerBase
         }
     }
 
+    // Updates a user's active status for administrator user management.
+    [HttpPut("users/{userId:int}/status")]
+    public async Task<IActionResult> UpdateUserStatus(int userId, [FromBody] AdminUserStatusRequest request)
+    {
+        AdminUserStatusResponse response = await _adminService.UpdateUserStatusAsync(userId, request.IsActive);
+
+        if (!response.Success)
+        {
+            return NotFound(response);
+        }
+
+        return Ok(response);
+    }
+
     /// <summary>
     /// Retrieves a paginated list of properties with filters for status, type, and price range.
     /// </summary>

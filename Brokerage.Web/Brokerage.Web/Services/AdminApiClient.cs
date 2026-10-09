@@ -299,5 +299,19 @@ public class AdminApiClient
             response,
             cancellationToken);
     }
+    // Sends the requested user status to the Admin API through the existing BFF HttpClient.
+    public async Task<AdminUserStatusApiResponse> UpdateUserStatusAsync(int userId, bool isActive, CancellationToken cancellationToken = default)
+
+    {
+        object request = new
+        {
+            IsActive = isActive
+        };
+
+        HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"api/Admin/users/{userId}/status", request, cancellationToken);
+
+        return await ReadResponseAsync<AdminUserStatusApiResponse>(response, cancellationToken);
+
+    }
 
 }

@@ -158,6 +158,7 @@
         </div>
 
     </form>
+    @Html.AntiForgeryToken()
 
     <div class="table-card">
 
@@ -216,14 +217,19 @@
                                 ? "Active"
                                 : "Inactive";
 
-                        <tr>
+                        string userActionText =
+                            user.IsActive
+                                ? "Block the user"
+                                : "Unblock the user";
+
+                        <tr class="user-row"
+                            data-user-id="@user.UserID"
+                            data-is-active="@user.IsActive.ToString().ToLowerInvariant()">
 
                             <td>
-
                                 <div class="user-profile">
 
                                     <div class="user-info">
-
                                         <span class="user-name">
                                             @user.FullName
                                         </span>
@@ -231,11 +237,9 @@
                                         <span class="user-id">
                                             ID: @user.UserID
                                         </span>
-
                                     </div>
 
                                 </div>
-
                             </td>
 
                             <td class="text-secondary">
@@ -248,9 +252,15 @@
 
                             <td>
 
-                                <span class="role-pill @roleClass">
+                                <button type="button"
+                                        class="role-pill @roleClass user-role-toggle"
+                                        data-user-id="@user.UserID"
+                                        aria-expanded="false"
+                                        aria-controls="user-details-@user.UserID">
+
                                     @user.RoleName.ToUpperInvariant()
-                                </span>
+
+                                </button>
 
                             </td>
 
@@ -263,27 +273,70 @@
                             </td>
 
                             <td>
-
                                 <span class="status-badge @statusClass">
-
                                     <span class="status-dot"></span>
-
-                                    @statusText
-
+                                    <span class="status-text">
+                                        @statusText
+                                    </span>
                                 </span>
-
                             </td>
 
                             <td class="action-col">
-
-                                <a href="#"
-                                   class="row-link">
+                                <button type="button"
+                                        class="row-link user-row-toggle"
+                                        data-user-id="@user.UserID"
+                                        aria-expanded="false"
+                                        aria-controls="user-details-@user.UserID">
 
                                     <img src="~/images/icons/chevron-rightt.png"
-                                         alt="View"
+                                         alt="Expand"
                                          class="ui-icon arrow-icon" />
 
-                                </a>
+                                </button>
+                            </td>
+
+                        </tr>
+
+                        <tr class="user-details-row"
+                            id="user-details-@user.UserID"
+                            hidden>
+
+                            <td colspan="8">
+
+                                <div class="user-action-card"
+                                     data-user-id="@user.UserID">
+
+                                    <div class="user-action-content">
+
+                                        <span class="user-action-title">
+                                            @userActionText
+                                        </span>
+
+                                        <span class="user-action-message">
+                                            @(user.IsActive
+                                                ? $"Do you want to block {user.FullName}?"
+                                                : $"Do you want to unblock {user.FullName}?")
+                                        </span>
+
+                                    </div>
+
+                                    <div class="user-action-buttons">
+
+                                        <button type="button"
+                                                class="user-action-btn user-action-yes"
+                                                data-status-action="confirm">
+                                            Yes
+                                        </button>
+
+                                        <button type="button"
+                                                class="user-action-btn user-action-no"
+                                                data-status-action="cancel">
+                                            No
+                                        </button>
+
+                                    </div>
+
+                                </div>
 
                             </td>
 

@@ -2,6 +2,7 @@
 using Brokerage.Models.DTOs.Admin;
 using Brokerage.Models.DTOs.Properties;
 using Brokerage.Models.Entities;
+using Brokerage.Models.Enums;
 
 namespace Brokerage.Business.Services;
 
@@ -217,6 +218,43 @@ public class AdminService
 
         return await _activityLogService
             .GetActivityLogsForAdminAsync(request);
+    }
+    // Updates a user's active status and returns the new state for the Admin Users page.
+    public async Task<AdminUserStatusResponse> UpdateUserStatusAsync(int userId, bool isActive)
+
+
+    {
+        UserStatus status =
+            isActive
+                ? UserStatus.Active
+                : UserStatus.Inactive;
+
+        bool updated =
+            await _userRepository.UpdateUserStatusAsync(
+                userId,
+                status);
+
+        if (!updated)
+        {
+            return new AdminUserStatusResponse
+            {
+                Success = false,
+                Message = "User not found.",
+                UserID = userId,
+                IsActive = isActive
+            };
+        }
+
+        return new AdminUserStatusResponse
+        {
+            Success = true,
+            Message =
+                status == UserStatus.Active
+                    ? "User unblocked successfully."
+                    : "User blocked successfully.",
+            UserID = userId,
+            IsActive = isActive
+        };
     }
 
 }

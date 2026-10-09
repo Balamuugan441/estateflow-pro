@@ -789,266 +789,190 @@ public class IndexModel : PageModel
             return Page();
         }
     }
+    // Creates or updates the property and then saves its amenities and media before moving to review.
     private async Task<IActionResult> SaveForReviewAsync(
-    CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
         try
         {
+            bool isNewProperty =
+                PropertyID == 0;
 
             CreatePropertyApiRequest request =
-    new CreatePropertyApiRequest
-    {
-        PropertyTitle = Input.PropertyTitle,
-        PropertyType = Input.PropertyType,
-        ListingType = Input.ListingType,
-        PropertyStatus = Input.PropertyStatus,
+                new CreatePropertyApiRequest
+                {
+                    PropertyTitle = Input.PropertyTitle,
+                    PropertyType = Input.PropertyType,
+                    ListingType = Input.ListingType,
+                    PropertyStatus = Input.PropertyStatus,
 
-        LocationAddress = Input.LocationAddress,
-        Country = Input.Country,
-        State = Input.State,
-        City = Input.City,
-        ZipCode = Input.ZipCode,
+                    LocationAddress = Input.LocationAddress,
+                    Country = Input.Country,
+                    State = Input.State,
+                    City = Input.City,
+                    ZipCode = Input.ZipCode,
 
-        Price = Details.Price,
-        SecurityDeposit = Details.SecurityDeposit,
-        Area = Details.Area,
-        AreaUnit = Details.AreaUnit,
-        Bedrooms = Details.Bedrooms,
-        Bathrooms = Details.Bathrooms ?? 2m,
+                    Price = Details.Price,
+                    SecurityDeposit = Details.SecurityDeposit,
+                    Area = Details.Area,
+                    AreaUnit = Details.AreaUnit,
+                    Bedrooms = Details.Bedrooms,
+                    Bathrooms = Details.Bathrooms ?? 2m,
 
-        Balconies = Details.Balconies,
-        Floor = Details.Floor,
-        ParkingSpaces = Details.ParkingSpaces,
-        YearBuilt = Details.YearBuilt,
-        PropertyAgeYears = Details.PropertyAgeYears,
-        PossessionDate = Details.PossessionDate,
+                    Balconies = Details.Balconies,
+                    Floor = Details.Floor,
+                    ParkingSpaces = Details.ParkingSpaces,
+                    YearBuilt = Details.YearBuilt,
+                    PropertyAgeYears = Details.PropertyAgeYears,
+                    PossessionDate = Details.PossessionDate,
 
-        FurnishingType = Details.FurnishingType,
-        FacingDirection = Details.FacingDirection,
-        PreferredTenants = Details.PreferredTenants,
-        TenantFoodPreference = Details.TenantFoodPreference,
-        Description = Details.Description
-    };
-
+                    FurnishingType = Details.FurnishingType,
+                    FacingDirection = Details.FacingDirection,
+                    PreferredTenants = Details.PreferredTenants,
+                    TenantFoodPreference = Details.TenantFoodPreference,
+                    Description = Details.Description
+                };
 
             int propertyId;
 
-
-            if (PropertyID == 0)
+            if (isNewProperty)
             {
-
-
                 CreatePropertyApiResponse response =
-               await _propertyApiClient
-                .CreatePropertyAsync(
-                     request,
-                    cancellationToken);
-
+                    await _propertyApiClient.CreatePropertyAsync(
+                        request,
+                        cancellationToken);
 
                 if (!response.Success)
                 {
                     ModelState.AddModelError(
                         string.Empty,
-                        response.Message
-                    );
+                        response.Message);
 
                     CurrentStep = 4;
 
                     return Page();
                 }
 
-
                 propertyId =
                     response.PropertyID;
+
+                PropertyID =
+                    propertyId;
             }
             else
             {
-
-
                 UpdatePropertyApiRequest updateRequest =
                     new UpdatePropertyApiRequest
                     {
-                        PropertyTitle =
-                            Input.PropertyTitle,
+                        PropertyTitle = Input.PropertyTitle,
+                        PropertyType = Input.PropertyType,
+                        ListingType = Input.ListingType,
+                        PropertyStatus = Input.PropertyStatus,
 
-                        PropertyType =
-                            Input.PropertyType,
+                        LocationAddress = Input.LocationAddress,
+                        Country = Input.Country,
+                        State = Input.State,
+                        City = Input.City,
+                        ZipCode = Input.ZipCode,
 
-                        ListingType =
-                            Input.ListingType,
+                        Price = Details.Price,
+                        SecurityDeposit = Details.SecurityDeposit,
+                        Area = Details.Area,
+                        AreaUnit = Details.AreaUnit,
+                        Bedrooms = Details.Bedrooms,
+                        Bathrooms = Details.Bathrooms ?? 2m,
 
-                        PropertyStatus =
-                            Input.PropertyStatus,
+                        Balconies = Details.Balconies,
+                        Floor = Details.Floor,
+                        ParkingSpaces = Details.ParkingSpaces,
+                        YearBuilt = Details.YearBuilt,
+                        PropertyAgeYears = Details.PropertyAgeYears,
+                        PossessionDate = Details.PossessionDate,
 
-                        LocationAddress =
-                            Input.LocationAddress,
-
-                        Country =
-                            Input.Country,
-
-                        State =
-                            Input.State,
-
-                        City =
-                            Input.City,
-
-                        ZipCode =
-                            Input.ZipCode,
-
-                        Price =
-                            Details.Price,
-
-                        SecurityDeposit =
-                            Details.SecurityDeposit,
-
-                        Area =
-                            Details.Area,
-
-                        AreaUnit =
-                            Details.AreaUnit,
-
-                        Bedrooms =
-                            Details.Bedrooms,
-
-                        Bathrooms =
-                            Details.Bathrooms ?? 2m,
-
-                        Balconies =
-                            Details.Balconies,
-
-                        Floor =
-                            Details.Floor,
-
-                        ParkingSpaces =
-                            Details.ParkingSpaces,
-
-                        YearBuilt =
-                            Details.YearBuilt,
-
-                        PropertyAgeYears =
-                            Details.PropertyAgeYears,
-
-                        PossessionDate =
-                            Details.PossessionDate,
-
-                        FurnishingType =
-                            Details.FurnishingType,
-
-                        FacingDirection =
-                            Details.FacingDirection,
-
-                        PreferredTenants =
-                            Details.PreferredTenants,
-
-                        TenantFoodPreference =
-                            Details.TenantFoodPreference,
-
-                        Description =
-                            Details.Description
+                        FurnishingType = Details.FurnishingType,
+                        FacingDirection = Details.FacingDirection,
+                        PreferredTenants = Details.PreferredTenants,
+                        TenantFoodPreference = Details.TenantFoodPreference,
+                        Description = Details.Description
                     };
 
-
                 ApiMessageResponse updateResponse =
-                    await _propertyApiClient
-                        .UpdatePropertyAsync(
-                            PropertyID,
-                            updateRequest,
-                            cancellationToken);
-
+                    await _propertyApiClient.UpdatePropertyAsync(
+                        PropertyID,
+                        updateRequest,
+                        cancellationToken);
 
                 if (!updateResponse.Success)
                 {
                     ModelState.AddModelError(
                         string.Empty,
-                        "Unable to update the property."
-                    );
+                        updateResponse.Message);
 
                     CurrentStep = 4;
 
                     return Page();
                 }
 
-
                 propertyId =
                     PropertyID;
             }
-
-
-
 
             bool amenitiesSaved =
                 await SaveAmenitiesAsync(
                     propertyId,
                     cancellationToken);
 
-
             if (!amenitiesSaved)
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "Property was created, but saving amenities failed."
-                );
+                    "Property was created, but saving amenities failed.");
 
                 CurrentStep = 4;
 
                 return Page();
             }
 
-
             bool hasMediaChanges =
-    IsRealFile(CoverPhoto) ||
-    GalleryImages.Any(IsRealFile) ||
-    Videos.Any(IsRealFile) ||
-    FloorPlans.Any(IsRealFile) ||
-    Documents.Any(IsRealFile) ||
-    RemovedMediaIds.Count > 0 ||
-    GalleryReplacementIds.Count > 0 ||
-    VideoReplacementIds.Count > 0 ||
-    FloorPlanReplacementIds.Count > 0 ||
-    DocumentReplacementIds.Count > 0;
+                IsRealFile(CoverPhoto) ||
+                GalleryImages.Any(IsRealFile) ||
+                Videos.Any(IsRealFile) ||
+                FloorPlans.Any(IsRealFile) ||
+                Documents.Any(IsRealFile) ||
+                RemovedMediaIds.Count > 0 ||
+                GalleryReplacementIds.Count > 0 ||
+                VideoReplacementIds.Count > 0 ||
+                FloorPlanReplacementIds.Count > 0 ||
+                DocumentReplacementIds.Count > 0;
 
-
-            if (PropertyID == 0 || hasMediaChanges)
+            if (isNewProperty || hasMediaChanges)
             {
-                /*
-                   New property:
-                   media is mandatory.
-
-                   Existing property:
-                   upload only when seller selected
-                   new media.
-                */
-
                 ApiMessageResponse mediaResponse =
-    await _propertyApiClient
-        .UploadPropertyMediaAsync(
-            propertyId,
-            CoverPhoto,
-            GalleryImages,
-            Videos,
-            FloorPlans,
-            Documents,
-            RemovedMediaIds,
-            GalleryReplacementIds,
-            VideoReplacementIds,
-            FloorPlanReplacementIds,
-            DocumentReplacementIds,
-            cancellationToken);
-
+                    await _propertyApiClient.UploadPropertyMediaAsync(
+                        propertyId,
+                        CoverPhoto,
+                        GalleryImages,
+                        Videos,
+                        FloorPlans,
+                        Documents,
+                        RemovedMediaIds,
+                        GalleryReplacementIds,
+                        VideoReplacementIds,
+                        FloorPlanReplacementIds,
+                        DocumentReplacementIds,
+                        cancellationToken);
 
                 if (!mediaResponse.Success)
                 {
                     ModelState.AddModelError(
                         string.Empty,
-                        mediaResponse.Message
-                    );
+                        mediaResponse.Message);
 
                     CurrentStep = 4;
 
                     return Page();
                 }
             }
-
 
             return RedirectToPage(
                 "./Index",
@@ -1056,15 +980,13 @@ public class IndexModel : PageModel
                 {
                     propertyId = propertyId,
                     step = 5
-                }
-            );
+                });
         }
         catch (Exception ex)
         {
             ModelState.AddModelError(
                 string.Empty,
-                $"Step 4 failed: {ex.Message}"
-            );
+                $"Step 4 failed: {ex.Message}");
 
             CurrentStep = 4;
 

@@ -2,7 +2,9 @@
 using Brokerage.Data.Interfaces;
 using Brokerage.Models.DTOs.Admin;
 using Brokerage.Models.Entities;
+using Brokerage.Models.Enums;
 using Dapper;
+using System.Data;
 
 namespace Brokerage.Data.Repositories
 {
@@ -10,214 +12,151 @@ namespace Brokerage.Data.Repositories
     {
         private readonly ISqlConnectionFactory _connectionFactory;
 
-
         public UserRepository(ISqlConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
         }
-        // Get user using email
 
+        // Check whether email already exists
         public async Task<bool> EmailExistsAsync(string email)
         {
-            const string sql = """
-            SELECT COUNT(1)
-            FROM Users
-            WHERE Email = @Email;
-            """;
             using var connection =
-              _connectionFactory.CreateConnection();
-            int count = await connection.ExecuteScalarAsync<int>(
-                sql,
-                new { Email = email });
+                _connectionFactory.CreateConnection();
+
+            int count =
+                await connection.ExecuteScalarAsync<int>(
+                    "dbo.usp_User_EmailExists",
+                    new
+                    {
+                        Email = email
+                    },
+                    commandType: CommandType.StoredProcedure);
 
             return count > 0;
         }
-        // Get role using role name
 
+        // Get role ID using role name
         public async Task<int?> GetRoleIdByNameAsync(string roleName)
         {
-            const string query = """
-                SELECT RoleID
-                FROM Roles
-                WHERE RoleName = @RoleName
-                """;
-
             using var connection =
                 _connectionFactory.CreateConnection();
 
             return await connection.QuerySingleOrDefaultAsync<int?>(
-                query,
-                new { RoleName = roleName });
+                "dbo.usp_Role_GetIdByName",
+                new
+                {
+                    RoleName = roleName
+                },
+                commandType: CommandType.StoredProcedure);
         }
-        // Create new user
 
+        // Create new user
         public async Task<int> CreateUserAsync(User user)
         {
-            const string query = """
-            INSERT INTO Users
-            (
-                RoleID,
-                FullName,
-                Email,
-                PasswordHash,
-                MobileNumber
-            )
-            OUTPUT INSERTED.UserID
-            VALUES
-            (
-                @RoleID,
-                @FullName,
-                @Email,
-                @PasswordHash,
-                @MobileNumber
-            );
-            """;
-
-            using var connection =
-          _connectionFactory.CreateConnection();
+            using var connection = _connectionFactory.CreateConnection();
 
             return await connection.ExecuteScalarAsync<int>(
-                query,
-                user);
+                "dbo.usp_User_Create",
+                user,
+                commandType: CommandType.StoredProcedure);
         }
-        // Fetches all the User Details 
+
+        // Get user using email
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            const string sql = """
-    SELECT
-        u.UserID,
-        u.UserGUID,
-        u.RoleID,
-        r.RoleName,
-        u.FullName,
-        u.Email,
-        u.PasswordHash,
-        u.MobileNumber,
-        u.IsActive,
-        u.CreatedAt
-    FROM Users u
-    INNER JOIN Roles r
-        ON u.RoleID = r.RoleID
-    WHERE u.Email = @Email;
-    """;
             using var connection = _connectionFactory.CreateConnection();
-            return await connection.QuerySingleOrDefaultAsync<User?>(sql, new { Email = email });
 
+
+            return await connection.QuerySingleOrDefaultAsync<User?>(
+                "dbo.usp_User_GetByEmail",
+                new
+                {
+                    Email = email
+                },
+                commandType: CommandType.StoredProcedure);
         }
-        // Store [passwordreset token and expiration time in the db
-        public async Task CreatePasswordResetTokenAsync(
-    PasswordResetToken resetToken)
-        {
-            const string query = """
-        INSERT INTO PasswordResetTokens
-        (
-            UserID,
-            TokenHash,
-            ExpiresAt
-        )
-        VALUES
-        (
-            @UserID,
-            @TokenHash,
-            @ExpiresAt
-        );
-        """;
 
-            using var connection =
-                _connectionFactory.CreateConnection();
+        // Store password reset token
+        public async Task CreatePasswordResetTokenAsync(
+            PasswordResetToken resetToken)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
 
             await connection.ExecuteAsync(
-                query,
-                resetToken);
+                "dbo.usp_PasswordResetToken_Create",
+                resetToken,
+                commandType: CommandType.StoredProcedure);
         }
-        // Get the password reset token using the token hash
-        public async Task<PasswordResetToken?> GetPasswordResetTokenAsync(
-    string tokenHash)
-        {
-            const string query = """
-        SELECT
-            ResetTokenID,
-            UserID,
-            TokenHash,
-            ExpiresAt,
-            UsedAt,
-            CreatedAt
-        FROM PasswordResetTokens
-        WHERE TokenHash = @TokenHash;
-        """;
 
+        // Get password reset token
+        public async Task<PasswordResetToken?> GetPasswordResetTokenAsync(
+            string tokenHash)
+        {
             using var connection =
                 _connectionFactory.CreateConnection();
 
             return await connection.QuerySingleOrDefaultAsync<PasswordResetToken?>(
-                query,
+                "dbo.usp_PasswordResetToken_GetByHash",
                 new
                 {
                     TokenHash = tokenHash
-                });
+                },
+                commandType: CommandType.StoredProcedure);
         }
-        public async Task MarkPasswordResetTokenUsedAsync(
-    int resetTokenId)
-        {
-            const string query = """
-        UPDATE PasswordResetTokens
-        SET UsedAt = GETUTCDATE()
-        WHERE ResetTokenID = @ResetTokenID;
-        """;
 
+        // Mark password reset token as used
+        public async Task MarkPasswordResetTokenUsedAsync(int resetTokenId)
+
+        {
             using var connection =
                 _connectionFactory.CreateConnection();
 
             await connection.ExecuteAsync(
-                query,
+                "dbo.usp_PasswordResetToken_MarkUsed",
                 new
                 {
                     ResetTokenID = resetTokenId
-                });
+                },
+                commandType: CommandType.StoredProcedure);
         }
-        public async Task UpdatePasswordAsync(
-    int userId,
-    string passwordHash)
-        {
-            const string query = """
-        UPDATE Users
-        SET PasswordHash = @PasswordHash
-        WHERE UserID = @UserID;
-        """;
 
-            using var connection =
-                _connectionFactory.CreateConnection();
+        // Update password
+        public async Task UpdatePasswordAsync(int userId, string passwordHash)
+
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
 
             await connection.ExecuteAsync(
-                query,
+                "dbo.usp_User_UpdatePassword",
                 new
                 {
                     UserID = userId,
                     PasswordHash = passwordHash
-                });
+                },
+                commandType: CommandType.StoredProcedure);
         }
-        public async Task InvalidateExistingPasswordResetTokensAsync(int userId)
+
+        // Invalidate existing password reset tokens
+        public async Task InvalidateExistingPasswordResetTokensAsync(
+            int userId)
         {
-            const string query = """
-        UPDATE PasswordResetTokens
-        SET UsedAt = GETUTCDATE()
-        WHERE UserID = @UserID
-          AND UsedAt IS NULL;
-        """;
+            using var connection = _connectionFactory.CreateConnection();
 
-            using var connection =
-                _connectionFactory.CreateConnection();
 
-            await connection.ExecuteAsync(
-                query,
+            await connection.ExecuteAsync("dbo.usp_PasswordResetToken_InvalidateExisting",
+
                 new
                 {
                     UserID = userId
-                });
+                },
+                commandType: CommandType.StoredProcedure);
         }
-        public async Task<AdminUserListResponse>
-     GetUsersForAdminAsync(
-         AdminUserQueryRequest request)
+
+        // Get paginated users for admin
+        public async Task<AdminUserListResponse> GetUsersForAdminAsync(
+            AdminUserQueryRequest request)
         {
             const int pageSize = 10;
 
@@ -226,143 +165,49 @@ namespace Brokerage.Data.Repositories
                     ? 1
                     : request.PageNumber;
 
-            int offset =
-                (pageNumber - 1) * pageSize;
+            string? search = request.Search?.Trim();
 
-            List<string> filters = [];
 
-            DynamicParameters parameters =
-                new DynamicParameters();
+            using var connection = _connectionFactory.CreateConnection();
 
-            string? search =
-                request.Search?.Trim();
 
-            if (!string.IsNullOrWhiteSpace(search))
+            var parameters = new
             {
-                filters.Add(
-                    "u.FullName LIKE @Search");
+                PageNumber = pageNumber,
+                PageSize = pageSize,
 
-                parameters.Add(
-                    "Search",
-                    search + "%");
-            }
+                Search = string.IsNullOrWhiteSpace(search)
+                    ? null
+                    : search,
 
-            if (!string.IsNullOrWhiteSpace(request.RoleName))
-            {
-                filters.Add(
-                    "r.RoleName = @RoleName");
+                RoleName = string.IsNullOrWhiteSpace(request.RoleName)
+                    ? null
+                    : request.RoleName,
 
-                parameters.Add(
-                    "RoleName",
-                    request.RoleName);
-            }
+                IsActive = request.IsActive,
 
-            if (request.IsActive.HasValue)
-            {
-                filters.Add(
-                    "u.IsActive = @IsActive");
+                FromDate = request.FromDate?.Date,
 
-                parameters.Add(
-                    "IsActive",
-                    request.IsActive.Value);
-            }
+                ToDate = request.ToDate?.Date
+            };
 
-            if (request.FromDate.HasValue)
-            {
-                filters.Add(
-                    "u.CreatedAt >= @FromDate");
+            using var multi =
+                await connection.QueryMultipleAsync(
+                    "dbo.usp_Admin_User_GetPaged",
+                    parameters,
+                    commandType: CommandType.StoredProcedure);
 
-                parameters.Add(
-                    "FromDate",
-                    request.FromDate.Value.Date);
-            }
+            int totalRecords = await multi.ReadSingleAsync<int>();
 
-            if (request.ToDate.HasValue)
-            {
-                filters.Add(
-                    "u.CreatedAt < DATEADD(day, 1, @ToDate)");
 
-                parameters.Add(
-                    "ToDate",
-                    request.ToDate.Value.Date);
-            }
+            IEnumerable<AdminUserResponse> users = await multi.ReadAsync<AdminUserResponse>();
 
-            string whereClause =
-                filters.Count > 0
-                    ? "WHERE " + string.Join(
-                        " AND ",
-                        filters)
-                    : string.Empty;
 
-            string countSql = $"""
-        SELECT COUNT(1)
-        FROM Users u
-        INNER JOIN Roles r
-            ON u.RoleID = r.RoleID
-        {whereClause};
-        """;
+            List<AdminUserResponse> userList = users.ToList();
 
-            using var connection =
-                _connectionFactory.CreateConnection();
 
-            int totalRecords =
-                await connection.ExecuteScalarAsync<int>(
-                    countSql,
-                    parameters);
+            int totalPages = totalRecords == 0 ? 0 : (int)Math.Ceiling(totalRecords / (double)pageSize);
 
-            string dataSql = $"""
-        SELECT
-            u.UserID,
-            u.UserGUID,
-            u.FullName,
-            u.Email,
-            u.MobileNumber,
-            r.RoleName,
-            u.IsActive,
-            u.CreatedAt,
-            COALESCE(pc.ListingCount, 0) AS ListingCount
-        FROM Users u
-        INNER JOIN Roles r
-            ON u.RoleID = r.RoleID
-        LEFT JOIN
-        (
-            SELECT
-                SellerID,
-                COUNT(1) AS ListingCount
-            FROM Properties
-            GROUP BY SellerID
-        ) pc
-            ON pc.SellerID = u.UserID
-        {whereClause}
-        ORDER BY
-            u.CreatedAt DESC,
-            u.UserID DESC
-        OFFSET @Offset ROWS
-        FETCH NEXT @PageSize ROWS ONLY;
-        """;
-
-            parameters.Add(
-                "Offset",
-                offset);
-
-            parameters.Add(
-                "PageSize",
-                pageSize);
-
-            IEnumerable<AdminUserResponse> users =
-                await connection.QueryAsync<AdminUserResponse>(
-                    dataSql,
-                    parameters);
-
-            List<AdminUserResponse> userList =
-                users.ToList();
-
-            int totalPages =
-                totalRecords == 0
-                    ? 0
-                    : (int)Math.Ceiling(
-                        totalRecords /
-                        (double)pageSize);
 
             return new AdminUserListResponse
             {
@@ -373,20 +218,33 @@ namespace Brokerage.Data.Repositories
                 TotalPages = totalPages
             };
         }
+
+        // Get total user count
         public async Task<int> GetTotalUserCountAsync()
         {
-            const string sql = """
-    SELECT COUNT(1)
-    FROM Users;
-    """;
-
             using var connection =
                 _connectionFactory.CreateConnection();
 
-            return await connection.ExecuteScalarAsync<int>(sql);
+            return await connection.ExecuteScalarAsync<int>(
+                "dbo.usp_User_GetTotalCount",
+                commandType: CommandType.StoredProcedure);
+        }
+        // Updates the user's IsActive status through the admin user-status stored procedure.
+        public async Task<bool> UpdateUserStatusAsync(int userId, UserStatus status)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            bool isActive = status == UserStatus.Active;
+
+            int rowsAffected = await connection.ExecuteScalarAsync<int>(
+           "dbo.usp_Admin_User_UpdateStatus",
+           new
+           {
+               UserID = userId,
+               IsActive = isActive
+           },
+           commandType: CommandType.StoredProcedure);
+
+            return rowsAffected > 0;
         }
     }
-
-
 }
-

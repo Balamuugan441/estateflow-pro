@@ -98,6 +98,10 @@ async function removeFavorite(button) {
         if (!response.ok || !result.success) {
             throw new Error(result.message || "Unable to remove favorite.");
         }
+        window.showFavoriteToast(
+    "Success",
+    "Property removed successfully from favorites."
+);
 
         card.remove();
 

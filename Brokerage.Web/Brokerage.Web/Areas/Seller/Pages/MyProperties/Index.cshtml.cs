@@ -18,6 +18,8 @@ public class IndexModel : PageModel
 {
     private readonly PropertyApiClient _propertyApiClient;
 
+    private readonly ChatApiClient _chatApiClient;
+
     private readonly IConfiguration _configuration;
 
 
@@ -26,11 +28,12 @@ public class IndexModel : PageModel
 
     public IndexModel(
         PropertyApiClient propertyApiClient,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ChatApiClient chatApiClient)
     {
         _propertyApiClient = propertyApiClient;
-
         _configuration = configuration;
+        _chatApiClient = chatApiClient;
     }
 
 
@@ -131,6 +134,19 @@ public class IndexModel : PageModel
         }
     }
 
+
+    public async Task<IActionResult> OnGetUnreadMessagesAsync(
+        CancellationToken cancellationToken)
+    {
+        List<ChatConversationApiModel> conversations =
+            await _chatApiClient.GetSellerConversationsAsync(
+                cancellationToken);
+
+        int unreadCount = conversations.Sum(
+            conversation => conversation.UnreadCount);
+
+        return new JsonResult(new { unreadCount });
+    }
 
     private static string BuildMediaUrl(
         string apiBaseUrl,

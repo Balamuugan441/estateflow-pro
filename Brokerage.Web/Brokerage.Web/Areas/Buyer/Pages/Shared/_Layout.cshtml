@@ -20,6 +20,12 @@
           href="~/css/seller/seller-footer.css" />
            <link rel="stylesheet"
           href="~/css/chat/chat.css" />
+    <link rel="stylesheet"
+          href="~/css/chat/message-indicator.css"
+          asp-append-version="true" />
+          <link rel="stylesheet"
+      href="~/css/Buyer/favorite-toast.css"
+      asp-append-version="true" />
           @await RenderSectionAsync("Styles", required: false)
           <link rel="stylesheet"
       href="~/css/notifications/notification-center.css"
@@ -42,7 +48,11 @@
     </footer>
     <script src="~/js/notifications/notification-center.js"
         asp-append-version="true"></script>
+    <script src="~/js/chat/message-indicator.js"
+        asp-append-version="true"></script>
         <script src="~/js/auth/profile-logout.js" asp-append-version="true"></script>
+        <script src="~/js/Buyer/favorite-toast.js"
+        asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 

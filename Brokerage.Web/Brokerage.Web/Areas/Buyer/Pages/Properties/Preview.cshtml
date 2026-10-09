@@ -37,6 +37,9 @@
     <link rel="stylesheet"
           href="~/css/Buyer/property-preview.css"
           asp-append-version="true" />
+          <link rel="stylesheet"
+      href="~/css/Buyer/favorite-toast.css"
+      asp-append-version="true" />
 }
 @Html.AntiForgeryToken()
 
@@ -901,6 +904,33 @@ else
     </div>
 
 </div>
+<div id="favoriteToastContainer"
+     class="favorite-toast-container"
+     aria-live="polite"
+     aria-atomic="true">
+
+    <div id="favoriteToast"
+         class="favorite-toast"
+         role="status">
+
+        <div class="favorite-toast-icon"
+             id="favoriteToastIcon">
+            ✓
+        </div>
+
+        <div class="favorite-toast-content">
+            <strong id="favoriteToastTitle">
+                Success
+            </strong>
+
+            <p id="favoriteToastMessage">
+                Property added to favorites.
+            </p>
+        </div>
+
+    </div>
+
+</div>
 
 @section Scripts
 {
@@ -1235,6 +1265,12 @@ async function togglePreviewFavorite() {
             "aria-pressed",
             result.isFavorite
         );
+        window.showFavoriteToast(
+    "Success",
+    result.isFavorite
+        ? "Property added successfully to favorites."
+        : "Property removed successfully from favorites."
+);
 
     }
     catch (error) {
@@ -1243,6 +1279,11 @@ async function togglePreviewFavorite() {
             "Preview favorite error:",
             error
         );
+        window.showFavoriteToast(
+        "Error",
+        error.message || "Unable to update favorites.",
+        true
+    );
 
     }
     finally {
@@ -1442,4 +1483,6 @@ saveButton?.addEventListener(
             closeBuyRequestModal
         );
     </script>
+    <script src="~/js/Buyer/favorite-toast.js"
+        asp-append-version="true"></script>
 }

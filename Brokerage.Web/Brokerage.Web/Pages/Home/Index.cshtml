@@ -205,17 +205,35 @@
                                     <span>@property.LocationAddress, @property.City</span>
                                 </div>
 
-                                <div class="property-specs">
-                                    <div class="spec-item">
-                                        <span>@property.Bedrooms Beds</span>
-                                    </div>
-                                    <div class="spec-item">
-                                        <span>@property.Bathrooms Baths</span>
-                                    </div>
-                                    <div class="spec-item">
-                                        <span>@property.Area @property.AreaUnit</span>
-                                    </div>
-                                </div>
+<!-- Property specifications with bed, bath, and sqft icons -->
+<div class="property-specs">
+    <div class="spec-item">
+        <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 4v16M2 8h18a2 2 0 0 1 2 2v10M2 17h20M6 8v9"></path>
+        </svg>
+        <span>@property.Bedrooms Beds</span>
+    </div>
+
+    <div class="spec-item">
+        <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12h16a1 1 0 0 1 1 1v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-3a1 1 0 0 1 1-1z"></path>
+            <path d="M6 12V5a2 2 0 0 1 2-2h3"></path>
+            <path d="M7 20v2M17 20v2"></path>
+        </svg>
+        <span>@property.Bathrooms Baths</span>
+    </div>
+
+    <div class="spec-item">
+        <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="10" rx="2"></rect>
+            <line x1="6" y1="7" x2="6" y2="11"></line>
+            <line x1="10" y1="7" x2="10" y2="13"></line>
+            <line x1="14" y1="7" x2="14" y2="11"></line>
+            <line x1="18" y1="7" x2="18" y2="13"></line>
+        </svg>
+        <span>@property.Area @property.AreaUnit</span>
+    </div>
+</div>
 
                                 <a href="/Listings/Details/@property.PropertyID" class="btn-view-details">
                                     View Details

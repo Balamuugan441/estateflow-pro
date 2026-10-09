@@ -104,11 +104,25 @@
 
    <a asp-area="Seller"
    asp-page="/Messages/Index"
-   class="action-btn"
-   aria-label="Messages">
+   class="action-btn message-header-link"
+   aria-label="Messages"
+   data-unread-messages-url="@Url.Page(
+       "/MyProperties/Index",
+       new
+       {
+           area = "Seller",
+           handler = "UnreadMessages"
+       })"
+   data-message-indicator-scope="seller-@User.FindFirst(
+       System.Security.Claims.ClaimTypes.NameIdentifier
+   )?.Value">
 
    <img width="32" height="24" src="https://img.icons8.com/fluency-systems-regular/48/FFFFFF/chat-message.png" alt="chat-message" />
-   </a>
+
+   <span class="message-unread-indicator"
+         aria-label="Unread messages"
+         hidden></span>
+</a>
 
 </div>
 

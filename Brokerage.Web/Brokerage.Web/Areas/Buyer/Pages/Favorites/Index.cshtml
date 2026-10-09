@@ -15,6 +15,9 @@
     <link rel="stylesheet"
           href="~/css/Buyer/buyer-main.css"
           asp-append-version="true" />
+          <link rel="stylesheet"
+      href="~/css/Buyer/favorite-toast.css"
+      asp-append-version="true" />
 }
 
 <div class="favorites-page">
@@ -236,6 +239,33 @@
         }
     </section>
 </div>
+<div id="favoriteToastContainer"
+     class="favorite-toast-container"
+     aria-live="polite"
+     aria-atomic="true">
+
+    <div id="favoriteToast"
+         class="favorite-toast"
+         role="status">
+
+        <div class="favorite-toast-icon"
+             id="favoriteToastIcon">
+            ✓
+        </div>
+
+        <div class="favorite-toast-content">
+            <strong id="favoriteToastTitle">
+                Success
+            </strong>
+
+            <p id="favoriteToastMessage">
+                Property added to favorites.
+            </p>
+        </div>
+
+    </div>
+
+</div>
 
 @Html.AntiForgeryToken()
 
@@ -246,4 +276,6 @@
 {
     <script src="~/js/Buyer/buyer-favorites.js"
             asp-append-version="true"></script>
+            <script src="~/js/Buyer/favorite-toast.js"
+        asp-append-version="true"></script>
 }

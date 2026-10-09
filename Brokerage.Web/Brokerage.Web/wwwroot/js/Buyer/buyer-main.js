@@ -571,6 +571,12 @@ async function toggleFavorite(button) {
                 ? "Remove property from favorites"
                 : "Add property to favorites"
         );
+        window.showFavoriteToast(
+    "Success",
+    result.isFavorite
+        ? "Property added successfully to favorites."
+        : "Property removed successfully from favorites."
+);
 
     }
     catch (error) {
@@ -579,6 +585,11 @@ async function toggleFavorite(button) {
             "Favorite update error:",
             error
         );
+        window.showFavoriteToast(
+        "Error",
+        error.message || "Unable to update favorites.",
+        true
+    );
     }
     finally {
 

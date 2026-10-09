@@ -23,9 +23,14 @@ public sealed class IndexModel : PageModel
 {
     private readonly PropertyApiClient _propertyApiClient;
 
-    public IndexModel(PropertyApiClient propertyApiClient)
+    private readonly ChatApiClient _chatApiClient;
+
+    public IndexModel(
+        PropertyApiClient propertyApiClient,
+        ChatApiClient chatApiClient)
     {
         _propertyApiClient = propertyApiClient;
+        _chatApiClient = chatApiClient;
     }
 
     public IReadOnlyList<BuyerPropertyApiModel> Properties { get; private set; } = [];
@@ -50,6 +55,19 @@ public sealed class IndexModel : PageModel
         TotalRecords = response.TotalRecords;
         CurrentPage = response.PageNumber;
         TotalPages = response.TotalPages;
+    }
+
+    public async Task<IActionResult> OnGetUnreadMessagesAsync(
+        CancellationToken cancellationToken)
+    {
+        List<ChatConversationApiModel> conversations =
+            await _chatApiClient.GetBuyerConversationsAsync(
+                cancellationToken);
+
+        int unreadCount = conversations.Sum(
+            conversation => conversation.UnreadCount);
+
+        return new JsonResult(new { unreadCount });
     }
 
     public async Task<IActionResult> OnGetSearchPropertiesAsync(

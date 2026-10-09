@@ -632,29 +632,34 @@ body {
         flex-shrink: 0;
     }
 
-/* Property Specs Row */
+/* Container with top and bottom divider lines */
 .property-specs {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 16px;
-    border-top: 1px dashed rgba(255, 255, 255, 0.1);
-    margin-bottom: 22px;
+    padding: 14px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 20px;
 }
 
+/* Individual spec item label */
 .spec-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12.5px;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
     color: #cbd5e1;
 }
 
-    .spec-item svg {
-        width: 15px;
-        height: 15px;
-        color: #64748b;
-    }
+/* Spec SVG icon alignment and sizing */
+.spec-icon {
+    width: 16px;
+    height: 16px;
+    color: #8a99ad;
+    flex-shrink: 0;
+}
 
 /* Details Action Button */
 .btn-view-details {

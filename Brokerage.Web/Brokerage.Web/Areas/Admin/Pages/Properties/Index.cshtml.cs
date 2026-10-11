@@ -27,6 +27,9 @@ public class IndexModel : PageModel
     public decimal? MaxPrice { get; set; }
 
     [BindProperty(SupportsGet = true)]
+    public string? SortBy { get; set; } = "latest";
+
+    [BindProperty(SupportsGet = true)]
     public int PageNumber { get; set; } = 1;
 
     public List<AdminPropertyApiModel> Properties { get; set; } = [];
@@ -83,6 +86,17 @@ public class IndexModel : PageModel
         TotalLive = response.TotalLive;
         TotalPending = response.TotalPending;
         TotalRejected = response.TotalRejected;
+
+        if (Properties != null && Properties.Count > 0)
+        {
+            Properties = SortBy?.ToLowerInvariant() switch
+            {
+                "oldest" => Properties.OrderBy(p => p.CreatedAt).ToList(),
+                "price_desc" => Properties.OrderByDescending(p => p.Price).ToList(),
+                "price_asc" => Properties.OrderBy(p => p.Price).ToList(),
+                _ => Properties.OrderByDescending(p => p.CreatedAt).ToList()
+            };
+        }
     }
 
     /// <summary>

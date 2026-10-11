@@ -64,7 +64,7 @@
 
     </div>
 
-    <form method="get">
+    <form method="get" id="propertiesFilterForm">
 
         <div class="filter-card">
 
@@ -177,6 +177,7 @@
                 <div class="price-inputs">
 
                     <input asp-for="MinPrice"
+                           id="MinPrice"
                            type="number"
                            step="0.01"
                            class="filter-input"
@@ -187,12 +188,35 @@
                     </span>
 
                     <input asp-for="MaxPrice"
+                           id="MaxPrice"
                            type="number"
                            step="0.01"
                            class="filter-input"
                            placeholder="Max" />
 
                 </div>
+
+            </div>
+
+            <div class="filter-group">
+
+                <label class="filter-label">
+                    SORT BY
+                </label>
+
+                <select asp-for="SortBy"
+                        id="SortBy"
+                        class="filter-select">
+
+                    <option value="latest">Sort by: Latest</option>
+
+                    <option value="oldest">Sort by: Oldest</option>
+
+                    <option value="price_desc">Price: High to Low</option>
+
+                    <option value="price_asc">Price: Low to High</option>
+
+                </select>
 
             </div>
 
@@ -433,6 +457,7 @@
                            asp-route-PropertyType="@Model.PropertyType"
                            asp-route-MinPrice="@Model.MinPrice"
                            asp-route-MaxPrice="@Model.MaxPrice"
+                           asp-route-SortBy="@Model.SortBy"
                            asp-route-PageNumber="@(Model.PageNumber - 1)"
                            class="page-btn">
                             &lt;
@@ -457,6 +482,7 @@
                                asp-route-PropertyType="@Model.PropertyType"
                                asp-route-MinPrice="@Model.MinPrice"
                                asp-route-MaxPrice="@Model.MaxPrice"
+                               asp-route-SortBy="@Model.SortBy"
                                asp-route-PageNumber="@pageItem.Value"
                                class="page-btn @activeClass">
                                 @pageItem.Value
@@ -476,6 +502,7 @@
                            asp-route-PropertyType="@Model.PropertyType"
                            asp-route-MinPrice="@Model.MinPrice"
                            asp-route-MaxPrice="@Model.MaxPrice"
+                           asp-route-SortBy="@Model.SortBy"
                            asp-route-PageNumber="@(Model.PageNumber + 1)"
                            class="page-btn">
                             &gt;
@@ -496,3 +523,7 @@
     </div>
 
 </div>
+
+@section Scripts {
+    <script src="~/js/admin/properties.js" asp-append-version="true"></script>
+}

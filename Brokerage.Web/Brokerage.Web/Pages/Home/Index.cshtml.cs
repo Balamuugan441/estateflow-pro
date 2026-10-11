@@ -41,12 +41,41 @@ public class IndexModel : PageModel
     }
 
     public async Task<IActionResult> OnGetPropertiesAsync(
-        string? city,
-        CancellationToken cancellationToken)
+     string? city,
+     int? bedrooms,
+     int? bathrooms,
+     string? listingType,
+     decimal? minPrice,
+     decimal? maxPrice,
+     CancellationToken cancellationToken)
     {
+        if (minPrice.HasValue && minPrice.Value < 0 ||
+            maxPrice.HasValue && maxPrice.Value < 0)
+        {
+            return BadRequest(new
+            {
+                message = "Price cannot be negative."
+            });
+        }
+
+        if (minPrice.HasValue &&
+            maxPrice.HasValue &&
+            minPrice.Value > maxPrice.Value)
+        {
+            return BadRequest(new
+            {
+                message = "Minimum price cannot exceed maximum price."
+            });
+        }
+
         List<PublicPropertyApiModel> properties =
             await _homeApiClient.GetLatestPropertiesAsync(
                 city,
+                bedrooms,
+                bathrooms,
+                listingType,
+                minPrice,
+                maxPrice,
                 cancellationToken);
 
         return new JsonResult(properties);

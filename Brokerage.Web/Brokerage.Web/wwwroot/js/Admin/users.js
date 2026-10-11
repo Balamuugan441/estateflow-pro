@@ -1,15 +1,49 @@
 ﻿document.addEventListener(
     "DOMContentLoaded",
-    function() {
+    function () {
+        const filterForm = document.getElementById("userFilterForm");
+        const fromDateInput = document.getElementById("FromDate") || document.querySelector("input[name='FromDate']");
+        const toDateInput = document.getElementById("ToDate") || document.querySelector("input[name='ToDate']");
+
+        if (!filterForm || !fromDateInput || !toDateInput) return;
+
+        // Dynamically update min/max constraints on date pickers
+        function updateDateLimits() {
+            if (fromDateInput.value) {
+                toDateInput.min = fromDateInput.value;
+            } else {
+                toDateInput.removeAttribute("min");
+            }
+
+            if (toDateInput.value) {
+                fromDateInput.max = toDateInput.value;
+            } else {
+                fromDateInput.removeAttribute("max");
+            }
+        }
+
+        fromDateInput.addEventListener("change", updateDateLimits);
+        toDateInput.addEventListener("change", updateDateLimits);
+
+        // Prevent form submit if From Date is greater than To Date
+        filterForm.addEventListener("submit", function (event) {
+            const fromDate = fromDateInput.value;
+            const toDate = toDateInput.value;
+
+            if (fromDate && toDate && fromDate > toDate) {
+                event.preventDefault();
+                alert("The 'From Date' cannot be greater than the 'To Date'.");
+                fromDateInput.focus();
+            }
+        });
+
+        // Run on initial load to handle prepopulated filters
+        updateDateLimits();
         const searchInput =
             document.getElementById(
                 "userSearch"
             );
 
-        const filterForm =
-            document.getElementById(
-                "userFilterForm"
-            );
 
         let searchTimer;
 

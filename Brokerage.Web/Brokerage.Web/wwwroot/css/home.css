@@ -483,6 +483,7 @@ body {
         border-color: transparent;
         font-weight: 600;
     }
+
 .filter-pills {
     position: relative;
     z-index: 10;
@@ -632,7 +633,6 @@ body {
         flex-shrink: 0;
     }
 
-/* Container with top and bottom divider lines */
 .property-specs {
     display: flex;
     align-items: center;
@@ -643,7 +643,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* Individual spec item label */
+/* Individual spec item layout and text */
 .spec-item {
     display: flex;
     align-items: center;
@@ -653,11 +653,11 @@ body {
     color: #cbd5e1;
 }
 
-/* Spec SVG icon alignment and sizing */
+/* Spec SVG icons styling */
 .spec-icon {
     width: 16px;
     height: 16px;
-    color: #8a99ad;
+    color: #94a3b8;
     flex-shrink: 0;
 }
 
@@ -983,6 +983,7 @@ body {
         gap: 40px;
     }
 }
+
 .login-modal-overlay {
     position: fixed;
     inset: 0;
@@ -1102,4 +1103,455 @@ body {
     background-position: center center;
     background-repeat: no-repeat;
 }
+/* =========================================
+   HOME PAGE FILTER DROPDOWN
+   ========================================= */
 
+.filter-menu-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Filter popover container */
+.home-filter-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 200;
+    width: 380px;
+    max-width: calc(100vw - 28px);
+    padding: 20px 22px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 14px;
+    row-gap: 16px;
+    background: #121824;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+    .home-filter-panel[hidden] {
+        display: none !important;
+    }
+
+    /* Card Heading */
+    .home-filter-panel h3 {
+        grid-column: 1 / -1;
+        margin: 0;
+        padding: 0 70px 14px 0;
+        color: #f8fafc;
+        font-family: var(--font-sans);
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+/* Individual Filter Fields */
+.home-filter-field {
+    min-width: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+    .home-filter-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #94a3b8;
+        font-family: var(--font-sans);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+
+/* Field Span Rules */
+.home-filter-panel > .home-filter-field:nth-of-type(1),
+.home-filter-panel > .home-filter-field:nth-of-type(2) {
+    grid-column: span 1;
+}
+
+.home-filter-panel > .home-filter-field:nth-of-type(3),
+.home-filter-panel > .home-filter-field:nth-of-type(4) {
+    grid-column: 1 / -1;
+}
+
+/* Dropdown Field Adjustments & Padding */
+.home-filter-field select {
+    display: block;
+    width: 100%;
+    height: 42px;
+    padding: 0 30px 0 12px; /* Generous right-padding to prevent overlap with arrow icon */
+    appearance: auto;
+    -webkit-appearance: auto;
+    border: 1px solid #303642;
+    border-radius: 8px;
+    outline: none;
+    background-color: #0b0f15;
+    color: #f1f5f9;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .home-filter-field select:hover {
+        border-color: #465166;
+    }
+
+    .home-filter-field select:focus {
+        border-color: var(--accent-blue-bright);
+        background-color: #101722;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+    }
+
+/* Price Range Inputs Alignment */
+.home-price-range {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+    .home-price-range input {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        height: 42px;
+        padding: 0 12px;
+        border: 1px solid #303642;
+        border-radius: 8px;
+        outline: none;
+        background-color: #0b0f15;
+        color: #f1f5f9;
+        font-family: var(--font-sans);
+        font-size: 13px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .home-price-range input::placeholder {
+            color: #64748b;
+            opacity: 1;
+        }
+
+        .home-price-range input:hover {
+            border-color: #465166;
+        }
+
+        .home-price-range input:focus {
+            border-color: var(--accent-blue-bright);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+        }
+
+    .home-price-range span {
+        color: #64748b;
+        font-size: 14px;
+        text-align: center;
+        user-select: none;
+    }
+
+/* Clear Action Link */
+.home-filter-actions {
+    position: absolute;
+    top: 20px;
+    right: 22px;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.filter-clear-button {
+    background: transparent;
+    border: none;
+    color: var(--accent-blue-bright);
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+    .filter-clear-button:hover {
+        color: #7dd3fc;
+    }
+
+.filter-validation-message {
+    grid-column: 1 / -1;
+    margin: -2px 0 0;
+    color: #f87171;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+    .filter-validation-message[hidden] {
+        display: none !important;
+    }
+
+.property-carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+/* Round arrow navigation buttons with optical center alignment */
+.carousel-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 50%;
+    background-color: #121824;
+    color: #e2e8f0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Precise optical center corrections for text arrow glyphs */
+#previousProperties.carousel-arrow {
+    padding-right: 2px;
+    padding-bottom: 1px;
+}
+
+#nextProperties.carousel-arrow {
+    padding-left: 2px;
+    padding-bottom: 1px;
+}
+
+/* Smooth hover transition state */
+.carousel-arrow:hover:not(:disabled) {
+    border-color: var(--accent-blue-bright);
+    background-color: rgba(56, 189, 248, 0.14);
+    color: var(--accent-blue-bright);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
+    transform: translateY(-2px) scale(1.05);
+}
+
+.carousel-arrow:active:not(:disabled) {
+    transform: translateY(0) scale(0.96);
+}
+
+.carousel-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Carousel page counter label */
+.carousel-page-label {
+    min-width: 46px;
+    color: #94a3b8;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+/* =========================================
+   RESPONSIVE ADJUSTMENTS
+   ========================================= */
+
+@media (max-width: 900px) {
+    .filter-menu-wrapper {
+        width: 100%;
+    }
+
+    .home-filter-panel {
+        top: calc(100% + 8px);
+        left: 0;
+        right: auto;
+        width: 400px;
+        max-width: calc(100vw - 44px);
+    }
+
+    .property-carousel-controls {
+        margin-bottom: 16px;
+    }
+}
+
+@media (max-width: 420px) {
+    .home-filter-panel {
+        padding: 19px 16px;
+        column-gap: 10px;
+        row-gap: 13px;
+        border-radius: 13px;
+    }
+
+        .home-filter-panel h3 {
+            font-size: 15px;
+        }
+
+    .home-filter-actions {
+        top: 20px;
+        right: 16px;
+    }
+
+    .home-filter-field label {
+        font-size: 11px;
+    }
+
+    .home-filter-field select,
+    .home-price-range input {
+        height: 43px;
+        padding-left: 9px;
+        padding-right: 8px;
+        font-size: 12px;
+    }
+
+    .home-price-range {
+        gap: 6px;
+    }
+
+    .carousel-arrow {
+        flex-basis: 38px;
+        width: 38px;
+        height: 38px;
+        font-size: 22px;
+    }
+}
+
+
+/* =========================================
+   CITY SEARCH AUTOCOMPLETE DROPDOWN
+   Fix: keep suggestions below the input instead of
+   letting them become a flex item on the right.
+   ========================================= */
+
+.hero-search-card,
+.search-form {
+    overflow: visible;
+}
+
+.search-input-wrapper {
+    position: relative;
+    min-width: 0;
+    z-index: 30;
+}
+
+/* The suggestion list is anchored to the search input */
+.city-suggestions {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 260px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 6px;
+    background: #121824;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.42);
+    z-index: 300;
+}
+
+    /* Do not let the hidden autocomplete occupy space */
+    .city-suggestions[hidden] {
+        display: none !important;
+    }
+
+.city-suggestion {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 42px;
+    padding: 0 13px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: #e2e8f0;
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+    .city-suggestion:hover,
+    .city-suggestion:focus-visible {
+        outline: none;
+        color: #ffffff;
+        background: rgba(56, 189, 248, 0.10);
+        border-color: rgba(56, 189, 248, 0.22);
+    }
+
+    .city-suggestion:active {
+        background: rgba(56, 189, 248, 0.16);
+    }
+
+.city-no-results {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 13px;
+    color: #94a3b8;
+    font-family: var(--font-sans);
+    font-size: 13px;
+}
+
+/* Keep the autocomplete above nearby search controls */
+.filter-menu-wrapper {
+    position: relative;
+    z-index: 10;
+}
+
+.btn-explore {
+    position: relative;
+    z-index: 1;
+}
+
+/* Scrollbar styling for longer suggestion lists */
+.city-suggestions::-webkit-scrollbar {
+    width: 6px;
+}
+
+.city-suggestions::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.city-suggestions::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 10px;
+}
+
+    .city-suggestions::-webkit-scrollbar-thumb:hover {
+        background: #526176;
+    }
+
+/* Small-screen dropdown sizing */
+@media (max-width: 900px) {
+    .search-input-wrapper {
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .city-suggestions {
+        top: calc(100% + 6px);
+        max-height: 220px;
+    }
+}

@@ -52,34 +52,134 @@
             </div>
 
             <div class="hero-search-card">
-                <form method="get" action="/Listings" class="search-form">
-                    <div class="search-input-wrapper">
-                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input type="text" name="q" class="search-input" placeholder="Search by city, neighborhood, or ZIP..." />
-                    </div>
+                <form id="homeSearchForm" class="search-form">
+                     <div class="search-input-wrapper">
+                     <svg class="search-icon"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2">
+                     <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                     </svg>
 
-                    <button type="button" class="btn-filter">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="4" y1="21" x2="4" y2="14"></line>
-                            <line x1="4" y1="10" x2="4" y2="3"></line>
-                            <line x1="12" y1="21" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12" y2="3"></line>
-                            <line x1="20" y1="21" x2="20" y2="16"></line>
-                            <line x1="20" y1="12" x2="20" y2="3"></line>
-                            <line x1="1" y1="14" x2="7" y2="14"></line>
-                            <line x1="9" y1="8" x2="15" y2="8"></line>
-                            <line x1="17" y1="16" x2="23" y2="16"></line>
-                        </svg>
-                        <span>Filters</span>
-                    </button>
+                <input type="text"
+               id="citySearchInput"
+               name="q"
+               class="search-input"
+               placeholder="Search a city..."
+               autocomplete="off"
+               aria-autocomplete="list"
+               aria-controls="citySuggestions"
+               aria-expanded="false" />
 
-                    <button type="submit" class="btn-explore">
-                        Explore Listings
-                    </button>
-                </form>
+              <div id="citySuggestions"
+             class="city-suggestions"
+             role="listbox"
+             hidden>
+             </div>
+    </div>
+    <div class="filter-menu-wrapper">
+    <button type="button"
+            id="filterToggleButton"
+            class="btn-filter"
+            aria-expanded="false"
+            aria-controls="homeFilterPanel">
+        <svg viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="2" y1="14" x2="6" y2="14"></line>
+            <line x1="10" y1="8" x2="14" y2="8"></line>
+            <line x1="18" y1="16" x2="22" y2="16"></line>
+        </svg>
+        Filters
+    </button>
+
+    <div id="homeFilterPanel"
+         class="home-filter-panel"
+         hidden>
+
+        <h3>Filter Properties</h3>
+
+        <div class="home-filter-field">
+            <label for="filterBedrooms">Bedrooms</label>
+            <select id="filterBedrooms">
+                <option value="">Any</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4+</option>
+            </select>
+        </div>
+
+        <div class="home-filter-field">
+            <label for="filterBathrooms">Bathrooms</label>
+            <select id="filterBathrooms">
+                <option value="">Any</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4+</option>
+            </select>
+        </div>
+
+        <div class="home-filter-field">
+            <label for="filterListingType">Listing Type</label>
+            <select id="filterListingType">
+                <option value="">All listings</option>
+                <option value="For Sale">For Sale</option>
+                <option value="For Rent">For Rent</option>
+            </select>
+        </div>
+
+        <div class="home-filter-field">
+            <label>Price Range</label>
+            <div class="home-price-range">
+                <input type="number"
+                       id="filterMinPrice"
+                       min="0"
+                       step="0.01"
+                       placeholder="Min price" />
+
+                <span>–</span>
+
+                <input type="number"
+                       id="filterMaxPrice"
+                       min="0"
+                       step="0.01"
+                       placeholder="Max price" />
+            </div>
+        </div>
+
+        <p id="filterValidationMessage"
+           class="filter-validation-message"
+           role="alert"
+           hidden>
+        </p>
+
+        <div class="home-filter-actions">
+            <button type="button"
+                    id="clearHomeFilters"
+                    class="filter-clear-button">
+                Clear
+            </button>
+
+           
+        </div>
+    </div>
+</div>
+
+    <button type="submit" class="btn-explore">
+        Explore Listings
+    </button>
+</form>
             </div>
 
             <div class="hero-stats-grid">
@@ -104,7 +204,7 @@
     </main>
 
     <!-- Featured Opportunities Section -->
-    <section class="featured-section">
+    <section class="featured-section" id="featuredListings">
         <div class="featured-container">
             <h2 class="section-title">Featured Opportunities</h2>
 
@@ -152,6 +252,27 @@
         Chennai
     </button>
 
+</div>
+    <div class="property-carousel-controls">
+    <button type="button"
+            id="previousProperties"
+            class="carousel-arrow"
+            aria-label="Previous properties"
+            disabled>
+        &lt;
+    </button>
+
+    <span id="carouselPageLabel" class="carousel-page-label">
+        1 / 1
+    </span>
+
+    <button type="button"
+            id="nextProperties"
+            class="carousel-arrow"
+            aria-label="Next properties"
+            disabled>
+        &gt;
+    </button>
 </div>
 
             <div class="property-grid" id="propertyGrid">

@@ -34,14 +34,22 @@ public class HomeService
     }
 
     public async Task<IEnumerable<PublicPropertyResponse>>
-        GetLatestPropertiesAsync(
-            string? city)
+    GetLatestPropertiesAsync(
+        string? city,
+        int? bedrooms = null,
+        int? bathrooms = null,
+        string? listingType = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null)
     {
-        const int propertyCount = 3;
-
         return await _propertyRepository
             .GetLatestApprovedPropertiesAsync(
                 city,
-                propertyCount);
+                int.MaxValue,
+                bedrooms,
+                bathrooms,
+                listingType,
+                minPrice,
+                maxPrice);
     }
 }

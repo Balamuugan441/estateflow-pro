@@ -32,9 +32,14 @@ public interface IPropertyRepository
     Task<int> GetApprovedPropertyCountAsync();
 
     Task<IEnumerable<PublicPropertyResponse>>
-        GetLatestApprovedPropertiesAsync(
-            string? city,
-            int count);
+    GetLatestApprovedPropertiesAsync(
+        string? city,
+        int count,
+        int? bedrooms = null,
+        int? bathrooms = null,
+        string? listingType = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null);
     Task<BuyerPropertyListResponse>
     SearchApprovedPropertiesAsync(
         BuyerPropertySearchRequest request,

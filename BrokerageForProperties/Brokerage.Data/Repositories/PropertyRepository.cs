@@ -457,11 +457,18 @@ public class PropertyRepository : IPropertyRepository
     }
 
     // Retrieves the latest approved properties optionally filtered by city.
-    public async Task<IEnumerable<PublicPropertyResponse>> GetLatestApprovedPropertiesAsync(
+    public async Task<IEnumerable<PublicPropertyResponse>>
+    GetLatestApprovedPropertiesAsync(
         string? city,
-        int count)
+        int count,
+        int? bedrooms = null,
+        int? bathrooms = null,
+        string? listingType = null,
+        decimal? minPrice = null,
+        decimal? maxPrice = null)
     {
-        using var connection = _connectionFactory.CreateConnection();
+        using var connection =
+            _connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<PublicPropertyResponse>(
             "dbo.usp_Property_GetLatestApproved",
@@ -470,7 +477,20 @@ public class PropertyRepository : IPropertyRepository
                 City = string.IsNullOrWhiteSpace(city)
                     ? null
                     : city.Trim(),
-                Count = count
+
+                Count = count,
+
+                Bedrooms = bedrooms,
+
+                Bathrooms = bathrooms,
+
+                ListingType = string.IsNullOrWhiteSpace(listingType)
+                    ? null
+                    : listingType.Trim(),
+
+                MinPrice = minPrice,
+
+                MaxPrice = maxPrice
             },
             commandType: CommandType.StoredProcedure);
     }

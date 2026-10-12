@@ -12,5 +12,7 @@ public class AdminPropertyQueryRequest
 
     public decimal? MaxPrice { get; set; }
 
+    public string? SortBy { get; set; } = "latest";
+
     public int PageNumber { get; set; } = 1;
 }

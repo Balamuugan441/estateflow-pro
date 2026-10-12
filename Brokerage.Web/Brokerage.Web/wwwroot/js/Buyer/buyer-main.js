@@ -25,14 +25,15 @@
         document.getElementById("locationSuggestions");
 
     const minPriceInput =
-        document.querySelector(
-            ".price-inputs input:nth-child(1)"
-        );
+        document.getElementById("minPriceInput") ||
+        document.querySelector(".price-inputs input:nth-child(1)");
 
     const maxPriceInput =
-        document.querySelector(
-            ".price-inputs input:nth-child(3)"
-        );
+        document.getElementById("maxPriceInput") ||
+        document.querySelector(".price-inputs input:nth-child(3)");
+
+    const priceErrorMessage =
+        document.getElementById("priceErrorMessage");
 
     const propertyTypeButtons =
         document.querySelectorAll(
@@ -70,6 +71,42 @@
 
     let locationTimer = null;
 
+    // 1. Prevent Negative Numbers & Scientific Notation (e/E/-)
+    const priceInputs = [minPriceInput, maxPriceInput].filter(Boolean);
+
+    priceInputs.forEach(function (input) {
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "-" || e.key === "e" || e.key === "E") {
+                e.preventDefault();
+            }
+        });
+
+        input.addEventListener("input", function () {
+            if (this.value !== "" && parseFloat(this.value) < 0) {
+                this.value = "";
+            }
+            validatePriceRange();
+        });
+    });
+
+    // 2. Min-Max Price Validation Logic
+    function validatePriceRange() {
+        const minVal = parseNumber(minPriceInput?.value);
+        const maxVal = parseNumber(maxPriceInput?.value);
+
+        if (minVal !== null && maxVal !== null && minVal > maxVal) {
+            if (priceErrorMessage) {
+                priceErrorMessage.style.display = "block";
+            }
+            return false;
+        }
+
+        if (priceErrorMessage) {
+            priceErrorMessage.style.display = "none";
+        }
+        return true;
+    }
+
     function buildSearchRequest(pageNumber) {
 
         const activePropertyType =
@@ -96,13 +133,6 @@
 
         const maxPrice =
             parseNumber(maxPriceInput?.value);
-        [minPriceInput, maxPriceInput].forEach(function (input) {
-            if (!input) return;
-
-            input.addEventListener("input", function () {
-                this.value = this.value.replace(/[^0-9]/g, "");
-            });
-        });
 
         const minBedrooms = activeBedroom ? Number(activeBedroom.dataset.bedrooms) : null;
 
@@ -142,6 +172,10 @@
     }
 
     async function loadProperties(pageNumber) {
+
+        if (!validatePriceRange()) {
+            return;
+        }
 
         currentPage =
             pageNumber < 1
@@ -286,13 +320,13 @@
         }
 
         propertyGrid.innerHTML =
-    properties
-        .map(createPropertyCard)
-        .join("");
+            properties
+                .map(createPropertyCard)
+                .join("");
 
-attachPropertyPreviewHandlers();
+        attachPropertyPreviewHandlers();
 
-attachFavoriteHandlers();
+        attachFavoriteHandlers();
     }
 
     function createPropertyCard(property) {
@@ -333,8 +367,8 @@ attachFavoriteHandlers();
                     <img
                         src="${escapeHtml(imageUrl)}"
                         alt="${escapeHtml(
-                            property.propertyTitle
-                        )}"
+                    property.propertyTitle
+                )}"
                         class="card-image"
                         loading="lazy" />
                   `
@@ -357,8 +391,8 @@ attachFavoriteHandlers();
                     <div class="badge-group">
                         <span class="badge badge-sale">
                             ${escapeHtml(
-                                listingType.toUpperCase()
-                            )}
+            listingType.toUpperCase()
+        )}
                         </span>
                     </div>
 
@@ -366,11 +400,10 @@ attachFavoriteHandlers();
     type="button"
     class="btn-favorite ${property.isFavorite ? "is-favorite" : ""}"
     data-property-guid="${property.propertyGUID}"
-    aria-label="${
-        property.isFavorite
-            ? "Remove property from favorites"
-            : "Add property to favorites"
-    }"
+    aria-label="${property.isFavorite
+                ? "Remove property from favorites"
+                : "Add property to favorites"
+            }"
     aria-pressed="${property.isFavorite}">
 
     <svg
@@ -399,8 +432,8 @@ attachFavoriteHandlers();
 
                             <h3 class="property-title">
                                 ${escapeHtml(
-                                    property.propertyTitle
-                                )}
+                property.propertyTitle
+            )}
                             </h3>
 
                             <div class="property-location">
@@ -480,143 +513,147 @@ attachFavoriteHandlers();
             </div>
         `;
     }
+
     function getRequestVerificationToken() {
 
-    const token =
-        document.querySelector(
-            'input[name="__RequestVerificationToken"]'
-        );
+        const token =
+            document.querySelector(
+                'input[name="__RequestVerificationToken"]'
+            );
 
-    return token?.value || "";
-}
-async function toggleFavorite(button) {
-
-    const propertyGuid =
-        button.dataset.propertyGuid;
-
-    if (!propertyGuid) {
-        return;
+        return token?.value || "";
     }
 
-    const currentlyFavorite =
-        button.classList.contains(
-            "is-favorite"
-        );
+    async function toggleFavorite(button) {
 
-    const nextFavorite =
-        !currentlyFavorite;
+        const propertyGuid =
+            button.dataset.propertyGuid;
 
-    button.disabled = true;
-
-    const body =
-        new URLSearchParams();
-
-    body.set(
-        "propertyGuid",
-        propertyGuid
-    );
-
-    body.set(
-        "favorite",
-        nextFavorite
-    );
-
-    try {
-
-        const response =
-            await fetch(
-                "?handler=Favorite",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Accept": "application/json",
-
-                        "Content-Type":
-                            "application/x-www-form-urlencoded; charset=UTF-8",
-
-                        "RequestVerificationToken":
-                            getRequestVerificationToken()
-                    },
-
-                    body: body.toString()
-                }
-            );
-
-        const result =
-            await response.json();
-
-        if (!response.ok ||
-            !result.success) {
-
-            throw new Error(
-                result.message ||
-                "Unable to update favorite."
-            );
+        if (!propertyGuid) {
+            return;
         }
 
-        button.classList.toggle(
-            "is-favorite",
-            result.isFavorite
-        );
-
-        button.setAttribute(
-            "aria-pressed",
-            result.isFavorite
-        );
-
-        button.setAttribute(
-            "aria-label",
-            result.isFavorite
-                ? "Remove property from favorites"
-                : "Add property to favorites"
-        );
-        window.showFavoriteToast(
-    "Success",
-    result.isFavorite
-        ? "Property added successfully to favorites."
-        : "Property removed successfully from favorites."
-);
-
-    }
-    catch (error) {
-
-        console.error(
-            "Favorite update error:",
-            error
-        );
-        window.showFavoriteToast(
-        "Error",
-        error.message || "Unable to update favorites.",
-        true
-    );
-    }
-    finally {
-
-        button.disabled = false;
-    }
-}
-function attachFavoriteHandlers() {
-
-    document
-        .querySelectorAll(
-            ".btn-favorite"
-        )
-        .forEach(function (button) {
-
-            button.addEventListener(
-                "click",
-                function (event) {
-
-                    event.stopPropagation();
-
-                    toggleFavorite(
-                        button
-                    );
-                }
+        const currentlyFavorite =
+            button.classList.contains(
+                "is-favorite"
             );
-        });
-}
+
+        const nextFavorite =
+            !currentlyFavorite;
+
+        button.disabled = true;
+
+        const body =
+            new URLSearchParams();
+
+        body.set(
+            "propertyGuid",
+            propertyGuid
+        );
+
+        body.set(
+            "favorite",
+            nextFavorite
+        );
+
+        try {
+
+            const response =
+                await fetch(
+                    "?handler=Favorite",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Accept": "application/json",
+
+                            "Content-Type":
+                                "application/x-www-form-urlencoded; charset=UTF-8",
+
+                            "RequestVerificationToken":
+                                getRequestVerificationToken()
+                        },
+
+                        body: body.toString()
+                    }
+                );
+
+            const result =
+                await response.json();
+
+            if (!response.ok ||
+                !result.success) {
+
+                throw new Error(
+                    result.message ||
+                    "Unable to update favorite."
+                );
+            }
+
+            button.classList.toggle(
+                "is-favorite",
+                result.isFavorite
+            );
+
+            button.setAttribute(
+                "aria-pressed",
+                result.isFavorite
+            );
+
+            button.setAttribute(
+                "aria-label",
+                result.isFavorite
+                    ? "Remove property from favorites"
+                    : "Add property to favorites"
+            );
+            window.showFavoriteToast(
+                "Success",
+                result.isFavorite
+                    ? "Property added successfully to favorites."
+                    : "Property removed successfully from favorites."
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "Favorite update error:",
+                error
+            );
+            window.showFavoriteToast(
+                "Error",
+                error.message || "Unable to update favorites.",
+                true
+            );
+        }
+        finally {
+
+            button.disabled = false;
+        }
+    }
+
+    function attachFavoriteHandlers() {
+
+        document
+            .querySelectorAll(
+                ".btn-favorite"
+            )
+            .forEach(function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function (event) {
+
+                        event.stopPropagation();
+
+                        toggleFavorite(
+                            button
+                        );
+                    }
+                );
+            });
+    }
+
     function attachPropertyPreviewHandlers() {
 
         const previewUrlElement =
@@ -793,7 +830,7 @@ function attachFavoriteHandlers() {
             pages.push("...");
         }
 
-        for (let i = Math.max(2, start); i <= Math.min(total - 1, end); i++) {
+        for (let i = Math.Max(2, start); i <= Math.min(total - 1, end); i++) {
             pages.push(i);
         }
 
@@ -911,7 +948,9 @@ function attachFavoriteHandlers() {
     applyFilterButton?.addEventListener(
         "click",
         function () {
-            loadProperties(1);
+            if (validatePriceRange()) {
+                loadProperties(1);
+            }
         }
     );
 
@@ -941,6 +980,10 @@ function attachFavoriteHandlers() {
 
             if (maxPriceInput) {
                 maxPriceInput.value = "";
+            }
+
+            if (priceErrorMessage) {
+                priceErrorMessage.style.display = "none";
             }
 
             propertyTypeButtons.forEach(
@@ -1107,13 +1150,13 @@ function attachFavoriteHandlers() {
                 button.innerHTML = `
                     <span class="location-type">
                         ${escapeHtml(
-                            location.type
-                        )}
+                    location.type
+                )}
                     </span>
                     <span class="location-name">
                         ${escapeHtml(
-                            location.name
-                        )}
+                    location.name
+                )}
                     </span>
                 `;
 

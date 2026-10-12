@@ -321,6 +321,7 @@ public class PropertyRepository : IPropertyRepository
     }
 
     // Retrieves filtered and paginated property records together with admin property statistics.
+
     public async Task<AdminPropertyListResponse> GetPropertiesForAdminAsync(
         AdminPropertyQueryRequest request)
     {
@@ -348,7 +349,10 @@ public class PropertyRepository : IPropertyRepository
                 ? null
                 : request.PropertyType,
             MinPrice = request.MinPrice,
-            MaxPrice = request.MaxPrice
+            MaxPrice = request.MaxPrice,
+            SortBy = string.IsNullOrWhiteSpace(request.SortBy)
+                ? "latest"
+                : request.SortBy
         };
 
         using SqlMapper.GridReader grid = await connection.QueryMultipleAsync(

@@ -67,9 +67,7 @@ public class AdminService
         return await _propertyRepository
             .GetPropertiesForAdminAsync(request);
     }
-    public async Task<AdminPendingApprovalListResponse>
-  GetPendingApprovalsAsync(
-      int pageNumber)
+    public async Task<AdminPendingApprovalListResponse> GetPendingApprovalsAsync(int pageNumber)
     {
         if (pageNumber < 1)
         {

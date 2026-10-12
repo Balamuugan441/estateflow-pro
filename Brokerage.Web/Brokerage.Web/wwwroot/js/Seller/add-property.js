@@ -188,9 +188,108 @@ document.addEventListener("DOMContentLoaded", function() {
             priceField.placeholder = "Enter rent price";
         }
     }
-
+   
     listingTypeField?.addEventListener("change", updatePriceFieldForListingType);
     updatePriceFieldForListingType();
+
+    // Function to validate description character length (max 1000 characters)
+    function validateDescription() {
+        const descriptionInput = document.getElementById("Details_Description");
+        if (!descriptionInput) return true;
+
+        const charCount = descriptionInput.value.length;
+        const validationSpan = descriptionInput.closest(".form-field")?.querySelector(".validation-message");
+
+        if (charCount > 1000) {
+            if (validationSpan) {
+                validationSpan.textContent = `Description cannot exceed 1000 characters (Current: ${charCount} characters).`;
+            }
+            descriptionInput.classList.add("input-validation-error");
+            return false;
+        } else {
+            if (validationSpan && validationSpan.textContent.includes("1000 characters")) {
+                validationSpan.textContent = "";
+            }
+            descriptionInput.classList.remove("input-validation-error");
+            return true;
+        }
+    }
+
+    // Real-time input listener to give immediate feedback when typing or pasting
+    const descriptionInput = document.getElementById("Details_Description");
+    if (descriptionInput) {
+        descriptionInput.addEventListener("input", validateDescription);
+    }
+    // Numeric fields configuration: ID, display label, and maximum allowed value
+    const step2NumericFields = [
+        { id: "Details_Price", label: "Price", max: 100000000 },           // Max: 100,000,000 (10 Cr / 100M)
+        { id: "Details_SecurityDeposit", label: "Security deposit", max: 100000000 }, // Max: 100,000,000
+        { id: "Details_Area", label: "Area", max: 1000000 }                // Max: 1,000,000
+    ];
+
+    // Attach keydown blocking and input sanitization for negative numbers & max range
+    step2NumericFields.forEach(fieldInfo => {
+        const input = document.getElementById(fieldInfo.id);
+        if (!input) return;
+
+        // 1. Block typing minus (-) and scientific notation (e/E)
+        input.addEventListener("keydown", function (e) {
+            if (e.key === "-" || e.key === "e" || e.key === "E") {
+                e.preventDefault();
+            }
+        });
+
+        // 2. Clear negative numbers if pasted and validate max range on typing
+        input.addEventListener("input", function () {
+            if (this.value !== "" && parseFloat(this.value) < 0) {
+                this.value = "";
+            }
+            validateNumericField(fieldInfo);
+        });
+    });
+
+    // Function to check if a numeric input exceeds its maximum limit
+    function validateNumericField(fieldInfo) {
+        const input = document.getElementById(fieldInfo.id);
+        if (!input) return true;
+
+        const value = parseFloat(input.value);
+        const validationSpan = input.closest(".form-field")?.querySelector(".validation-message");
+
+        if (!isNaN(value) && value > fieldInfo.max) {
+            if (validationSpan) {
+                validationSpan.textContent = `${fieldInfo.label} cannot be greater than ${fieldInfo.max.toLocaleString("en-IN")}.`;
+            }
+            input.classList.add("input-validation-error");
+            return false;
+        } else {
+            // Clear max error message if value is now valid
+            if (validationSpan && validationSpan.textContent.includes("cannot be greater than")) {
+                validationSpan.textContent = "";
+            }
+            input.classList.remove("input-validation-error");
+            return true;
+        }
+    }
+
+    // Combined Step 2 validation check (Description length + Numeric range checks)
+    function validateStepTwo() {
+        let isStepValid = true;
+
+        // Validate description (max 1000 chars)
+        if (typeof validateDescription === "function" && !validateDescription()) {
+            isStepValid = false;
+        }
+
+        // Validate numeric fields (Price, Deposit, Area)
+        step2NumericFields.forEach(fieldInfo => {
+            if (!validateNumericField(fieldInfo)) {
+                isStepValid = false;
+            }
+        });
+
+        return isStepValid;
+    }
 
     // Handle continue button click to validate step and advance form
     continueButton?.addEventListener("click", function() {
@@ -202,6 +301,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         if (currentStep === 2) {
+            // Prevent form submission or moving forward if Step 2 validation fails
+            if (!validateStepTwo()) {
+                return;
+            }
+
             form.noValidate = true;
             formAction.value = "ValidateStep2";
             form.requestSubmit();

@@ -111,7 +111,7 @@ body {
     display: flex;
     align-items: flex-end;
     gap: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     flex-wrap: wrap;
 }
 
@@ -131,6 +131,21 @@ body {
 .price-group {
     flex: 1.4;
     min-width: 180px;
+    position: relative;
+}
+
+.sort-group {
+    flex: 1.2;
+    min-width: 155px;
+}
+
+.price-error-message {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    color: #f87171;
+    font-size: 11.5px;
+    white-space: nowrap;
 }
 
 .filter-label {
@@ -146,7 +161,7 @@ body {
     background-color: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    padding: 0 14px;
+    padding: 0 12px;
     color: var(--text-primary);
     font-size: 13.5px;
     outline: none;
@@ -159,6 +174,7 @@ body {
         border-color: var(--primary-blue);
     }
 
+/* SVG Search Icon Styles */
 .input-icon-wrapper {
     position: relative;
     display: flex;
@@ -380,6 +396,7 @@ body {
     border-color: var(--status-rejected-border);
     color: var(--status-rejected-text);
 }
+
 .badge-accepted {
     background-color: var(--status-live-bg);
     border-color: var(--status-live-border);

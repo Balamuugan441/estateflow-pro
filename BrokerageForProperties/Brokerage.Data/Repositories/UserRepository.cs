@@ -57,7 +57,14 @@ namespace Brokerage.Data.Repositories
 
             return await connection.ExecuteScalarAsync<int>(
                 "dbo.usp_User_Create",
-                user,
+                new
+                {
+                    user.RoleID,
+                    user.FullName,
+                    user.Email,
+                    user.PasswordHash,
+                    user.MobileNumber
+                },
                 commandType: CommandType.StoredProcedure);
         }
 
@@ -84,9 +91,14 @@ namespace Brokerage.Data.Repositories
 
 
             await connection.ExecuteAsync(
-                "dbo.usp_PasswordResetToken_Create",
-                resetToken,
-                commandType: CommandType.StoredProcedure);
+        "dbo.usp_PasswordResetToken_Create",
+        new
+        {
+            resetToken.UserID,
+            resetToken.TokenHash,
+            resetToken.ExpiresAt
+        },
+        commandType: CommandType.StoredProcedure);
         }
 
         // Get password reset token

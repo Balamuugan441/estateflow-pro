@@ -503,6 +503,7 @@
            class="form-control"
            type="number"
            min="1"
+           max="100000000"
            step="0.01"
            placeholder="Enter rent price"
         />
@@ -528,6 +529,7 @@
                        class="form-control"
                        type="number"
                        min="0"
+                       max="100000000"
                        step="0.01"
                        placeholder="Enter security deposit"
                   />
@@ -552,6 +554,7 @@
                        class="form-control"
                        type="number"
                        min="1"
+                       max="100000000"
                        step="0.01"
                        placeholder="Enter area"
                     />
@@ -1109,7 +1112,7 @@
             <textarea asp-for="Details.Description"
                       class="form-control property-description"
                       rows="4"
-                      maxlength="4000"
+                      maxlength="1000"
                       placeholder="Describe the property">
             </textarea>
 

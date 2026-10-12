@@ -66,8 +66,7 @@
             @foreach (NotificationApiModel notification
                      in Model.Notifications)
             {
-                bool unread =
-                    !notification.IsRead;
+                bool unread = !notification.IsRead;
 
                 string iconClass =
                     Model.GetNotificationIconClass(

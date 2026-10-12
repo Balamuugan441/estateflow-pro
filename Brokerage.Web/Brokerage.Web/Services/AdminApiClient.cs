@@ -82,14 +82,15 @@ public class AdminApiClient
             ?? new AdminUserListApiResponse();
     }
     public async Task<AdminPropertyListApiResponse>
-    GetPropertiesAsync(
-        string? search,
-        string? listingStatus,
-        string? propertyType,
-        decimal? minPrice,
-        decimal? maxPrice,
-        int pageNumber,
-        CancellationToken cancellationToken = default)
+GetPropertiesAsync(
+    string? search,
+    string? listingStatus,
+    string? propertyType,
+    decimal? minPrice,
+    decimal? maxPrice,
+    string? sortBy,
+    int pageNumber,
+    CancellationToken cancellationToken = default)
     {
         Dictionary<string, string?> query = [];
 
@@ -120,6 +121,11 @@ public class AdminApiClient
             query["maxPrice"] =
                 maxPrice.Value.ToString(
                     CultureInfo.InvariantCulture);
+        }
+
+        if (!string.IsNullOrWhiteSpace(sortBy))
+        {
+            query["sortBy"] = sortBy;
         }
 
         query["pageNumber"] =

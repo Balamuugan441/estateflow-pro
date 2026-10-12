@@ -1,8 +1,8 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Brokerage.Business.Services
 {
@@ -26,8 +26,7 @@ namespace Brokerage.Business.Services
             string audience =
                 jwtSettings["Audience"]!;
 
-            int expirationMinutes =
-                int.Parse(jwtSettings["ExpirationMinutes"]!);
+            int expirationMinutes = int.Parse(jwtSettings["ExpirationMinutes"]!);
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier,userId.ToString()),

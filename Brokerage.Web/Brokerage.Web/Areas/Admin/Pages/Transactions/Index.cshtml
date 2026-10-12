@@ -33,10 +33,11 @@
                 </div>
             </div>
 
-            <div class="filter-group">
+            <div class="filter-group" style="position: relative;">
                 <label class="filter-label">Price Range (USD)</label>
                 <div class="price-range-inputs">
                     <input type="number"
+                           id="minPrice"
                            name="minPrice"
                            value="@Model.MinPrice"
                            min="0"
@@ -44,6 +45,7 @@
                            placeholder="Min"
                            class="form-control" />
                     <input type="number"
+                           id="maxPrice"
                            name="maxPrice"
                            value="@Model.MaxPrice"
                            min="0"
@@ -51,6 +53,11 @@
                            placeholder="Max"
                            class="form-control" />
                 </div>
+                <span id="priceErrorMessage"
+                      class="price-error-message"
+                      style="color: #f87171; font-size: 11.5px; margin-top: 4px; display: none;">
+                    * Min price cannot be greater than max price
+                </span>
             </div>
 
             <div class="filter-actions">
@@ -170,7 +177,8 @@
 
                     <!-- Previous Page Button -->
                     <a class="pagination-btn @(Model.PageNumber <= 1 ? "disabled" : "")"
-                       href="@(Model.PageNumber <= 1 ? "#" : Url.Page("/Transactions/Index", new {
+                       href="@(Model.PageNumber <= 1 ? "#" : Url.Page("/Transactions/Index", new
+                       {
                            area = "Admin",
                            pageNumber = Model.PageNumber - 1,
                            fromDate = Model.FromDate?.ToString("yyyy-MM-dd"),
@@ -188,7 +196,8 @@
                     @for (int pageNum = 1; pageNum <= Model.TotalPages; pageNum++)
                     {
                         <a class="pagination-btn @(pageNum == Model.PageNumber ? "active" : "")"
-                           href="@Url.Page("/Transactions/Index", new {
+                           href="@Url.Page("/Transactions/Index", new
+                           {
                                area = "Admin",
                                pageNumber = pageNum,
                                fromDate = Model.FromDate?.ToString("yyyy-MM-dd"),
@@ -202,7 +211,8 @@
 
                     <!-- Next Page Button -->
                     <a class="pagination-btn @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")"
-                       href="@(Model.PageNumber >= Model.TotalPages ? "#" : Url.Page("/Transactions/Index", new {
+                       href="@(Model.PageNumber >= Model.TotalPages ? "#" : Url.Page("/Transactions/Index", new
+                       {
                            area = "Admin",
                            pageNumber = Model.PageNumber + 1,
                            fromDate = Model.FromDate?.ToString("yyyy-MM-dd"),

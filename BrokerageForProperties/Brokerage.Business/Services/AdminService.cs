@@ -3,6 +3,7 @@ using Brokerage.Models.DTOs.Admin;
 using Brokerage.Models.DTOs.Properties;
 using Brokerage.Models.Entities;
 using Brokerage.Models.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace Brokerage.Business.Services;
 
@@ -12,16 +13,21 @@ public class AdminService
     private readonly IPropertyRepository _propertyRepository;
     private readonly IAdminDashboardRepository _adminDashboardRepository;
     private readonly ActivityLogService _activityLogService;
+    private readonly NotificationService _notificationService;
+    private readonly ILogger<AdminService> _logger;
     public AdminService(
         IUserRepository userRepository,
         IPropertyRepository propertyRepository,
         IAdminDashboardRepository adminDashboardRepository,
-        ActivityLogService activityLogService)
+        ActivityLogService activityLogService, NotificationService notificationService,
+ILogger<AdminService> logger)
     {
         _userRepository = userRepository;
         _propertyRepository = propertyRepository;
         _adminDashboardRepository = adminDashboardRepository;
         _activityLogService = activityLogService;
+        _notificationService = notificationService;
+        _logger = logger;
     }
 
     public async Task<AdminUserListResponse>
@@ -129,6 +135,7 @@ public class AdminService
                 Message = "Unable to update property status."
             };
         }
+        bool notificationSent = await NotifySellerOfPropertyStatusAsync(property, listingStatus);
 
         string actionType =
             listingStatus == "Approved"
@@ -149,13 +156,16 @@ public class AdminService
             "Success",
             $"Pending → {listingStatus}. {details}");
 
+        string message = listingStatus == "Approved"
+     ? "Property approved successfully."
+     : "Property rejected successfully.";
+
         return new AdminPropertyActionResponse
         {
             Success = true,
-            Message =
-                listingStatus == "Approved"
-                    ? "Property approved successfully."
-                    : "Property rejected successfully."
+            Message = notificationSent
+                ? $"{message} Seller has been notified."
+                : $"{message} However, the seller notification could not be saved."
         };
     }
     public async Task<PropertyReviewResponse?>
@@ -254,5 +264,97 @@ public class AdminService
             IsActive = isActive
         };
     }
+    //Updates property staus from accepted -> rejected, rejected -> accepted
+    public async Task<AdminPropertyActionResponse>
+    UpdatePropertyStatusAsync(int propertyId, string listingStatus)
+    {
+        if (listingStatus != "Approved" &&
+            listingStatus != "Rejected")
+        {
+            return new AdminPropertyActionResponse
+            {
+                Success = false,
+                Message = "Invalid status."
+            };
+        }
 
+        var property =
+            await _propertyRepository.GetPropertyByIdAsync(propertyId);
+
+        if (property == null ||
+            (property.ListingStatus != "Approved" &&
+             property.ListingStatus != "Rejected"))
+        {
+            return new AdminPropertyActionResponse
+            {
+                Success = false,
+                Message = "Property not found or status cannot be changed."
+            };
+        }
+
+        bool updated = await _propertyRepository
+            .UpdateListingStatusAsync(propertyId, listingStatus);
+        if (!updated)
+        {
+            return new AdminPropertyActionResponse
+            {
+                Success = false,
+                Message = "Unable to update property status."
+            };
+        }
+
+        bool notificationSent =
+            await NotifySellerOfPropertyStatusAsync(
+                property,
+                listingStatus);
+
+        string message = listingStatus == "Approved"
+     ? "Property approved successfully."
+     : "Property rejected successfully.";
+
+        return new AdminPropertyActionResponse
+        {
+            Success = true,
+            Message = notificationSent
+                ? $"{message} Seller has been notified."
+                : $"{message} However, the seller notification could not be saved."
+        };
+    }
+    private async Task<bool> NotifySellerOfPropertyStatusAsync(
+    Property property,
+    string listingStatus)
+    {
+        bool approved = listingStatus == "Approved";
+
+        try
+        {
+            return await _notificationService.CreateAsync(
+                recipientUserId: property.SellerID,
+
+                notificationType: approved
+                    ? "PropertyApproved"
+                    : "PropertyRejected",
+
+                title: approved
+                    ? "Property Approved"
+                    : "Property Rejected",
+
+                message: approved
+                    ? $"Good news! Your property \"{property.PropertyTitle}\" has been approved and is now available to buyers."
+                    : $"Your property \"{property.PropertyTitle}\" has been rejected and is not available to buyers. You can review it and make changes before resubmitting.",
+
+                relatedEntityType: "Property",
+                relatedEntityId: property.PropertyID);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Could not create a property status notification for seller {SellerID}, property {PropertyID}.",
+                property.SellerID,
+                property.PropertyID);
+
+            return false;
+        }
+    }
 }

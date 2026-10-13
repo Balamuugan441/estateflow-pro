@@ -214,4 +214,14 @@ public class AdminController : ControllerBase
 
         return Ok(response);
     }
+    [HttpPut("properties/{propertyId:int}/status")]
+    public async Task<IActionResult> UpdatePropertyStatus(
+    int propertyId,
+    [FromBody] AdminPropertyStatusRequest request)
+    {
+        var result = await _adminService.UpdatePropertyStatusAsync(
+            propertyId, request.ListingStatus);
+
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

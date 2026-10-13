@@ -688,7 +688,7 @@
                         </h3>
 
                         <span class="property-price">
-                            ${price}
+                            ₹ ${price}
                         </span>
                     </div>
 
@@ -712,12 +712,14 @@
                     <div class="property-specs">
                         <div class="spec-item">
                             <span>
+              
                                 ${escapeHtml(property.bedrooms)} Beds
                             </span>
                         </div>
 
                         <div class="spec-item">
                             <span>
+                            
                                 ${escapeHtml(property.bathrooms)} Baths
                             </span>
                         </div>
@@ -738,7 +740,6 @@
             </div>
         `;
     }
-
 
     // Keep property interactions restricted for visitors who are not logged in
     function attachLoginRequiredHandlers() {

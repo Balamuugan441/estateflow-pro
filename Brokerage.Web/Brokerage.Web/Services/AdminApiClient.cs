@@ -319,5 +319,15 @@ GetPropertiesAsync(
         return await ReadResponseAsync<AdminUserStatusApiResponse>(response, cancellationToken);
 
     }
+    public async Task<AdminPropertyActionApiResponse>
+    UpdatePropertyStatusAsync(int propertyId, string listingStatus)
+    {
+        var response = await _httpClient.PutAsJsonAsync(
+            $"api/Admin/properties/{propertyId}/status",
+            new { ListingStatus = listingStatus });
+
+        return await ReadResponseAsync<AdminPropertyActionApiResponse>(
+            response, CancellationToken.None);
+    }
 
 }

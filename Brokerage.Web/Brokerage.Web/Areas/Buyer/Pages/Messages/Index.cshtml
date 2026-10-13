@@ -15,9 +15,8 @@
 
     <div class="chat-container">
 
-        <!-- =========================================
-             LEFT: CONVERSATION LIST
-             ========================================= -->
+        <!-- LEFT: CONVERSATION LIST -->
+             
 
         <aside class="chat-conversations">
 
@@ -37,15 +36,13 @@
                 {
                     @foreach (var conversation in Model.Conversations)
                     {
-                        bool isActive =
-                            Model.ActiveConversation?.ConversationID
-                            == conversation.ConversationID;
+                        bool isActive = Model.ActiveConversation?.ConversationID == conversation.ConversationID;
 
                         <a asp-page="./Index"
-   asp-route-conversationId="@conversation.ConversationID"
-   id="conversation-@conversation.ConversationID"
-   data-conversation-id="@conversation.ConversationID"
-   class="conversation-item @(isActive ? "active" : "")">
+                        asp-route-conversationId="@conversation.ConversationID"
+                        id="conversation-@conversation.ConversationID"
+                         data-conversation-id="@conversation.ConversationID"
+                         class="conversation-item @(isActive ? "active" : "")">
 
                             <div class="conversation-top">
 
@@ -54,14 +51,11 @@
                                 </div>
 
                                 @if (conversation.LastMessageAt.HasValue)
-{
-    <span class="conversation-time">
-        @(conversation.LastMessageAt
-            .Value
-            .ToLocalTime()
-            .ToString("dd MMM"))
-    </span>
-}
+                               {
+                                   <span class="conversation-time">
+                                   @(conversation.LastMessageAt.Value.ToLocalTime().ToString("dd MMM"))
+                                   </span>
+                                }
 
                             </div>
 
@@ -74,11 +68,11 @@
                             </div>
 
                             @if (conversation.UnreadCount > 0)
-{
-    <span class="unread-badge">
-        @conversation.UnreadCount
-    </span>
-}
+                        {
+                             <span class="unread-badge">
+                              @conversation.UnreadCount
+                              </span>
+                        }
 
                         </a>
                     }
@@ -89,9 +83,8 @@
         </aside>
 
 
-        <!-- =========================================
-             RIGHT: ACTIVE CHAT
-             ========================================= -->
+        <!-- 
+             RIGHT: ACTIVE CHAT -->
 
         <section class="chat-main">
 
@@ -114,9 +107,8 @@
             }
             else
             {
-                <!-- =================================
-                     CHAT HEADER
-                     ================================= -->
+                <!--  CHAT HEADER -->
+                    
 
                 <header class="chat-header">
 
@@ -131,9 +123,9 @@
                 </header>
 
 
-                <!-- =================================
+                <!--
                      CHAT MESSAGES
-                     ================================= -->
+                    -->
 
                 <div id="chatMessages"
                      class="chat-messages">
@@ -166,10 +158,8 @@
                                     </div>
 
                                     <div class="chat-message-time">
-    @(message.SentAt
-        .ToLocalTime()
-        .ToString("dd MMM yyyy, hh:mm tt"))
-</div>
+                                    @(message.SentAt.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt"))
+                                    </div>
 
                                 </div>
 
@@ -180,9 +170,9 @@
                 </div>
 
 
-                <!-- =================================
-                     READ-ONLY / MESSAGE COMPOSER
-                     ================================= -->
+                <!--READ-ONLY / MESSAGE COMPOSER -->
+                     
+                   
 
                 @if (Model.ActiveConversation.IsReadOnly)
                 {

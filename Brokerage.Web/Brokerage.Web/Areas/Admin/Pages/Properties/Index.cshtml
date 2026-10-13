@@ -340,7 +340,11 @@
                                 coverImageUrl = $"{Model.ApiBaseUrl.TrimEnd('/')}{property.CoverImagePath}";
                             }
 
-                            <tr>
+                            <tr class="@(property.ListingStatus is "Approved" or "Rejected"
+                                        ? "status-change-row" : "")"
+                                data-property-id="@property.PropertyID"
+                                data-property-title="@property.PropertyTitle"
+                                data-listing-status="@property.ListingStatus">
 
                                 <td>
 
@@ -531,7 +535,21 @@
     </div>
 
 </div>
+<div id="statusCard" class="status-card" hidden>
+    <form method="post" asp-page-handler="UpdateStatus"
+          id="statusForm">
 
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" name="propertyId" id="propertyId">
+        <input type="hidden" name="listingStatus" id="targetStatus">
+
+        <p id="statusMessage"></p>
+
+        <button type="button" id="cancelStatus">Cancel</button>
+        <button type="submit">Yes, confirm</button>
+    </form>
+</div>
 @section Scripts {
     <script src="~/js/admin/properties.js" asp-append-version="true"></script>
 }

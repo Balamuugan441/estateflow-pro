@@ -145,4 +145,13 @@ public class IndexModel : PageModel
 
         return pages;
     }
+    public async Task<IActionResult> OnPostUpdateStatusAsync(
+    int propertyId,
+    string listingStatus)
+    {
+        var result = await _adminApiClient.UpdatePropertyStatusAsync(
+            propertyId, listingStatus);
+
+        return new JsonResult(result);
+    }
 }

@@ -32,9 +32,21 @@ public class IndexModel : PageModel
         try
         {
             Notifications =
-                await _notificationApiClient
-                    .GetAllAsync(
+     await _notificationApiClient
+         .GetAllAsync(cancellationToken);
+
+            // Mark notifications as read when the page is viewed.
+            foreach (var notification in Notifications)
+            {
+                if (!notification.IsRead)
+                {
+                    await _notificationApiClient.MarkAsReadAsync(
+                        notification.NotificationID,
                         cancellationToken);
+
+                    notification.IsRead = true;
+                }
+            }
 
             return Page();
         }

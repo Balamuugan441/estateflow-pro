@@ -18,4 +18,12 @@ public interface INotificationRepository
     Task<List<NotificationDto>> GetAllAsync(
     int userId,
     CancellationToken cancellationToken = default);
+    Task<bool> CreateAsync(
+    int recipientUserId,
+    string notificationType,
+    string title,
+    string message,
+    string? relatedEntityType,
+    int? relatedEntityId,
+    CancellationToken cancellationToken = default);
 }

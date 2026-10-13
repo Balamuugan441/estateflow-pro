@@ -668,11 +668,11 @@ public class PropertyService
         }
 
 
-        // -----------------------------------------
+
         // Gallery validation
         //
         // Existing gallery is enough.
-        // -----------------------------------------
+
 
         if (galleryImages.Count == 0 &&
             existingGalleryCount == 0)
@@ -683,9 +683,9 @@ public class PropertyService
         }
 
 
-        // -----------------------------------------
+
         // Total gallery limit
-        // -----------------------------------------
+
 
         if (
             existingGalleryCount +
@@ -698,9 +698,9 @@ public class PropertyService
         }
 
 
-        // -----------------------------------------
+
         // Total video limit
-        // -----------------------------------------
+
 
         if (
             existingVideoCount +
@@ -713,9 +713,9 @@ public class PropertyService
         }
 
 
-        // -----------------------------------------
+
         // Total floor-plan limit
-        // -----------------------------------------
+
 
         if (
             existingFloorPlanCount +
@@ -728,9 +728,9 @@ public class PropertyService
         }
 
 
-        // -----------------------------------------
+
         // Total document limit
-        // -----------------------------------------
+
 
         if (
             existingDocumentCount +
@@ -815,16 +815,15 @@ public class PropertyService
             }
             else
             {
-
                 // No existing cover → INSERT
                 mediaList.Add(newCover);
             }
         }
 
 
-        // =========================================
+
         // GALLERY
-        // =========================================
+
 
         int displayOrder = 2;
 
@@ -850,10 +849,7 @@ public class PropertyService
                     galleryImage.FileName,
                     $"properties/{propertyId}");
 
-            int replacementId =
-                i < request.GalleryReplacementIds.Count
-                    ? request.GalleryReplacementIds[i]
-                    : 0;
+            int replacementId = i < request.GalleryReplacementIds.Count ? request.GalleryReplacementIds[i] : 0;
 
             if (replacementId > 0)
             {
@@ -986,10 +982,8 @@ public class PropertyService
             }
         }
 
-
-        // =========================================
         // FLOOR PLANS
-        // =========================================
+
 
         for (int i = 0; i < request.FloorPlans.Count; i++)
         {

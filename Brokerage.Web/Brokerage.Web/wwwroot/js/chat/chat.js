@@ -288,8 +288,7 @@
 
     async function sendMessage() {
 
-        const messageText =
-            messageInput.value.trim();
+        const messageText = messageInput.value.trim();
 
         if (!messageText) {
             return;

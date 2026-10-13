@@ -2,6 +2,7 @@
 using Brokerage.Data.Interfaces;
 using Brokerage.Models.DTOs.Notifications;
 using Dapper;
+using System.Data;
 
 namespace Brokerage.Data.Repositories;
 
@@ -128,5 +129,35 @@ public class NotificationRepository : INotificationRepository
                         cancellationToken));
 
         return notifications.ToList();
+    }
+    public async Task<bool> CreateAsync(
+    int recipientUserId,
+    string notificationType,
+    string title,
+    string message,
+    string? relatedEntityType,
+    int? relatedEntityId,
+    CancellationToken cancellationToken = default)
+    {
+        using var connection =
+            _connectionFactory.CreateConnection();
+
+        int rowsAffected =
+            await connection.ExecuteScalarAsync<int>(
+                new CommandDefinition(
+                    "dbo.usp_Notifications_Create",
+                    new
+                    {
+                        RecipientUserID = recipientUserId,
+                        NotificationType = notificationType,
+                        Title = title,
+                        Message = message,
+                        RelatedEntityType = relatedEntityType,
+                        RelatedEntityID = relatedEntityId
+                    },
+                    commandType: CommandType.StoredProcedure,
+                    cancellationToken: cancellationToken));
+
+        return rowsAffected > 0;
     }
 }

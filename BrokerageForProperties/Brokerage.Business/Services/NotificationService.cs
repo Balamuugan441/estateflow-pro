@@ -47,4 +47,22 @@ public class NotificationService
                 userId,
                 cancellationToken);
     }
+    public async Task<bool> CreateAsync(
+    int recipientUserId,
+    string notificationType,
+    string title,
+    string message,
+    string? relatedEntityType,
+    int? relatedEntityId,
+    CancellationToken cancellationToken = default)
+    {
+        return await _notificationRepository.CreateAsync(
+            recipientUserId,
+            notificationType,
+            title,
+            message,
+            relatedEntityType,
+            relatedEntityId,
+            cancellationToken);
+    }
 }
